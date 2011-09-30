@@ -54,31 +54,47 @@ static void __call_rcu(struct rcu_head *head,
 
 #include "rcutiny_plugin.h"
 
-#ifdef CONFIG_NO_HZ
-
 static long rcu_dynticks_nesting = 1;
 
 /*
- * Enter dynticks-idle mode, which is an extended quiescent state
- * if we have fully entered that mode (i.e., if the new value of
- * dynticks_nesting is zero).
+ * Enter idle, which is an extended quiescent state if we have fully
+ * entered that mode (i.e., if the new value of dynticks_nesting is zero).
  */
-void rcu_enter_nohz(void)
+void rcu_idle_enter(void)
 {
 	if (--rcu_dynticks_nesting == 0)
 		rcu_sched_qs(0); /* implies rcu_bh_qsctr_inc(0) */
 }
 
 /*
- * Exit dynticks-idle mode, so that we are no longer in an extended
- * quiescent state.
+ * Exit idle, so that we are no longer in an extended quiescent state.
  */
-void rcu_exit_nohz(void)
+void rcu_idle_exit(void)
 {
 	rcu_dynticks_nesting++;
 }
 
-#endif /* #ifdef CONFIG_NO_HZ */
+#ifdef CONFIG_PROVE_RCU
+
+/*
+ * Test whether RCU thinks that the current CPU is idle.
+ */
+int rcu_is_cpu_idle(void)
+{
+	return !rcu_dynticks_nesting;
+}
+
+#endif /* #ifdef CONFIG_PROVE_RCU */
+
+/*
+ * Test whether the current CPU was interrupted from idle.  Nested
+ * interrupts don't count, we must be running at the first interrupt
+ * level.
+ */
+int rcu_is_cpu_rrupt_from_idle(void)
+{
+	return rcu_dynticks_nesting <= 0;
+}
 
 /*
  * Helper function for rcu_sched_qs() and rcu_bh_qs().
@@ -127,14 +143,13 @@ void rcu_bh_qs(int cpu)
 
 /*
  * Check to see if the scheduling-clock interrupt came from an extended
- * quiescent state, and, if so, tell RCU about it.
+ * quiescent state, and, if so, tell RCU about it.  This function must
+ * be called from hardirq context.  It is normally called from the
+ * scheduling-clock interrupt.
  */
 void rcu_check_callbacks(int cpu, int user)
 {
-	if (user ||
-	    (idle_cpu(cpu) &&
-	     !in_softirq() &&
-	     hardirq_count() <= (1 << HARDIRQ_SHIFT)))
+	if (user || rcu_is_cpu_rrupt_from_idle())
 		rcu_sched_qs(cpu);
 	else if (!in_softirq())
 		rcu_bh_qs(cpu);

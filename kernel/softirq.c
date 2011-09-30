@@ -296,7 +296,7 @@ void irq_enter(void)
 {
 	int cpu = smp_processor_id();
 
-	rcu_irq_enter();
+	rcu_idle_exit();
 	if (idle_cpu(cpu) && !in_interrupt()) {
 		/*
 		 * Prevent raise_softirq from needlessly waking up ksoftirqd
@@ -347,7 +347,7 @@ void irq_exit(void)
 	if (!in_interrupt() && local_softirq_pending())
 		invoke_softirq();
 
-	rcu_irq_exit();
+	rcu_idle_enter();
 #ifdef CONFIG_NO_HZ
 	/* Make sure that timer wheel updates are propagated */
 	if (idle_cpu(smp_processor_id()) && !in_interrupt() && !need_resched())

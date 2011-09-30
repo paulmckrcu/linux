@@ -195,12 +195,10 @@ void rcu_note_context_switch(int cpu)
 }
 EXPORT_SYMBOL_GPL(rcu_note_context_switch);
 
-#ifdef CONFIG_NO_HZ
 DEFINE_PER_CPU(struct rcu_dynticks, rcu_dynticks) = {
 	.dynticks_nesting = 1,
 	.dynticks = ATOMIC_INIT(1),
 };
-#endif /* #ifdef CONFIG_NO_HZ */
 
 static int blimit = 10;		/* Maximum callbacks per rcu_do_batch. */
 static int qhimark = 10000;	/* If this many pending, ignore blimit. */
@@ -328,11 +326,11 @@ static int rcu_implicit_offline_qs(struct rcu_data *rdp)
 		return 1;
 	}
 
-	/* If preemptible RCU, no point in sending reschedule IPI. */
-	if (rdp->preemptible)
-		return 0;
-
-	/* The CPU is online, so send it a reschedule IPI. */
+	/*
+	 * The CPU is online, so send it a reschedule IPI.  This forces
+	 * it through the scheduler, and (inefficiently) also handles cases
+	 * where idle loops fail to inform RCU about the CPU being idle.
+	 */
 	if (rdp->cpu != smp_processor_id())
 		smp_send_reschedule(rdp->cpu);
 	else
@@ -343,17 +341,15 @@ static int rcu_implicit_offline_qs(struct rcu_data *rdp)
 
 #endif /* #ifdef CONFIG_SMP */
 
-#ifdef CONFIG_NO_HZ
-
 /**
- * rcu_enter_nohz - inform RCU that current CPU is entering nohz
+ * rcu_idle_enter - inform RCU that current CPU is entering idle
  *
- * Enter nohz mode, in other words, -leave- the mode in which RCU
+ * Enter idle mode, in other words, -leave- the mode in which RCU
  * read-side critical sections can occur.  (Though RCU read-side
- * critical sections can occur in irq handlers in nohz mode, a possibility
+ * critical sections can occur in irq handlers in idle, a possibility
  * handled by rcu_irq_enter() and rcu_irq_exit()).
  */
-void rcu_enter_nohz(void)
+void rcu_idle_enter(void)
 {
 	unsigned long flags;
 	struct rcu_dynticks *rdtp;
@@ -374,12 +370,12 @@ void rcu_enter_nohz(void)
 }
 
 /*
- * rcu_exit_nohz - inform RCU that current CPU is leaving nohz
+ * rcu_idle_exit - inform RCU that current CPU is leaving idle
  *
- * Exit nohz mode, in other words, -enter- the mode in which RCU
+ * Exit idle, in other words, -enter- the mode in which RCU
  * read-side critical sections normally occur.
  */
-void rcu_exit_nohz(void)
+void rcu_idle_exit(void)
 {
 	unsigned long flags;
 	struct rcu_dynticks *rdtp;
@@ -442,27 +438,32 @@ void rcu_nmi_exit(void)
 	WARN_ON_ONCE(atomic_read(&rdtp->dynticks) & 0x1);
 }
 
-/**
- * rcu_irq_enter - inform RCU of entry to hard irq context
- *
- * If the CPU was idle with dynamic ticks active, this updates the
- * rdtp->dynticks to let the RCU handling know that the CPU is active.
- */
-void rcu_irq_enter(void)
-{
-	rcu_exit_nohz();
-}
+#ifdef CONFIG_PROVE_RCU
 
 /**
- * rcu_irq_exit - inform RCU of exit from hard irq context
+ * rcu_is_cpu_idle - see if RCU thinks that the current CPU is idle
  *
- * If the CPU was idle with dynamic ticks active, update the rdp->dynticks
- * to put let the RCU handling be aware that the CPU is going back to idle
- * with no ticks.
+ * If the current CPU is in its idle loop and is neither in an interrupt
+ * or NMI handler, return true.  The caller must have at least disabled
+ * preemption.
  */
-void rcu_irq_exit(void)
+int rcu_is_cpu_idle(void)
 {
-	rcu_enter_nohz();
+	return (atomic_read(&__get_cpu_var(rcu_dynticks).dynticks) & 0x1) == 0;
+}
+
+#endif /* #ifdef CONFIG_PROVE_RCU */
+
+/**
+ * rcu_is_cpu_rrupt_from_idle - see if idle or immediately interrupted from idle
+ *
+ * If the current CPU is idle or running at a first-level (not nested)
+ * interrupt from idle, return true.  The caller must have at least
+ * disabled preemption.
+ */
+int rcu_is_cpu_rrupt_from_idle(void)
+{
+	return __get_cpu_var(rcu_dynticks).dynticks_nesting <= 1;
 }
 
 #ifdef CONFIG_SMP
@@ -511,24 +512,6 @@ static int rcu_implicit_dynticks_qs(struct rcu_data *rdp)
 }
 
 #endif /* #ifdef CONFIG_SMP */
-
-#else /* #ifdef CONFIG_NO_HZ */
-
-#ifdef CONFIG_SMP
-
-static int dyntick_save_progress_counter(struct rcu_data *rdp)
-{
-	return 0;
-}
-
-static int rcu_implicit_dynticks_qs(struct rcu_data *rdp)
-{
-	return rcu_implicit_offline_qs(rdp);
-}
-
-#endif /* #ifdef CONFIG_SMP */
-
-#endif /* #else #ifdef CONFIG_NO_HZ */
 
 int rcu_cpu_stall_suppress __read_mostly;
 
@@ -1334,16 +1317,14 @@ static void rcu_do_batch(struct rcu_state *rsp, struct rcu_data *rdp)
  * (user mode or idle loop for rcu, non-softirq execution for rcu_bh).
  * Also schedule RCU core processing.
  *
- * This function must be called with hardirqs disabled.  It is normally
+ * This function must be called from hardirq context.  It is normally
  * invoked from the scheduling-clock interrupt.  If rcu_pending returns
  * false, there is no point in invoking rcu_check_callbacks().
  */
 void rcu_check_callbacks(int cpu, int user)
 {
 	trace_rcu_utilization("Start scheduler-tick");
-	if (user ||
-	    (idle_cpu(cpu) && rcu_scheduler_active &&
-	     !in_softirq() && hardirq_count() <= (1 << HARDIRQ_SHIFT))) {
+	if (user || rcu_is_cpu_rrupt_from_idle()) {
 
 		/*
 		 * Get here if this CPU took its interrupt from user
@@ -1913,9 +1894,7 @@ rcu_boot_init_percpu_data(int cpu, struct rcu_state *rsp)
 	for (i = 0; i < RCU_NEXT_SIZE; i++)
 		rdp->nxttail[i] = &rdp->nxtlist;
 	rdp->qlen = 0;
-#ifdef CONFIG_NO_HZ
 	rdp->dynticks = &per_cpu(rcu_dynticks, cpu);
-#endif /* #ifdef CONFIG_NO_HZ */
 	rdp->cpu = cpu;
 	rdp->rsp = rsp;
 	raw_spin_unlock_irqrestore(&rnp->lock, flags);
