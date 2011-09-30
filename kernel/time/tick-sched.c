@@ -405,7 +405,7 @@ void tick_nohz_stop_sched_tick(int inidle)
 			ts->idle_tick = hrtimer_get_expires(&ts->sched_timer);
 			ts->tick_stopped = 1;
 			ts->idle_jiffies = last_jiffies;
-			rcu_enter_nohz();
+			rcu_idle_enter();
 		}
 
 		ts->idle_sleeps++;
@@ -514,7 +514,7 @@ void tick_nohz_restart_sched_tick(void)
 
 	ts->inidle = 0;
 
-	rcu_exit_nohz();
+	rcu_idle_exit();
 
 	/* Update jiffies first */
 	select_nohz_load_balancer(0);
