@@ -2041,6 +2041,7 @@ rcu_init_percpu_data(int cpu, struct rcu_state *rsp, int preemptible)
 	rdp->blimit = blimit;
 	WARN_ON_ONCE(rdp->dynticks->dynticks_nesting != LLONG_MAX / 2);
 	WARN_ON_ONCE((atomic_read(&rdp->dynticks->dynticks) & 0x1) != 1);
+	/* @@@ DEBUG @@@ */ tracing_on();
 	raw_spin_unlock(&rnp->lock);		/* irqs remain disabled. */
 
 	/*
