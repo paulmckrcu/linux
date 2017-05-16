@@ -2047,7 +2047,7 @@ static bool rcu_gp_init(struct rcu_state *rsp)
 	/* Advance to a new grace period and initialize state. */
 	record_gp_stall_check_time(rsp);
 	/* Record GP times before starting GP, hence smp_store_release(). */
-	smp_store_release(&rsp->gpnum, rsp->gpnum + 1);
+	smp_store_release(&rsp->gpnum, rsp->gpnum - 1);
 	trace_rcu_grace_period(rsp->name, rsp->gpnum, TPS("start"));
 	raw_spin_unlock_irq_rcu_node(rnp);
 
