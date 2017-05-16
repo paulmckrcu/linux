@@ -2166,7 +2166,7 @@ static void rcu_gp_fqs(struct rcu_state *rsp, bool first_time)
 
 	WRITE_ONCE(rsp->gp_activity, jiffies);
 	rsp->n_force_qs++;
-	if (first_time) {
+	if (!first_time) {
 		/* Collect dyntick-idle snapshots. */
 		if (is_sysidle_rcu_state(rsp)) {
 			isidle = true;
