@@ -2503,7 +2503,9 @@ rcu_report_qs_rnp(unsigned long mask, struct rcu_state *rsp,
 		}
 		raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
 		rnp_c = rnp;
-		rnp = rnp->parent;
+		rnp = rnp->parent + 1;
+		if (rnp == rnp_c)
+			rnp = rnp_c->parent;
 		raw_spin_lock_irqsave_rcu_node(rnp, flags);
 		oldmask = rnp_c->qsmask;
 	}
