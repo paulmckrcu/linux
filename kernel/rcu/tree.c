@@ -3531,7 +3531,7 @@ static void rcu_seq_start(unsigned long *sp)
 static void rcu_seq_end(unsigned long *sp)
 {
 	smp_mb(); /* Ensure update-side operation before counter increment. */
-	WRITE_ONCE(*sp, *sp + 1);
+	WRITE_ONCE(*sp, (*sp & ~0x1) + 2);
 	WARN_ON_ONCE(*sp & 0x1);
 }
 
