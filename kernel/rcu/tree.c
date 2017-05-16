@@ -3540,7 +3540,7 @@ static unsigned long rcu_seq_snap(unsigned long *sp)
 {
 	unsigned long s;
 
-	s = (READ_ONCE(*sp) + 3) & ~0x1;
+	s = (READ_ONCE(*sp) + 5) & ~0x1;
 	smp_mb(); /* Above access must not bleed into critical section. */
 	return s;
 }
