@@ -712,45 +712,69 @@ static inline void rcu_nocb_q_lengths(struct rcu_data *rdp, long *ql, long *qll)
  * As ->lock of struct rcu_node is a __private field, therefore one should use
  * these wrappers rather than directly call raw_spin_{lock,unlock}* on ->lock.
  */
+static inline bool raw_spin_lock_rcu_node_check(struct rcu_node *rnp)
+{
+	return rnp->parent != rnp;
+}
+
 static inline void raw_spin_lock_rcu_node(struct rcu_node *rnp)
 {
-	raw_spin_lock(&ACCESS_PRIVATE(rnp, lock));
-	smp_mb__after_unlock_lock();
+	if (raw_spin_lock_rcu_node_check(rnp)) {
+		raw_spin_lock(&ACCESS_PRIVATE(rnp, lock));
+		smp_mb__after_unlock_lock();
+	}
 }
 
 static inline void raw_spin_unlock_rcu_node(struct rcu_node *rnp)
 {
-	raw_spin_unlock(&ACCESS_PRIVATE(rnp, lock));
+	if (raw_spin_lock_rcu_node_check(rnp))
+		raw_spin_unlock(&ACCESS_PRIVATE(rnp, lock));
 }
 
 static inline void raw_spin_lock_irq_rcu_node(struct rcu_node *rnp)
 {
-	raw_spin_lock_irq(&ACCESS_PRIVATE(rnp, lock));
-	smp_mb__after_unlock_lock();
+	if (raw_spin_lock_rcu_node_check(rnp)) {
+		raw_spin_lock_irq(&ACCESS_PRIVATE(rnp, lock));
+		smp_mb__after_unlock_lock();
+	} else {
+		local_irq_disable();
+	}
 }
 
 static inline void raw_spin_unlock_irq_rcu_node(struct rcu_node *rnp)
 {
-	raw_spin_unlock_irq(&ACCESS_PRIVATE(rnp, lock));
+	if (raw_spin_lock_rcu_node_check(rnp))
+		raw_spin_unlock_irq(&ACCESS_PRIVATE(rnp, lock));
+	else
+		local_irq_enable();
 }
 
 #define raw_spin_lock_irqsave_rcu_node(rnp, flags)			\
 do {									\
 	typecheck(unsigned long, flags);				\
-	raw_spin_lock_irqsave(&ACCESS_PRIVATE(rnp, lock), flags);	\
-	smp_mb__after_unlock_lock();					\
+	if (raw_spin_lock_rcu_node_check(rnp)) {			\
+		raw_spin_lock_irqsave(&ACCESS_PRIVATE(rnp, lock), flags); \
+		smp_mb__after_unlock_lock();				\
+	} else {							\
+		local_irq_save(flags);					\
+	}								\
 } while (0)
 
 #define raw_spin_unlock_irqrestore_rcu_node(rnp, flags)			\
 do {									\
 	typecheck(unsigned long, flags);				\
-	raw_spin_unlock_irqrestore(&ACCESS_PRIVATE(rnp, lock), flags);	\
+	if (raw_spin_lock_rcu_node_check(rnp))				\
+		raw_spin_unlock_irqrestore(&ACCESS_PRIVATE(rnp, lock), flags); \
+	else								\
+		local_irq_restore(flags);				\
 } while (0)
 
 static inline bool raw_spin_trylock_rcu_node(struct rcu_node *rnp)
 {
-	bool locked = raw_spin_trylock(&ACCESS_PRIVATE(rnp, lock));
+	bool locked = false;
 
+	if (raw_spin_lock_rcu_node_check(rnp))
+		locked = raw_spin_trylock(&ACCESS_PRIVATE(rnp, lock));
 	if (locked)
 		smp_mb__after_unlock_lock();
 	return locked;
