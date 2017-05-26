@@ -249,9 +249,6 @@ void rcu_sched_qs(void)
 {
 	if (!__this_cpu_read(rcu_sched_data.cpu_no_qs.s))
 		return;
-	trace_rcu_grace_period(TPS("rcu_sched"),
-			       __this_cpu_read(rcu_sched_data.gpnum),
-			       TPS("cpuqs"));
 	__this_cpu_write(rcu_sched_data.cpu_no_qs.b.norm, false);
 	if (!__this_cpu_read(rcu_sched_data.cpu_no_qs.b.exp))
 		return;
@@ -263,9 +260,6 @@ void rcu_sched_qs(void)
 void rcu_bh_qs(void)
 {
 	if (__this_cpu_read(rcu_bh_data.cpu_no_qs.s)) {
-		trace_rcu_grace_period(TPS("rcu_bh"),
-				       __this_cpu_read(rcu_bh_data.gpnum),
-				       TPS("cpuqs"));
 		__this_cpu_write(rcu_bh_data.cpu_no_qs.b.norm, false);
 	}
 }
@@ -3446,7 +3440,7 @@ static unsigned long rcu_seq_snap(unsigned long *sp)
 {
 	unsigned long s;
 
-	s = (READ_ONCE(*sp) + 3) & ~0x1;
+	s = (READ_ONCE(*sp) + 1) & ~0x1;
 	smp_mb(); /* Above access must not bleed into critical section. */
 	return s;
 }
