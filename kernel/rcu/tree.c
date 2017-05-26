@@ -2025,7 +2025,6 @@ static bool rcu_gp_init(struct rcu_state *rsp)
 					    rnp->level, rnp->grplo,
 					    rnp->grphi, rnp->qsmask);
 		raw_spin_unlock_irq_rcu_node(rnp);
-		cond_resched_rcu_qs();
 		WRITE_ONCE(rsp->gp_activity, jiffies);
 	}
 
@@ -2136,7 +2135,6 @@ static void rcu_gp_cleanup(struct rcu_state *rsp)
 		sq = rcu_nocb_gp_get(rnp);
 		raw_spin_unlock_irq_rcu_node(rnp);
 		rcu_nocb_gp_cleanup(sq);
-		cond_resched_rcu_qs();
 		WRITE_ONCE(rsp->gp_activity, jiffies);
 		rcu_gp_slow(rsp, gp_cleanup_delay);
 	}
@@ -2188,7 +2186,6 @@ static int __noreturn rcu_gp_kthread(void *arg)
 			/* Locking provides needed memory barrier. */
 			if (rcu_gp_init(rsp))
 				break;
-			cond_resched_rcu_qs();
 			WRITE_ONCE(rsp->gp_activity, jiffies);
 			WARN_ON(signal_pending(current));
 			trace_rcu_grace_period(rsp->name,
@@ -2233,7 +2230,6 @@ static int __noreturn rcu_gp_kthread(void *arg)
 				trace_rcu_grace_period(rsp->name,
 						       READ_ONCE(rsp->gpnum),
 						       TPS("fqsend"));
-				cond_resched_rcu_qs();
 				WRITE_ONCE(rsp->gp_activity, jiffies);
 				ret = 0; /* Force full wait till next FQS. */
 				j = jiffies_till_next_fqs;
@@ -2246,7 +2242,6 @@ static int __noreturn rcu_gp_kthread(void *arg)
 				}
 			} else {
 				/* Deal with stray signal. */
-				cond_resched_rcu_qs();
 				WRITE_ONCE(rsp->gp_activity, jiffies);
 				WARN_ON(signal_pending(current));
 				trace_rcu_grace_period(rsp->name,
@@ -2344,7 +2339,6 @@ static bool rcu_start_gp(struct rcu_state *rsp)
 static void rcu_report_qs_rsp(struct rcu_state *rsp, unsigned long flags)
 	__releases(rcu_get_root(rsp)->lock)
 {
-	WARN_ON_ONCE(!rcu_gp_in_progress(rsp));
 	WRITE_ONCE(rsp->gp_flags, READ_ONCE(rsp->gp_flags) | RCU_GP_FLAG_FQS);
 	raw_spin_unlock_irqrestore_rcu_node(rcu_get_root(rsp), flags);
 	rcu_gp_kthread_wake(rsp);
@@ -2379,7 +2373,6 @@ rcu_report_qs_rnp(unsigned long mask, struct rcu_state *rsp,
 			raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
 			return;
 		}
-		WARN_ON_ONCE(oldmask); /* Any child must be all zeroed! */
 		rnp->qsmask &= ~mask;
 		trace_rcu_quiescent_state_report(rsp->name, rnp->gpnum,
 						 mask, rnp->qsmask, rnp->level,
