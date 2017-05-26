@@ -2018,8 +2018,7 @@ static bool rcu_gp_init(struct rcu_state *rsp)
 		WRITE_ONCE(rnp->gpnum, rsp->gpnum);
 		if (WARN_ON_ONCE(rnp->completed != rsp->completed))
 			WRITE_ONCE(rnp->completed, rsp->completed);
-		if (rnp == rdp->mynode)
-			(void)__note_gp_changes(rsp, rnp, rdp);
+		(void)__note_gp_changes(rsp, rnp, rdp);
 		rcu_preempt_boost_start_gp(rnp);
 		trace_rcu_grace_period_init(rsp->name, rnp->gpnum,
 					    rnp->level, rnp->grplo,
@@ -2344,7 +2343,6 @@ static bool rcu_start_gp(struct rcu_state *rsp)
 static void rcu_report_qs_rsp(struct rcu_state *rsp, unsigned long flags)
 	__releases(rcu_get_root(rsp)->lock)
 {
-	WARN_ON_ONCE(!rcu_gp_in_progress(rsp));
 	WRITE_ONCE(rsp->gp_flags, READ_ONCE(rsp->gp_flags) | RCU_GP_FLAG_FQS);
 	raw_spin_unlock_irqrestore_rcu_node(rcu_get_root(rsp), flags);
 	rcu_gp_kthread_wake(rsp);
@@ -2379,7 +2377,6 @@ rcu_report_qs_rnp(unsigned long mask, struct rcu_state *rsp,
 			raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
 			return;
 		}
-		WARN_ON_ONCE(oldmask); /* Any child must be all zeroed! */
 		rnp->qsmask &= ~mask;
 		trace_rcu_quiescent_state_report(rsp->name, rnp->gpnum,
 						 mask, rnp->qsmask, rnp->level,
