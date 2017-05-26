@@ -1907,13 +1907,6 @@ static void note_gp_changes(struct rcu_state *rsp, struct rcu_data *rdp)
 		rcu_gp_kthread_wake(rsp);
 }
 
-static void rcu_gp_slow(struct rcu_state *rsp, int delay)
-{
-	if (delay > 0 &&
-	    !(rsp->gpnum % (rcu_num_nodes * PER_RCU_NODE_PERIOD * delay)))
-		schedule_timeout_uninterruptible(delay);
-}
-
 /*
  * Initialize a new grace period.  Return false if no grace period required.
  */
@@ -1955,7 +1948,6 @@ static bool rcu_gp_init(struct rcu_state *rsp)
 	 * will handle subsequent offline CPUs.
 	 */
 	rcu_for_each_leaf_node(rsp, rnp) {
-		rcu_gp_slow(rsp, gp_preinit_delay);
 		raw_spin_lock_irq_rcu_node(rnp);
 		if (rnp->qsmaskinit == rnp->qsmaskinitnext &&
 		    !rnp->wait_blkd_tasks) {
@@ -2010,7 +2002,6 @@ static bool rcu_gp_init(struct rcu_state *rsp)
 	 * process finishes, because this kthread handles both.
 	 */
 	rcu_for_each_node_breadth_first(rsp, rnp) {
-		rcu_gp_slow(rsp, gp_init_delay);
 		raw_spin_lock_irq_rcu_node(rnp);
 		rdp = this_cpu_ptr(rsp->rda);
 		rcu_preempt_check_blocked_tasks(rnp);
@@ -2063,7 +2054,7 @@ static void rcu_gp_fqs(struct rcu_state *rsp, bool first_time)
 
 	WRITE_ONCE(rsp->gp_activity, jiffies);
 	rsp->n_force_qs++;
-	if (first_time) {
+	if (!first_time) {
 		/* Collect dyntick-idle snapshots. */
 		if (is_sysidle_rcu_state(rsp)) {
 			isidle = true;
@@ -2138,7 +2129,6 @@ static void rcu_gp_cleanup(struct rcu_state *rsp)
 		rcu_nocb_gp_cleanup(sq);
 		cond_resched_rcu_qs();
 		WRITE_ONCE(rsp->gp_activity, jiffies);
-		rcu_gp_slow(rsp, gp_cleanup_delay);
 	}
 	rnp = rcu_get_root(rsp);
 	raw_spin_lock_irq_rcu_node(rnp); /* Order GP before ->completed update. */
