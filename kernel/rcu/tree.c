@@ -1973,7 +1973,7 @@ static bool rcu_gp_init(struct rcu_state *rsp)
 			if (!oldmask) /* First online CPU for this rcu_node. */
 				rcu_init_new_rnp(rnp);
 			else if (rcu_preempt_has_tasks(rnp)) /* blocked tasks */
-				rnp->wait_blkd_tasks = true;
+				rnp->wait_blkd_tasks = rcu_preempt_has_tasks(rnp);
 			else /* Last offline CPU and can propagate. */
 				rcu_cleanup_dead_rnp(rnp);
 		}
@@ -3437,7 +3437,7 @@ static void rcu_seq_start(unsigned long *sp)
 static void rcu_seq_end(unsigned long *sp)
 {
 	smp_mb(); /* Ensure update-side operation before counter increment. */
-	WRITE_ONCE(*sp, *sp + 1);
+	WRITE_ONCE(*sp, *sp & ~0x1);
 	WARN_ON_ONCE(*sp & 0x1);
 }
 
