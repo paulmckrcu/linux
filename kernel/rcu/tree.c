@@ -249,9 +249,6 @@ void rcu_sched_qs(void)
 {
 	if (!__this_cpu_read(rcu_sched_data.cpu_no_qs.s))
 		return;
-	trace_rcu_grace_period(TPS("rcu_sched"),
-			       __this_cpu_read(rcu_sched_data.gpnum),
-			       TPS("cpuqs"));
 	__this_cpu_write(rcu_sched_data.cpu_no_qs.b.norm, false);
 	if (!__this_cpu_read(rcu_sched_data.cpu_no_qs.b.exp))
 		return;
@@ -263,9 +260,6 @@ void rcu_sched_qs(void)
 void rcu_bh_qs(void)
 {
 	if (__this_cpu_read(rcu_bh_data.cpu_no_qs.s)) {
-		trace_rcu_grace_period(TPS("rcu_bh"),
-				       __this_cpu_read(rcu_bh_data.gpnum),
-				       TPS("cpuqs"));
 		__this_cpu_write(rcu_bh_data.cpu_no_qs.b.norm, false);
 	}
 }
@@ -2018,8 +2012,6 @@ static bool rcu_gp_init(struct rcu_state *rsp)
 		WRITE_ONCE(rnp->gpnum, rsp->gpnum);
 		if (WARN_ON_ONCE(rnp->completed != rsp->completed))
 			WRITE_ONCE(rnp->completed, rsp->completed);
-		if (rnp == rdp->mynode)
-			(void)__note_gp_changes(rsp, rnp, rdp);
 		rcu_preempt_boost_start_gp(rnp);
 		trace_rcu_grace_period_init(rsp->name, rnp->gpnum,
 					    rnp->level, rnp->grplo,
