@@ -2382,12 +2382,6 @@ rcu_report_qs_rnp(unsigned long mask, struct rcu_state *rsp,
 						 mask, rnp->qsmask, rnp->level,
 						 rnp->grplo, rnp->grphi,
 						 !!rnp->gp_tasks);
-		if (rnp->qsmask != 0 || rcu_preempt_blocked_readers_cgp(rnp)) {
-
-			/* Other bits still set at this level, so done. */
-			raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
-			return;
-		}
 		mask = rnp->grpmask;
 		if (rnp->parent == NULL) {
 
