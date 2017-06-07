@@ -244,6 +244,7 @@ static int rcu_gp_in_progress(struct rcu_state *rsp)
  */
 void rcu_sched_qs(void)
 {
+	return;
 	if (!__this_cpu_read(rcu_sched_data.cpu_no_qs.s))
 		return;
 	trace_rcu_grace_period(TPS("rcu_sched"),
