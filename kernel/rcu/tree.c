@@ -2365,6 +2365,9 @@ rcu_report_qs_rnp(unsigned long mask, struct rcu_state *rsp,
 	unsigned long oldmask = 0;
 	struct rcu_node *rnp_c;
 
+	raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
+	return;
+
 	/* Walk up the rcu_node hierarchy. */
 	for (;;) {
 		if (!(rnp->qsmask & mask) || rnp->gpnum != gps) {
