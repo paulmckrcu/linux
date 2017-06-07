@@ -1879,6 +1879,7 @@ static bool __note_gp_changes(struct rcu_state *rsp, struct rcu_node *rnp,
 		rdp->core_needs_qs = need_gp;
 		zero_cpu_stall_ticks(rdp);
 		WRITE_ONCE(rdp->gpwrap, false);
+		rnp->qsmask &= ~rdp->grpmask;
 	}
 	return ret;
 }
