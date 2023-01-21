@@ -58,6 +58,7 @@ struct nmiaction {
 int __register_nmi_handler(unsigned int, struct nmiaction *);
 
 void unregister_nmi_handler(unsigned int, const char *);
+void set_nmi_torture(int nmi_delay_in, bool nmi_halt1_in, bool nmi_halt2_in, bool nmi_halt3_in);
 
 void stop_nmi(void);
 void restart_nmi(void);
