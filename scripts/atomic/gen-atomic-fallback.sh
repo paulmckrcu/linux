@@ -24,12 +24,8 @@ gen_template_fallback()
 	local params="$(gen_params "${int}" "${atomic}" "$@")"
 	local args="$(gen_args "$@")"
 
-	if [ ! -z "${template}" ]; then
-		printf "#ifndef ${atomicname}\n"
-		. ${template}
-		printf "#define ${atomicname} ${atomicname}\n"
-		printf "#endif\n\n"
-	fi
+	. ${template}
+	printf "#define ${atomicname} ${atomicname}\n"
 }
 
 #gen_order_fallback(meta, pfx, name, sfx, order, atomic, int, args...)
@@ -70,6 +66,59 @@ cat << EOF
 EOF
 }
 
+#gen_proto_order_variant(meta, pfx, name, sfx, order, atomic, int, args...)
+gen_proto_order_variant()
+{
+	local meta="$1"; shift
+	local pfx="$1"; shift
+	local name="$1"; shift
+	local sfx="$1"; shift
+	local order="$1"; shift
+	local atomic="$1"
+
+	local atomicname="arch_${atomic}_${pfx}${name}${sfx}${order}"
+	local basename="arch_${atomic}_${pfx}${name}${sfx}"
+
+	local template="$(find_fallback_template "${pfx}" "${name}" "${sfx}" "${order}")"
+
+	# Where there is no possible fallback, this order variant is mandatory
+	# and must be provided by arch code. Add a comment to the header to
+	# make this obvious.
+	#
+	# Ideally we'd error on a missing definition, but arch code might
+	# define this order variant as a C function without a preprocessor
+	# symbol.
+	if [ -z ${template} ] && [ -z "${order}" ] && ! meta_has_relaxed "${meta}"; then
+		printf "/* ${atomicname}() is mandatory */\n\n"
+		return
+	fi
+
+	printf "#if defined(${atomicname})\n"
+	printf "/* Provided directly by arch code -- no fallback necessary. */\n"
+
+	# Allow FULL/ACQUIRE/RELEASE ops to be defined in terms of RELAXED ops
+	if [ "${order}" != "_relaxed" ] && meta_has_relaxed "${meta}"; then
+		printf "#elif defined(${basename}_relaxed)\n"
+		gen_order_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "${order}" "$@"
+	fi
+	
+	# Allow ACQUIRE/RELEASE/RELAXED ops to be defined in terms of FULL ops
+	if [ ! -z "${order}" ]; then
+		printf "#elif defined(${basename})\n"
+		printf "#define ${atomicname} ${basename}\n"
+	fi
+
+	printf "#else\n"
+	if [ ! -z "${template}" ]; then
+		gen_proto_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "${order}" "$@"
+	else
+		printf "#error \"Unable to define ${atomicname}\"\n"
+	fi
+
+	printf "#endif /* ${atomicname} */\n\n"
+}
+
+
 #gen_proto_order_variants(meta, pfx, name, sfx, atomic, int, args...)
 gen_proto_order_variants()
 {
@@ -79,49 +128,19 @@ gen_proto_order_variants()
 	local sfx="$1"; shift
 	local atomic="$1"
 
-	local basename="arch_${atomic}_${pfx}${name}${sfx}"
+	gen_proto_order_variant "${meta}" "${pfx}" "${name}" "${sfx}" "" "$@"
 
-	local template="$(find_fallback_template "${pfx}" "${name}" "${sfx}" "")"
-
-	# If we don't have relaxed atomics, then we don't bother with ordering fallbacks
-	# read_acquire and set_release need to be templated, though
-	if ! meta_has_relaxed "${meta}"; then
-		gen_proto_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "" "$@"
-
-		if meta_has_acquire "${meta}"; then
-			gen_proto_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "_acquire" "$@"
-		fi
-
-		if meta_has_release "${meta}"; then
-			gen_proto_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "_release" "$@"
-		fi
-
-		return
+	if meta_has_acquire "${meta}"; then
+		gen_proto_order_variant "${meta}" "${pfx}" "${name}" "${sfx}" "_acquire" "$@"
 	fi
 
-	printf "#ifndef ${basename}_relaxed\n"
-
-	if [ ! -z "${template}" ]; then
-		printf "#ifdef ${basename}\n"
+	if meta_has_release "${meta}"; then
+		gen_proto_order_variant "${meta}" "${pfx}" "${name}" "${sfx}" "_release" "$@"
 	fi
 
-	gen_basic_fallbacks "${basename}"
-
-	if [ ! -z "${template}" ]; then
-		printf "#endif /* ${basename} */\n\n"
-		gen_proto_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "" "$@"
-		gen_proto_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "_acquire" "$@"
-		gen_proto_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "_release" "$@"
-		gen_proto_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "_relaxed" "$@"
+	if meta_has_relaxed "${meta}"; then
+		gen_proto_order_variant "${meta}" "${pfx}" "${name}" "${sfx}" "_relaxed" "$@"
 	fi
-
-	printf "#else /* ${basename}_relaxed */\n\n"
-
-	gen_order_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "_acquire" "$@"
-	gen_order_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "_release" "$@"
-	gen_order_fallback "${meta}" "${pfx}" "${name}" "${sfx}" "" "$@"
-
-	printf "#endif /* ${basename}_relaxed */\n\n"
 }
 
 gen_order_fallbacks()
