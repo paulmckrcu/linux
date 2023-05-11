@@ -239,8 +239,14 @@
 })
 #endif /* arch_try_cmpxchg64_local */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_read() here
+ */
 /* arch_atomic_read() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_read_acquire() here
+ */
 #if defined(arch_atomic_read_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_read)
@@ -263,8 +269,14 @@ arch_atomic_read_acquire(const atomic_t *v)
 #define arch_atomic_read_acquire arch_atomic_read_acquire
 #endif /* arch_atomic_read_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_set() here
+ */
 /* arch_atomic_set() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_set_release() here
+ */
 #if defined(arch_atomic_set_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_set)
@@ -283,8 +295,14 @@ arch_atomic_set_release(atomic_t *v, int i)
 #define arch_atomic_set_release arch_atomic_set_release
 #endif /* arch_atomic_set_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add() here
+ */
 /* arch_atomic_add() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add_return() here
+ */
 #if defined(arch_atomic_add_return)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_add_return_relaxed)
@@ -302,6 +320,9 @@ arch_atomic_add_return(int i, atomic_t *v)
 #error "Unable to define arch_atomic_add_return"
 #endif /* arch_atomic_add_return */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add_return_acquire() here
+ */
 #if defined(arch_atomic_add_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_add_return_relaxed)
@@ -319,6 +340,9 @@ arch_atomic_add_return_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_add_return_acquire"
 #endif /* arch_atomic_add_return_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add_return_release() here
+ */
 #if defined(arch_atomic_add_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_add_return_relaxed)
@@ -335,6 +359,9 @@ arch_atomic_add_return_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_add_return_release"
 #endif /* arch_atomic_add_return_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add_return_relaxed() here
+ */
 #if defined(arch_atomic_add_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_add_return)
@@ -343,6 +370,9 @@ arch_atomic_add_return_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_add_return_relaxed"
 #endif /* arch_atomic_add_return_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_add() here
+ */
 #if defined(arch_atomic_fetch_add)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_add_relaxed)
@@ -360,6 +390,9 @@ arch_atomic_fetch_add(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_add"
 #endif /* arch_atomic_fetch_add */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_add_acquire() here
+ */
 #if defined(arch_atomic_fetch_add_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_add_relaxed)
@@ -377,6 +410,9 @@ arch_atomic_fetch_add_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_add_acquire"
 #endif /* arch_atomic_fetch_add_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_add_release() here
+ */
 #if defined(arch_atomic_fetch_add_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_add_relaxed)
@@ -393,6 +429,9 @@ arch_atomic_fetch_add_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_add_release"
 #endif /* arch_atomic_fetch_add_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_add_relaxed() here
+ */
 #if defined(arch_atomic_fetch_add_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_add)
@@ -401,8 +440,14 @@ arch_atomic_fetch_add_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_add_relaxed"
 #endif /* arch_atomic_fetch_add_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_sub() here
+ */
 /* arch_atomic_sub() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_sub_return() here
+ */
 #if defined(arch_atomic_sub_return)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_sub_return_relaxed)
@@ -420,6 +465,9 @@ arch_atomic_sub_return(int i, atomic_t *v)
 #error "Unable to define arch_atomic_sub_return"
 #endif /* arch_atomic_sub_return */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_sub_return_acquire() here
+ */
 #if defined(arch_atomic_sub_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_sub_return_relaxed)
@@ -437,6 +485,9 @@ arch_atomic_sub_return_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_sub_return_acquire"
 #endif /* arch_atomic_sub_return_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_sub_return_release() here
+ */
 #if defined(arch_atomic_sub_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_sub_return_relaxed)
@@ -453,6 +504,9 @@ arch_atomic_sub_return_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_sub_return_release"
 #endif /* arch_atomic_sub_return_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_sub_return_relaxed() here
+ */
 #if defined(arch_atomic_sub_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_sub_return)
@@ -461,6 +515,9 @@ arch_atomic_sub_return_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_sub_return_relaxed"
 #endif /* arch_atomic_sub_return_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_sub() here
+ */
 #if defined(arch_atomic_fetch_sub)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_sub_relaxed)
@@ -478,6 +535,9 @@ arch_atomic_fetch_sub(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_sub"
 #endif /* arch_atomic_fetch_sub */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_sub_acquire() here
+ */
 #if defined(arch_atomic_fetch_sub_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_sub_relaxed)
@@ -495,6 +555,9 @@ arch_atomic_fetch_sub_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_sub_acquire"
 #endif /* arch_atomic_fetch_sub_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_sub_release() here
+ */
 #if defined(arch_atomic_fetch_sub_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_sub_relaxed)
@@ -511,6 +574,9 @@ arch_atomic_fetch_sub_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_sub_release"
 #endif /* arch_atomic_fetch_sub_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_sub_relaxed() here
+ */
 #if defined(arch_atomic_fetch_sub_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_sub)
@@ -519,6 +585,9 @@ arch_atomic_fetch_sub_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_sub_relaxed"
 #endif /* arch_atomic_fetch_sub_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_inc() here
+ */
 #if defined(arch_atomic_inc)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -530,6 +599,9 @@ arch_atomic_inc(atomic_t *v)
 #define arch_atomic_inc arch_atomic_inc
 #endif /* arch_atomic_inc */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_inc_return() here
+ */
 #if defined(arch_atomic_inc_return)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_inc_return_relaxed)
@@ -552,6 +624,9 @@ arch_atomic_inc_return(atomic_t *v)
 #define arch_atomic_inc_return arch_atomic_inc_return
 #endif /* arch_atomic_inc_return */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_inc_return_acquire() here
+ */
 #if defined(arch_atomic_inc_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_inc_return_relaxed)
@@ -574,6 +649,9 @@ arch_atomic_inc_return_acquire(atomic_t *v)
 #define arch_atomic_inc_return_acquire arch_atomic_inc_return_acquire
 #endif /* arch_atomic_inc_return_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_inc_return_release() here
+ */
 #if defined(arch_atomic_inc_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_inc_return_relaxed)
@@ -595,6 +673,9 @@ arch_atomic_inc_return_release(atomic_t *v)
 #define arch_atomic_inc_return_release arch_atomic_inc_return_release
 #endif /* arch_atomic_inc_return_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_inc_return_relaxed() here
+ */
 #if defined(arch_atomic_inc_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_inc_return)
@@ -608,6 +689,9 @@ arch_atomic_inc_return_relaxed(atomic_t *v)
 #define arch_atomic_inc_return_relaxed arch_atomic_inc_return_relaxed
 #endif /* arch_atomic_inc_return_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_inc() here
+ */
 #if defined(arch_atomic_fetch_inc)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_inc_relaxed)
@@ -630,6 +714,9 @@ arch_atomic_fetch_inc(atomic_t *v)
 #define arch_atomic_fetch_inc arch_atomic_fetch_inc
 #endif /* arch_atomic_fetch_inc */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_inc_acquire() here
+ */
 #if defined(arch_atomic_fetch_inc_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_inc_relaxed)
@@ -652,6 +739,9 @@ arch_atomic_fetch_inc_acquire(atomic_t *v)
 #define arch_atomic_fetch_inc_acquire arch_atomic_fetch_inc_acquire
 #endif /* arch_atomic_fetch_inc_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_inc_release() here
+ */
 #if defined(arch_atomic_fetch_inc_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_inc_relaxed)
@@ -673,6 +763,9 @@ arch_atomic_fetch_inc_release(atomic_t *v)
 #define arch_atomic_fetch_inc_release arch_atomic_fetch_inc_release
 #endif /* arch_atomic_fetch_inc_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_inc_relaxed() here
+ */
 #if defined(arch_atomic_fetch_inc_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_inc)
@@ -686,6 +779,9 @@ arch_atomic_fetch_inc_relaxed(atomic_t *v)
 #define arch_atomic_fetch_inc_relaxed arch_atomic_fetch_inc_relaxed
 #endif /* arch_atomic_fetch_inc_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_dec() here
+ */
 #if defined(arch_atomic_dec)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -697,6 +793,9 @@ arch_atomic_dec(atomic_t *v)
 #define arch_atomic_dec arch_atomic_dec
 #endif /* arch_atomic_dec */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_dec_return() here
+ */
 #if defined(arch_atomic_dec_return)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_dec_return_relaxed)
@@ -719,6 +818,9 @@ arch_atomic_dec_return(atomic_t *v)
 #define arch_atomic_dec_return arch_atomic_dec_return
 #endif /* arch_atomic_dec_return */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_dec_return_acquire() here
+ */
 #if defined(arch_atomic_dec_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_dec_return_relaxed)
@@ -741,6 +843,9 @@ arch_atomic_dec_return_acquire(atomic_t *v)
 #define arch_atomic_dec_return_acquire arch_atomic_dec_return_acquire
 #endif /* arch_atomic_dec_return_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_dec_return_release() here
+ */
 #if defined(arch_atomic_dec_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_dec_return_relaxed)
@@ -762,6 +867,9 @@ arch_atomic_dec_return_release(atomic_t *v)
 #define arch_atomic_dec_return_release arch_atomic_dec_return_release
 #endif /* arch_atomic_dec_return_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_dec_return_relaxed() here
+ */
 #if defined(arch_atomic_dec_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_dec_return)
@@ -775,6 +883,9 @@ arch_atomic_dec_return_relaxed(atomic_t *v)
 #define arch_atomic_dec_return_relaxed arch_atomic_dec_return_relaxed
 #endif /* arch_atomic_dec_return_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_dec() here
+ */
 #if defined(arch_atomic_fetch_dec)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_dec_relaxed)
@@ -797,6 +908,9 @@ arch_atomic_fetch_dec(atomic_t *v)
 #define arch_atomic_fetch_dec arch_atomic_fetch_dec
 #endif /* arch_atomic_fetch_dec */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_dec_acquire() here
+ */
 #if defined(arch_atomic_fetch_dec_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_dec_relaxed)
@@ -819,6 +933,9 @@ arch_atomic_fetch_dec_acquire(atomic_t *v)
 #define arch_atomic_fetch_dec_acquire arch_atomic_fetch_dec_acquire
 #endif /* arch_atomic_fetch_dec_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_dec_release() here
+ */
 #if defined(arch_atomic_fetch_dec_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_dec_relaxed)
@@ -840,6 +957,9 @@ arch_atomic_fetch_dec_release(atomic_t *v)
 #define arch_atomic_fetch_dec_release arch_atomic_fetch_dec_release
 #endif /* arch_atomic_fetch_dec_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_dec_relaxed() here
+ */
 #if defined(arch_atomic_fetch_dec_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_dec)
@@ -853,8 +973,14 @@ arch_atomic_fetch_dec_relaxed(atomic_t *v)
 #define arch_atomic_fetch_dec_relaxed arch_atomic_fetch_dec_relaxed
 #endif /* arch_atomic_fetch_dec_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_and() here
+ */
 /* arch_atomic_and() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_and() here
+ */
 #if defined(arch_atomic_fetch_and)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_and_relaxed)
@@ -872,6 +998,9 @@ arch_atomic_fetch_and(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_and"
 #endif /* arch_atomic_fetch_and */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_and_acquire() here
+ */
 #if defined(arch_atomic_fetch_and_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_and_relaxed)
@@ -889,6 +1018,9 @@ arch_atomic_fetch_and_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_and_acquire"
 #endif /* arch_atomic_fetch_and_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_and_release() here
+ */
 #if defined(arch_atomic_fetch_and_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_and_relaxed)
@@ -905,6 +1037,9 @@ arch_atomic_fetch_and_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_and_release"
 #endif /* arch_atomic_fetch_and_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_and_relaxed() here
+ */
 #if defined(arch_atomic_fetch_and_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_and)
@@ -913,6 +1048,9 @@ arch_atomic_fetch_and_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_and_relaxed"
 #endif /* arch_atomic_fetch_and_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_andnot() here
+ */
 #if defined(arch_atomic_andnot)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -924,6 +1062,9 @@ arch_atomic_andnot(int i, atomic_t *v)
 #define arch_atomic_andnot arch_atomic_andnot
 #endif /* arch_atomic_andnot */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_andnot() here
+ */
 #if defined(arch_atomic_fetch_andnot)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_andnot_relaxed)
@@ -946,6 +1087,9 @@ arch_atomic_fetch_andnot(int i, atomic_t *v)
 #define arch_atomic_fetch_andnot arch_atomic_fetch_andnot
 #endif /* arch_atomic_fetch_andnot */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_andnot_acquire() here
+ */
 #if defined(arch_atomic_fetch_andnot_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_andnot_relaxed)
@@ -968,6 +1112,9 @@ arch_atomic_fetch_andnot_acquire(int i, atomic_t *v)
 #define arch_atomic_fetch_andnot_acquire arch_atomic_fetch_andnot_acquire
 #endif /* arch_atomic_fetch_andnot_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_andnot_release() here
+ */
 #if defined(arch_atomic_fetch_andnot_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_andnot_relaxed)
@@ -989,6 +1136,9 @@ arch_atomic_fetch_andnot_release(int i, atomic_t *v)
 #define arch_atomic_fetch_andnot_release arch_atomic_fetch_andnot_release
 #endif /* arch_atomic_fetch_andnot_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_andnot_relaxed() here
+ */
 #if defined(arch_atomic_fetch_andnot_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_andnot)
@@ -1002,8 +1152,14 @@ arch_atomic_fetch_andnot_relaxed(int i, atomic_t *v)
 #define arch_atomic_fetch_andnot_relaxed arch_atomic_fetch_andnot_relaxed
 #endif /* arch_atomic_fetch_andnot_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_or() here
+ */
 /* arch_atomic_or() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_or() here
+ */
 #if defined(arch_atomic_fetch_or)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_or_relaxed)
@@ -1021,6 +1177,9 @@ arch_atomic_fetch_or(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_or"
 #endif /* arch_atomic_fetch_or */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_or_acquire() here
+ */
 #if defined(arch_atomic_fetch_or_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_or_relaxed)
@@ -1038,6 +1197,9 @@ arch_atomic_fetch_or_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_or_acquire"
 #endif /* arch_atomic_fetch_or_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_or_release() here
+ */
 #if defined(arch_atomic_fetch_or_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_or_relaxed)
@@ -1054,6 +1216,9 @@ arch_atomic_fetch_or_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_or_release"
 #endif /* arch_atomic_fetch_or_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_or_relaxed() here
+ */
 #if defined(arch_atomic_fetch_or_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_or)
@@ -1062,8 +1227,14 @@ arch_atomic_fetch_or_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_or_relaxed"
 #endif /* arch_atomic_fetch_or_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_xor() here
+ */
 /* arch_atomic_xor() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_xor() here
+ */
 #if defined(arch_atomic_fetch_xor)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_xor_relaxed)
@@ -1081,6 +1252,9 @@ arch_atomic_fetch_xor(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_xor"
 #endif /* arch_atomic_fetch_xor */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_xor_acquire() here
+ */
 #if defined(arch_atomic_fetch_xor_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_xor_relaxed)
@@ -1098,6 +1272,9 @@ arch_atomic_fetch_xor_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_xor_acquire"
 #endif /* arch_atomic_fetch_xor_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_xor_release() here
+ */
 #if defined(arch_atomic_fetch_xor_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_xor_relaxed)
@@ -1114,6 +1291,9 @@ arch_atomic_fetch_xor_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_xor_release"
 #endif /* arch_atomic_fetch_xor_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_xor_relaxed() here
+ */
 #if defined(arch_atomic_fetch_xor_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_fetch_xor)
@@ -1122,6 +1302,9 @@ arch_atomic_fetch_xor_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_xor_relaxed"
 #endif /* arch_atomic_fetch_xor_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_xchg() here
+ */
 #if defined(arch_atomic_xchg)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_xchg_relaxed)
@@ -1139,6 +1322,9 @@ arch_atomic_xchg(atomic_t *v, int i)
 #error "Unable to define arch_atomic_xchg"
 #endif /* arch_atomic_xchg */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_xchg_acquire() here
+ */
 #if defined(arch_atomic_xchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_xchg_relaxed)
@@ -1156,6 +1342,9 @@ arch_atomic_xchg_acquire(atomic_t *v, int i)
 #error "Unable to define arch_atomic_xchg_acquire"
 #endif /* arch_atomic_xchg_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_xchg_release() here
+ */
 #if defined(arch_atomic_xchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_xchg_relaxed)
@@ -1172,6 +1361,9 @@ arch_atomic_xchg_release(atomic_t *v, int i)
 #error "Unable to define arch_atomic_xchg_release"
 #endif /* arch_atomic_xchg_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_xchg_relaxed() here
+ */
 #if defined(arch_atomic_xchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_xchg)
@@ -1180,6 +1372,9 @@ arch_atomic_xchg_release(atomic_t *v, int i)
 #error "Unable to define arch_atomic_xchg_relaxed"
 #endif /* arch_atomic_xchg_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_cmpxchg() here
+ */
 #if defined(arch_atomic_cmpxchg)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_cmpxchg_relaxed)
@@ -1197,6 +1392,9 @@ arch_atomic_cmpxchg(atomic_t *v, int old, int new)
 #error "Unable to define arch_atomic_cmpxchg"
 #endif /* arch_atomic_cmpxchg */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_cmpxchg_acquire() here
+ */
 #if defined(arch_atomic_cmpxchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_cmpxchg_relaxed)
@@ -1214,6 +1412,9 @@ arch_atomic_cmpxchg_acquire(atomic_t *v, int old, int new)
 #error "Unable to define arch_atomic_cmpxchg_acquire"
 #endif /* arch_atomic_cmpxchg_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_cmpxchg_release() here
+ */
 #if defined(arch_atomic_cmpxchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_cmpxchg_relaxed)
@@ -1230,6 +1431,9 @@ arch_atomic_cmpxchg_release(atomic_t *v, int old, int new)
 #error "Unable to define arch_atomic_cmpxchg_release"
 #endif /* arch_atomic_cmpxchg_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_cmpxchg_relaxed() here
+ */
 #if defined(arch_atomic_cmpxchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_cmpxchg)
@@ -1238,6 +1442,9 @@ arch_atomic_cmpxchg_release(atomic_t *v, int old, int new)
 #error "Unable to define arch_atomic_cmpxchg_relaxed"
 #endif /* arch_atomic_cmpxchg_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_try_cmpxchg() here
+ */
 #if defined(arch_atomic_try_cmpxchg)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_try_cmpxchg_relaxed)
@@ -1264,6 +1471,9 @@ arch_atomic_try_cmpxchg(atomic_t *v, int *old, int new)
 #define arch_atomic_try_cmpxchg arch_atomic_try_cmpxchg
 #endif /* arch_atomic_try_cmpxchg */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_try_cmpxchg_acquire() here
+ */
 #if defined(arch_atomic_try_cmpxchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_try_cmpxchg_relaxed)
@@ -1290,6 +1500,9 @@ arch_atomic_try_cmpxchg_acquire(atomic_t *v, int *old, int new)
 #define arch_atomic_try_cmpxchg_acquire arch_atomic_try_cmpxchg_acquire
 #endif /* arch_atomic_try_cmpxchg_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_try_cmpxchg_release() here
+ */
 #if defined(arch_atomic_try_cmpxchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_try_cmpxchg_relaxed)
@@ -1315,6 +1528,9 @@ arch_atomic_try_cmpxchg_release(atomic_t *v, int *old, int new)
 #define arch_atomic_try_cmpxchg_release arch_atomic_try_cmpxchg_release
 #endif /* arch_atomic_try_cmpxchg_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_try_cmpxchg_relaxed() here
+ */
 #if defined(arch_atomic_try_cmpxchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_try_cmpxchg)
@@ -1332,6 +1548,9 @@ arch_atomic_try_cmpxchg_relaxed(atomic_t *v, int *old, int new)
 #define arch_atomic_try_cmpxchg_relaxed arch_atomic_try_cmpxchg_relaxed
 #endif /* arch_atomic_try_cmpxchg_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_sub_and_test() here
+ */
 #if defined(arch_atomic_sub_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1352,6 +1571,9 @@ arch_atomic_sub_and_test(int i, atomic_t *v)
 #define arch_atomic_sub_and_test arch_atomic_sub_and_test
 #endif /* arch_atomic_sub_and_test */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_dec_and_test() here
+ */
 #if defined(arch_atomic_dec_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1371,6 +1593,9 @@ arch_atomic_dec_and_test(atomic_t *v)
 #define arch_atomic_dec_and_test arch_atomic_dec_and_test
 #endif /* arch_atomic_dec_and_test */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_inc_and_test() here
+ */
 #if defined(arch_atomic_inc_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1390,6 +1615,9 @@ arch_atomic_inc_and_test(atomic_t *v)
 #define arch_atomic_inc_and_test arch_atomic_inc_and_test
 #endif /* arch_atomic_inc_and_test */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add_negative() here
+ */
 #if defined(arch_atomic_add_negative)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_add_negative_relaxed)
@@ -1420,6 +1648,9 @@ arch_atomic_add_negative(int i, atomic_t *v)
 #define arch_atomic_add_negative arch_atomic_add_negative
 #endif /* arch_atomic_add_negative */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add_negative_acquire() here
+ */
 #if defined(arch_atomic_add_negative_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_add_negative_relaxed)
@@ -1450,6 +1681,9 @@ arch_atomic_add_negative_acquire(int i, atomic_t *v)
 #define arch_atomic_add_negative_acquire arch_atomic_add_negative_acquire
 #endif /* arch_atomic_add_negative_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add_negative_release() here
+ */
 #if defined(arch_atomic_add_negative_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_add_negative_relaxed)
@@ -1479,6 +1713,9 @@ arch_atomic_add_negative_release(int i, atomic_t *v)
 #define arch_atomic_add_negative_release arch_atomic_add_negative_release
 #endif /* arch_atomic_add_negative_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add_negative_relaxed() here
+ */
 #if defined(arch_atomic_add_negative_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic_add_negative)
@@ -1500,6 +1737,9 @@ arch_atomic_add_negative_relaxed(int i, atomic_t *v)
 #define arch_atomic_add_negative_relaxed arch_atomic_add_negative_relaxed
 #endif /* arch_atomic_add_negative_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_fetch_add_unless() here
+ */
 #if defined(arch_atomic_fetch_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1527,6 +1767,9 @@ arch_atomic_fetch_add_unless(atomic_t *v, int a, int u)
 #define arch_atomic_fetch_add_unless arch_atomic_fetch_add_unless
 #endif /* arch_atomic_fetch_add_unless */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_add_unless() here
+ */
 #if defined(arch_atomic_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1547,6 +1790,9 @@ arch_atomic_add_unless(atomic_t *v, int a, int u)
 #define arch_atomic_add_unless arch_atomic_add_unless
 #endif /* arch_atomic_add_unless */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_inc_not_zero() here
+ */
 #if defined(arch_atomic_inc_not_zero)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1565,6 +1811,9 @@ arch_atomic_inc_not_zero(atomic_t *v)
 #define arch_atomic_inc_not_zero arch_atomic_inc_not_zero
 #endif /* arch_atomic_inc_not_zero */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_inc_unless_negative() here
+ */
 #if defined(arch_atomic_inc_unless_negative)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1583,6 +1832,9 @@ arch_atomic_inc_unless_negative(atomic_t *v)
 #define arch_atomic_inc_unless_negative arch_atomic_inc_unless_negative
 #endif /* arch_atomic_inc_unless_negative */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_dec_unless_positive() here
+ */
 #if defined(arch_atomic_dec_unless_positive)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1601,6 +1853,9 @@ arch_atomic_dec_unless_positive(atomic_t *v)
 #define arch_atomic_dec_unless_positive arch_atomic_dec_unless_positive
 #endif /* arch_atomic_dec_unless_positive */
 
+/*
+ * TODO: add kerneldoc for arch_atomic_dec_if_positive() here
+ */
 #if defined(arch_atomic_dec_if_positive)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1624,8 +1879,14 @@ arch_atomic_dec_if_positive(atomic_t *v)
 #include <asm-generic/atomic64.h>
 #endif
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_read() here
+ */
 /* arch_atomic64_read() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_read_acquire() here
+ */
 #if defined(arch_atomic64_read_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_read)
@@ -1648,8 +1909,14 @@ arch_atomic64_read_acquire(const atomic64_t *v)
 #define arch_atomic64_read_acquire arch_atomic64_read_acquire
 #endif /* arch_atomic64_read_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_set() here
+ */
 /* arch_atomic64_set() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_set_release() here
+ */
 #if defined(arch_atomic64_set_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_set)
@@ -1668,8 +1935,14 @@ arch_atomic64_set_release(atomic64_t *v, s64 i)
 #define arch_atomic64_set_release arch_atomic64_set_release
 #endif /* arch_atomic64_set_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add() here
+ */
 /* arch_atomic64_add() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add_return() here
+ */
 #if defined(arch_atomic64_add_return)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_add_return_relaxed)
@@ -1687,6 +1960,9 @@ arch_atomic64_add_return(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_add_return"
 #endif /* arch_atomic64_add_return */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add_return_acquire() here
+ */
 #if defined(arch_atomic64_add_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_add_return_relaxed)
@@ -1704,6 +1980,9 @@ arch_atomic64_add_return_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_add_return_acquire"
 #endif /* arch_atomic64_add_return_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add_return_release() here
+ */
 #if defined(arch_atomic64_add_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_add_return_relaxed)
@@ -1720,6 +1999,9 @@ arch_atomic64_add_return_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_add_return_release"
 #endif /* arch_atomic64_add_return_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add_return_relaxed() here
+ */
 #if defined(arch_atomic64_add_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_add_return)
@@ -1728,6 +2010,9 @@ arch_atomic64_add_return_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_add_return_relaxed"
 #endif /* arch_atomic64_add_return_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_add() here
+ */
 #if defined(arch_atomic64_fetch_add)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_add_relaxed)
@@ -1745,6 +2030,9 @@ arch_atomic64_fetch_add(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_add"
 #endif /* arch_atomic64_fetch_add */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_add_acquire() here
+ */
 #if defined(arch_atomic64_fetch_add_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_add_relaxed)
@@ -1762,6 +2050,9 @@ arch_atomic64_fetch_add_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_add_acquire"
 #endif /* arch_atomic64_fetch_add_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_add_release() here
+ */
 #if defined(arch_atomic64_fetch_add_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_add_relaxed)
@@ -1778,6 +2069,9 @@ arch_atomic64_fetch_add_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_add_release"
 #endif /* arch_atomic64_fetch_add_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_add_relaxed() here
+ */
 #if defined(arch_atomic64_fetch_add_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_add)
@@ -1786,8 +2080,14 @@ arch_atomic64_fetch_add_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_add_relaxed"
 #endif /* arch_atomic64_fetch_add_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_sub() here
+ */
 /* arch_atomic64_sub() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_sub_return() here
+ */
 #if defined(arch_atomic64_sub_return)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_sub_return_relaxed)
@@ -1805,6 +2105,9 @@ arch_atomic64_sub_return(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_sub_return"
 #endif /* arch_atomic64_sub_return */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_sub_return_acquire() here
+ */
 #if defined(arch_atomic64_sub_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_sub_return_relaxed)
@@ -1822,6 +2125,9 @@ arch_atomic64_sub_return_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_sub_return_acquire"
 #endif /* arch_atomic64_sub_return_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_sub_return_release() here
+ */
 #if defined(arch_atomic64_sub_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_sub_return_relaxed)
@@ -1838,6 +2144,9 @@ arch_atomic64_sub_return_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_sub_return_release"
 #endif /* arch_atomic64_sub_return_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_sub_return_relaxed() here
+ */
 #if defined(arch_atomic64_sub_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_sub_return)
@@ -1846,6 +2155,9 @@ arch_atomic64_sub_return_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_sub_return_relaxed"
 #endif /* arch_atomic64_sub_return_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_sub() here
+ */
 #if defined(arch_atomic64_fetch_sub)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_sub_relaxed)
@@ -1863,6 +2175,9 @@ arch_atomic64_fetch_sub(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_sub"
 #endif /* arch_atomic64_fetch_sub */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_sub_acquire() here
+ */
 #if defined(arch_atomic64_fetch_sub_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_sub_relaxed)
@@ -1880,6 +2195,9 @@ arch_atomic64_fetch_sub_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_sub_acquire"
 #endif /* arch_atomic64_fetch_sub_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_sub_release() here
+ */
 #if defined(arch_atomic64_fetch_sub_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_sub_relaxed)
@@ -1896,6 +2214,9 @@ arch_atomic64_fetch_sub_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_sub_release"
 #endif /* arch_atomic64_fetch_sub_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_sub_relaxed() here
+ */
 #if defined(arch_atomic64_fetch_sub_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_sub)
@@ -1904,6 +2225,9 @@ arch_atomic64_fetch_sub_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_sub_relaxed"
 #endif /* arch_atomic64_fetch_sub_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_inc() here
+ */
 #if defined(arch_atomic64_inc)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -1915,6 +2239,9 @@ arch_atomic64_inc(atomic64_t *v)
 #define arch_atomic64_inc arch_atomic64_inc
 #endif /* arch_atomic64_inc */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_inc_return() here
+ */
 #if defined(arch_atomic64_inc_return)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_inc_return_relaxed)
@@ -1937,6 +2264,9 @@ arch_atomic64_inc_return(atomic64_t *v)
 #define arch_atomic64_inc_return arch_atomic64_inc_return
 #endif /* arch_atomic64_inc_return */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_inc_return_acquire() here
+ */
 #if defined(arch_atomic64_inc_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_inc_return_relaxed)
@@ -1959,6 +2289,9 @@ arch_atomic64_inc_return_acquire(atomic64_t *v)
 #define arch_atomic64_inc_return_acquire arch_atomic64_inc_return_acquire
 #endif /* arch_atomic64_inc_return_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_inc_return_release() here
+ */
 #if defined(arch_atomic64_inc_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_inc_return_relaxed)
@@ -1980,6 +2313,9 @@ arch_atomic64_inc_return_release(atomic64_t *v)
 #define arch_atomic64_inc_return_release arch_atomic64_inc_return_release
 #endif /* arch_atomic64_inc_return_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_inc_return_relaxed() here
+ */
 #if defined(arch_atomic64_inc_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_inc_return)
@@ -1993,6 +2329,9 @@ arch_atomic64_inc_return_relaxed(atomic64_t *v)
 #define arch_atomic64_inc_return_relaxed arch_atomic64_inc_return_relaxed
 #endif /* arch_atomic64_inc_return_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_inc() here
+ */
 #if defined(arch_atomic64_fetch_inc)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_inc_relaxed)
@@ -2015,6 +2354,9 @@ arch_atomic64_fetch_inc(atomic64_t *v)
 #define arch_atomic64_fetch_inc arch_atomic64_fetch_inc
 #endif /* arch_atomic64_fetch_inc */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_inc_acquire() here
+ */
 #if defined(arch_atomic64_fetch_inc_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_inc_relaxed)
@@ -2037,6 +2379,9 @@ arch_atomic64_fetch_inc_acquire(atomic64_t *v)
 #define arch_atomic64_fetch_inc_acquire arch_atomic64_fetch_inc_acquire
 #endif /* arch_atomic64_fetch_inc_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_inc_release() here
+ */
 #if defined(arch_atomic64_fetch_inc_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_inc_relaxed)
@@ -2058,6 +2403,9 @@ arch_atomic64_fetch_inc_release(atomic64_t *v)
 #define arch_atomic64_fetch_inc_release arch_atomic64_fetch_inc_release
 #endif /* arch_atomic64_fetch_inc_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_inc_relaxed() here
+ */
 #if defined(arch_atomic64_fetch_inc_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_inc)
@@ -2071,6 +2419,9 @@ arch_atomic64_fetch_inc_relaxed(atomic64_t *v)
 #define arch_atomic64_fetch_inc_relaxed arch_atomic64_fetch_inc_relaxed
 #endif /* arch_atomic64_fetch_inc_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_dec() here
+ */
 #if defined(arch_atomic64_dec)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2082,6 +2433,9 @@ arch_atomic64_dec(atomic64_t *v)
 #define arch_atomic64_dec arch_atomic64_dec
 #endif /* arch_atomic64_dec */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_dec_return() here
+ */
 #if defined(arch_atomic64_dec_return)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_dec_return_relaxed)
@@ -2104,6 +2458,9 @@ arch_atomic64_dec_return(atomic64_t *v)
 #define arch_atomic64_dec_return arch_atomic64_dec_return
 #endif /* arch_atomic64_dec_return */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_dec_return_acquire() here
+ */
 #if defined(arch_atomic64_dec_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_dec_return_relaxed)
@@ -2126,6 +2483,9 @@ arch_atomic64_dec_return_acquire(atomic64_t *v)
 #define arch_atomic64_dec_return_acquire arch_atomic64_dec_return_acquire
 #endif /* arch_atomic64_dec_return_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_dec_return_release() here
+ */
 #if defined(arch_atomic64_dec_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_dec_return_relaxed)
@@ -2147,6 +2507,9 @@ arch_atomic64_dec_return_release(atomic64_t *v)
 #define arch_atomic64_dec_return_release arch_atomic64_dec_return_release
 #endif /* arch_atomic64_dec_return_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_dec_return_relaxed() here
+ */
 #if defined(arch_atomic64_dec_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_dec_return)
@@ -2160,6 +2523,9 @@ arch_atomic64_dec_return_relaxed(atomic64_t *v)
 #define arch_atomic64_dec_return_relaxed arch_atomic64_dec_return_relaxed
 #endif /* arch_atomic64_dec_return_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_dec() here
+ */
 #if defined(arch_atomic64_fetch_dec)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_dec_relaxed)
@@ -2182,6 +2548,9 @@ arch_atomic64_fetch_dec(atomic64_t *v)
 #define arch_atomic64_fetch_dec arch_atomic64_fetch_dec
 #endif /* arch_atomic64_fetch_dec */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_dec_acquire() here
+ */
 #if defined(arch_atomic64_fetch_dec_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_dec_relaxed)
@@ -2204,6 +2573,9 @@ arch_atomic64_fetch_dec_acquire(atomic64_t *v)
 #define arch_atomic64_fetch_dec_acquire arch_atomic64_fetch_dec_acquire
 #endif /* arch_atomic64_fetch_dec_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_dec_release() here
+ */
 #if defined(arch_atomic64_fetch_dec_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_dec_relaxed)
@@ -2225,6 +2597,9 @@ arch_atomic64_fetch_dec_release(atomic64_t *v)
 #define arch_atomic64_fetch_dec_release arch_atomic64_fetch_dec_release
 #endif /* arch_atomic64_fetch_dec_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_dec_relaxed() here
+ */
 #if defined(arch_atomic64_fetch_dec_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_dec)
@@ -2238,8 +2613,14 @@ arch_atomic64_fetch_dec_relaxed(atomic64_t *v)
 #define arch_atomic64_fetch_dec_relaxed arch_atomic64_fetch_dec_relaxed
 #endif /* arch_atomic64_fetch_dec_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_and() here
+ */
 /* arch_atomic64_and() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_and() here
+ */
 #if defined(arch_atomic64_fetch_and)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_and_relaxed)
@@ -2257,6 +2638,9 @@ arch_atomic64_fetch_and(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_and"
 #endif /* arch_atomic64_fetch_and */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_and_acquire() here
+ */
 #if defined(arch_atomic64_fetch_and_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_and_relaxed)
@@ -2274,6 +2658,9 @@ arch_atomic64_fetch_and_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_and_acquire"
 #endif /* arch_atomic64_fetch_and_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_and_release() here
+ */
 #if defined(arch_atomic64_fetch_and_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_and_relaxed)
@@ -2290,6 +2677,9 @@ arch_atomic64_fetch_and_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_and_release"
 #endif /* arch_atomic64_fetch_and_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_and_relaxed() here
+ */
 #if defined(arch_atomic64_fetch_and_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_and)
@@ -2298,6 +2688,9 @@ arch_atomic64_fetch_and_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_and_relaxed"
 #endif /* arch_atomic64_fetch_and_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_andnot() here
+ */
 #if defined(arch_atomic64_andnot)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2309,6 +2702,9 @@ arch_atomic64_andnot(s64 i, atomic64_t *v)
 #define arch_atomic64_andnot arch_atomic64_andnot
 #endif /* arch_atomic64_andnot */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_andnot() here
+ */
 #if defined(arch_atomic64_fetch_andnot)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_andnot_relaxed)
@@ -2331,6 +2727,9 @@ arch_atomic64_fetch_andnot(s64 i, atomic64_t *v)
 #define arch_atomic64_fetch_andnot arch_atomic64_fetch_andnot
 #endif /* arch_atomic64_fetch_andnot */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_andnot_acquire() here
+ */
 #if defined(arch_atomic64_fetch_andnot_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_andnot_relaxed)
@@ -2353,6 +2752,9 @@ arch_atomic64_fetch_andnot_acquire(s64 i, atomic64_t *v)
 #define arch_atomic64_fetch_andnot_acquire arch_atomic64_fetch_andnot_acquire
 #endif /* arch_atomic64_fetch_andnot_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_andnot_release() here
+ */
 #if defined(arch_atomic64_fetch_andnot_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_andnot_relaxed)
@@ -2374,6 +2776,9 @@ arch_atomic64_fetch_andnot_release(s64 i, atomic64_t *v)
 #define arch_atomic64_fetch_andnot_release arch_atomic64_fetch_andnot_release
 #endif /* arch_atomic64_fetch_andnot_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_andnot_relaxed() here
+ */
 #if defined(arch_atomic64_fetch_andnot_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_andnot)
@@ -2387,8 +2792,14 @@ arch_atomic64_fetch_andnot_relaxed(s64 i, atomic64_t *v)
 #define arch_atomic64_fetch_andnot_relaxed arch_atomic64_fetch_andnot_relaxed
 #endif /* arch_atomic64_fetch_andnot_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_or() here
+ */
 /* arch_atomic64_or() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_or() here
+ */
 #if defined(arch_atomic64_fetch_or)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_or_relaxed)
@@ -2406,6 +2817,9 @@ arch_atomic64_fetch_or(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_or"
 #endif /* arch_atomic64_fetch_or */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_or_acquire() here
+ */
 #if defined(arch_atomic64_fetch_or_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_or_relaxed)
@@ -2423,6 +2837,9 @@ arch_atomic64_fetch_or_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_or_acquire"
 #endif /* arch_atomic64_fetch_or_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_or_release() here
+ */
 #if defined(arch_atomic64_fetch_or_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_or_relaxed)
@@ -2439,6 +2856,9 @@ arch_atomic64_fetch_or_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_or_release"
 #endif /* arch_atomic64_fetch_or_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_or_relaxed() here
+ */
 #if defined(arch_atomic64_fetch_or_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_or)
@@ -2447,8 +2867,14 @@ arch_atomic64_fetch_or_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_or_relaxed"
 #endif /* arch_atomic64_fetch_or_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_xor() here
+ */
 /* arch_atomic64_xor() is mandatory */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_xor() here
+ */
 #if defined(arch_atomic64_fetch_xor)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_xor_relaxed)
@@ -2466,6 +2892,9 @@ arch_atomic64_fetch_xor(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_xor"
 #endif /* arch_atomic64_fetch_xor */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_xor_acquire() here
+ */
 #if defined(arch_atomic64_fetch_xor_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_xor_relaxed)
@@ -2483,6 +2912,9 @@ arch_atomic64_fetch_xor_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_xor_acquire"
 #endif /* arch_atomic64_fetch_xor_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_xor_release() here
+ */
 #if defined(arch_atomic64_fetch_xor_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_xor_relaxed)
@@ -2499,6 +2931,9 @@ arch_atomic64_fetch_xor_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_xor_release"
 #endif /* arch_atomic64_fetch_xor_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_xor_relaxed() here
+ */
 #if defined(arch_atomic64_fetch_xor_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_fetch_xor)
@@ -2507,6 +2942,9 @@ arch_atomic64_fetch_xor_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_xor_relaxed"
 #endif /* arch_atomic64_fetch_xor_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_xchg() here
+ */
 #if defined(arch_atomic64_xchg)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_xchg_relaxed)
@@ -2524,6 +2962,9 @@ arch_atomic64_xchg(atomic64_t *v, s64 i)
 #error "Unable to define arch_atomic64_xchg"
 #endif /* arch_atomic64_xchg */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_xchg_acquire() here
+ */
 #if defined(arch_atomic64_xchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_xchg_relaxed)
@@ -2541,6 +2982,9 @@ arch_atomic64_xchg_acquire(atomic64_t *v, s64 i)
 #error "Unable to define arch_atomic64_xchg_acquire"
 #endif /* arch_atomic64_xchg_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_xchg_release() here
+ */
 #if defined(arch_atomic64_xchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_xchg_relaxed)
@@ -2557,6 +3001,9 @@ arch_atomic64_xchg_release(atomic64_t *v, s64 i)
 #error "Unable to define arch_atomic64_xchg_release"
 #endif /* arch_atomic64_xchg_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_xchg_relaxed() here
+ */
 #if defined(arch_atomic64_xchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_xchg)
@@ -2565,6 +3012,9 @@ arch_atomic64_xchg_release(atomic64_t *v, s64 i)
 #error "Unable to define arch_atomic64_xchg_relaxed"
 #endif /* arch_atomic64_xchg_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_cmpxchg() here
+ */
 #if defined(arch_atomic64_cmpxchg)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_cmpxchg_relaxed)
@@ -2582,6 +3032,9 @@ arch_atomic64_cmpxchg(atomic64_t *v, s64 old, s64 new)
 #error "Unable to define arch_atomic64_cmpxchg"
 #endif /* arch_atomic64_cmpxchg */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_cmpxchg_acquire() here
+ */
 #if defined(arch_atomic64_cmpxchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_cmpxchg_relaxed)
@@ -2599,6 +3052,9 @@ arch_atomic64_cmpxchg_acquire(atomic64_t *v, s64 old, s64 new)
 #error "Unable to define arch_atomic64_cmpxchg_acquire"
 #endif /* arch_atomic64_cmpxchg_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_cmpxchg_release() here
+ */
 #if defined(arch_atomic64_cmpxchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_cmpxchg_relaxed)
@@ -2615,6 +3071,9 @@ arch_atomic64_cmpxchg_release(atomic64_t *v, s64 old, s64 new)
 #error "Unable to define arch_atomic64_cmpxchg_release"
 #endif /* arch_atomic64_cmpxchg_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_cmpxchg_relaxed() here
+ */
 #if defined(arch_atomic64_cmpxchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_cmpxchg)
@@ -2623,6 +3082,9 @@ arch_atomic64_cmpxchg_release(atomic64_t *v, s64 old, s64 new)
 #error "Unable to define arch_atomic64_cmpxchg_relaxed"
 #endif /* arch_atomic64_cmpxchg_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_try_cmpxchg() here
+ */
 #if defined(arch_atomic64_try_cmpxchg)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_try_cmpxchg_relaxed)
@@ -2649,6 +3111,9 @@ arch_atomic64_try_cmpxchg(atomic64_t *v, s64 *old, s64 new)
 #define arch_atomic64_try_cmpxchg arch_atomic64_try_cmpxchg
 #endif /* arch_atomic64_try_cmpxchg */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_try_cmpxchg_acquire() here
+ */
 #if defined(arch_atomic64_try_cmpxchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_try_cmpxchg_relaxed)
@@ -2675,6 +3140,9 @@ arch_atomic64_try_cmpxchg_acquire(atomic64_t *v, s64 *old, s64 new)
 #define arch_atomic64_try_cmpxchg_acquire arch_atomic64_try_cmpxchg_acquire
 #endif /* arch_atomic64_try_cmpxchg_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_try_cmpxchg_release() here
+ */
 #if defined(arch_atomic64_try_cmpxchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_try_cmpxchg_relaxed)
@@ -2700,6 +3168,9 @@ arch_atomic64_try_cmpxchg_release(atomic64_t *v, s64 *old, s64 new)
 #define arch_atomic64_try_cmpxchg_release arch_atomic64_try_cmpxchg_release
 #endif /* arch_atomic64_try_cmpxchg_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_try_cmpxchg_relaxed() here
+ */
 #if defined(arch_atomic64_try_cmpxchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_try_cmpxchg)
@@ -2717,6 +3188,9 @@ arch_atomic64_try_cmpxchg_relaxed(atomic64_t *v, s64 *old, s64 new)
 #define arch_atomic64_try_cmpxchg_relaxed arch_atomic64_try_cmpxchg_relaxed
 #endif /* arch_atomic64_try_cmpxchg_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_sub_and_test() here
+ */
 #if defined(arch_atomic64_sub_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2737,6 +3211,9 @@ arch_atomic64_sub_and_test(s64 i, atomic64_t *v)
 #define arch_atomic64_sub_and_test arch_atomic64_sub_and_test
 #endif /* arch_atomic64_sub_and_test */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_dec_and_test() here
+ */
 #if defined(arch_atomic64_dec_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2756,6 +3233,9 @@ arch_atomic64_dec_and_test(atomic64_t *v)
 #define arch_atomic64_dec_and_test arch_atomic64_dec_and_test
 #endif /* arch_atomic64_dec_and_test */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_inc_and_test() here
+ */
 #if defined(arch_atomic64_inc_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2775,6 +3255,9 @@ arch_atomic64_inc_and_test(atomic64_t *v)
 #define arch_atomic64_inc_and_test arch_atomic64_inc_and_test
 #endif /* arch_atomic64_inc_and_test */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add_negative() here
+ */
 #if defined(arch_atomic64_add_negative)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_add_negative_relaxed)
@@ -2805,6 +3288,9 @@ arch_atomic64_add_negative(s64 i, atomic64_t *v)
 #define arch_atomic64_add_negative arch_atomic64_add_negative
 #endif /* arch_atomic64_add_negative */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add_negative_acquire() here
+ */
 #if defined(arch_atomic64_add_negative_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_add_negative_relaxed)
@@ -2835,6 +3321,9 @@ arch_atomic64_add_negative_acquire(s64 i, atomic64_t *v)
 #define arch_atomic64_add_negative_acquire arch_atomic64_add_negative_acquire
 #endif /* arch_atomic64_add_negative_acquire */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add_negative_release() here
+ */
 #if defined(arch_atomic64_add_negative_release)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_add_negative_relaxed)
@@ -2864,6 +3353,9 @@ arch_atomic64_add_negative_release(s64 i, atomic64_t *v)
 #define arch_atomic64_add_negative_release arch_atomic64_add_negative_release
 #endif /* arch_atomic64_add_negative_release */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add_negative_relaxed() here
+ */
 #if defined(arch_atomic64_add_negative_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
 #elif defined(arch_atomic64_add_negative)
@@ -2885,6 +3377,9 @@ arch_atomic64_add_negative_relaxed(s64 i, atomic64_t *v)
 #define arch_atomic64_add_negative_relaxed arch_atomic64_add_negative_relaxed
 #endif /* arch_atomic64_add_negative_relaxed */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_fetch_add_unless() here
+ */
 #if defined(arch_atomic64_fetch_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2912,6 +3407,9 @@ arch_atomic64_fetch_add_unless(atomic64_t *v, s64 a, s64 u)
 #define arch_atomic64_fetch_add_unless arch_atomic64_fetch_add_unless
 #endif /* arch_atomic64_fetch_add_unless */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_add_unless() here
+ */
 #if defined(arch_atomic64_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2932,6 +3430,9 @@ arch_atomic64_add_unless(atomic64_t *v, s64 a, s64 u)
 #define arch_atomic64_add_unless arch_atomic64_add_unless
 #endif /* arch_atomic64_add_unless */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_inc_not_zero() here
+ */
 #if defined(arch_atomic64_inc_not_zero)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2950,6 +3451,9 @@ arch_atomic64_inc_not_zero(atomic64_t *v)
 #define arch_atomic64_inc_not_zero arch_atomic64_inc_not_zero
 #endif /* arch_atomic64_inc_not_zero */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_inc_unless_negative() here
+ */
 #if defined(arch_atomic64_inc_unless_negative)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2968,6 +3472,9 @@ arch_atomic64_inc_unless_negative(atomic64_t *v)
 #define arch_atomic64_inc_unless_negative arch_atomic64_inc_unless_negative
 #endif /* arch_atomic64_inc_unless_negative */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_dec_unless_positive() here
+ */
 #if defined(arch_atomic64_dec_unless_positive)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -2986,6 +3493,9 @@ arch_atomic64_dec_unless_positive(atomic64_t *v)
 #define arch_atomic64_dec_unless_positive arch_atomic64_dec_unless_positive
 #endif /* arch_atomic64_dec_unless_positive */
 
+/*
+ * TODO: add kerneldoc for arch_atomic64_dec_if_positive() here
+ */
 #if defined(arch_atomic64_dec_if_positive)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
@@ -3006,4 +3516,4 @@ arch_atomic64_dec_if_positive(atomic64_t *v)
 #endif /* arch_atomic64_dec_if_positive */
 
 #endif /* _LINUX_ATOMIC_FALLBACK_H */
-// bc24943c64d22563a71547ea9ad1aa8dc4701a23
+// 3099bb95b5f0a64a5f24db13a54dbcf53ae90a78

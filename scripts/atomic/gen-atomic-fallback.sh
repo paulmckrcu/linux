@@ -81,6 +81,10 @@ gen_proto_order_variant()
 
 	local template="$(find_fallback_template "${pfx}" "${name}" "${sfx}" "${order}")"
 
+	printf "/*\n"
+	printf " * TODO: add kerneldoc for ${basename}${order}() here\n"
+	printf " */\n"
+
 	# Where there is no possible fallback, this order variant is mandatory
 	# and must be provided by arch code. Add a comment to the header to
 	# make this obvious.
