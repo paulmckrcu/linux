@@ -1554,15 +1554,6 @@ arch_atomic_try_cmpxchg_relaxed(atomic_t *v, int *old, int new)
 #if defined(arch_atomic_sub_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic_sub_and_test - subtract value from variable and test result
- * @i: integer value to subtract
- * @v: pointer of type atomic_t
- *
- * Atomically subtracts @i from @v and returns
- * true if the result is zero, or false for all
- * other cases.
- */
 static __always_inline bool
 arch_atomic_sub_and_test(int i, atomic_t *v)
 {
@@ -1577,14 +1568,6 @@ arch_atomic_sub_and_test(int i, atomic_t *v)
 #if defined(arch_atomic_dec_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic_dec_and_test - decrement and test
- * @v: pointer of type atomic_t
- *
- * Atomically decrements @v by 1 and
- * returns true if the result is 0, or false for all other
- * cases.
- */
 static __always_inline bool
 arch_atomic_dec_and_test(atomic_t *v)
 {
@@ -1599,14 +1582,6 @@ arch_atomic_dec_and_test(atomic_t *v)
 #if defined(arch_atomic_inc_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic_inc_and_test - increment and test
- * @v: pointer of type atomic_t
- *
- * Atomically increments @v by 1
- * and returns true if the result is zero, or false for all
- * other cases.
- */
 static __always_inline bool
 arch_atomic_inc_and_test(atomic_t *v)
 {
@@ -1632,14 +1607,6 @@ arch_atomic_add_negative(int i, atomic_t *v)
 }
 #define arch_atomic_add_negative arch_atomic_add_negative
 #else
-/**
- * arch_atomic_add_negative - Add and test if negative
- * @i: integer value to add
- * @v: pointer of type atomic_t
- *
- * Atomically adds @i to @v and returns true if the result is negative,
- * or false when the result is greater than or equal to zero.
- */
 static __always_inline bool
 arch_atomic_add_negative(int i, atomic_t *v)
 {
@@ -1665,14 +1632,6 @@ arch_atomic_add_negative_acquire(int i, atomic_t *v)
 #elif defined(arch_atomic_add_negative)
 #define arch_atomic_add_negative_acquire arch_atomic_add_negative
 #else
-/**
- * arch_atomic_add_negative_acquire - Add and test if negative
- * @i: integer value to add
- * @v: pointer of type atomic_t
- *
- * Atomically adds @i to @v and returns true if the result is negative,
- * or false when the result is greater than or equal to zero.
- */
 static __always_inline bool
 arch_atomic_add_negative_acquire(int i, atomic_t *v)
 {
@@ -1697,14 +1656,6 @@ arch_atomic_add_negative_release(int i, atomic_t *v)
 #elif defined(arch_atomic_add_negative)
 #define arch_atomic_add_negative_release arch_atomic_add_negative
 #else
-/**
- * arch_atomic_add_negative_release - Add and test if negative
- * @i: integer value to add
- * @v: pointer of type atomic_t
- *
- * Atomically adds @i to @v and returns true if the result is negative,
- * or false when the result is greater than or equal to zero.
- */
 static __always_inline bool
 arch_atomic_add_negative_release(int i, atomic_t *v)
 {
@@ -1721,14 +1672,6 @@ arch_atomic_add_negative_release(int i, atomic_t *v)
 #elif defined(arch_atomic_add_negative)
 #define arch_atomic_add_negative_relaxed arch_atomic_add_negative
 #else
-/**
- * arch_atomic_add_negative_relaxed - Add and test if negative
- * @i: integer value to add
- * @v: pointer of type atomic_t
- *
- * Atomically adds @i to @v and returns true if the result is negative,
- * or false when the result is greater than or equal to zero.
- */
 static __always_inline bool
 arch_atomic_add_negative_relaxed(int i, atomic_t *v)
 {
@@ -1743,15 +1686,6 @@ arch_atomic_add_negative_relaxed(int i, atomic_t *v)
 #if defined(arch_atomic_fetch_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic_fetch_add_unless - add unless the number is already a given value
- * @v: pointer of type atomic_t
- * @a: the amount to add to v...
- * @u: ...unless v is equal to u.
- *
- * Atomically adds @a to @v, so long as @v was not already @u.
- * Returns original value of @v
- */
 static __always_inline int
 arch_atomic_fetch_add_unless(atomic_t *v, int a, int u)
 {
@@ -1773,15 +1707,6 @@ arch_atomic_fetch_add_unless(atomic_t *v, int a, int u)
 #if defined(arch_atomic_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic_add_unless - add unless the number is already a given value
- * @v: pointer of type atomic_t
- * @a: the amount to add to v...
- * @u: ...unless v is equal to u.
- *
- * Atomically adds @a to @v, if @v was not already @u.
- * Returns true if the addition was done.
- */
 static __always_inline bool
 arch_atomic_add_unless(atomic_t *v, int a, int u)
 {
@@ -1796,13 +1721,6 @@ arch_atomic_add_unless(atomic_t *v, int a, int u)
 #if defined(arch_atomic_inc_not_zero)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic_inc_not_zero - increment unless the number is zero
- * @v: pointer of type atomic_t
- *
- * Atomically increments @v by 1, if @v is non-zero.
- * Returns true if the increment was done.
- */
 static __always_inline bool
 arch_atomic_inc_not_zero(atomic_t *v)
 {
@@ -3194,15 +3112,6 @@ arch_atomic64_try_cmpxchg_relaxed(atomic64_t *v, s64 *old, s64 new)
 #if defined(arch_atomic64_sub_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic64_sub_and_test - subtract value from variable and test result
- * @i: integer value to subtract
- * @v: pointer of type atomic64_t
- *
- * Atomically subtracts @i from @v and returns
- * true if the result is zero, or false for all
- * other cases.
- */
 static __always_inline bool
 arch_atomic64_sub_and_test(s64 i, atomic64_t *v)
 {
@@ -3217,14 +3126,6 @@ arch_atomic64_sub_and_test(s64 i, atomic64_t *v)
 #if defined(arch_atomic64_dec_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic64_dec_and_test - decrement and test
- * @v: pointer of type atomic64_t
- *
- * Atomically decrements @v by 1 and
- * returns true if the result is 0, or false for all other
- * cases.
- */
 static __always_inline bool
 arch_atomic64_dec_and_test(atomic64_t *v)
 {
@@ -3239,14 +3140,6 @@ arch_atomic64_dec_and_test(atomic64_t *v)
 #if defined(arch_atomic64_inc_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic64_inc_and_test - increment and test
- * @v: pointer of type atomic64_t
- *
- * Atomically increments @v by 1
- * and returns true if the result is zero, or false for all
- * other cases.
- */
 static __always_inline bool
 arch_atomic64_inc_and_test(atomic64_t *v)
 {
@@ -3272,14 +3165,6 @@ arch_atomic64_add_negative(s64 i, atomic64_t *v)
 }
 #define arch_atomic64_add_negative arch_atomic64_add_negative
 #else
-/**
- * arch_atomic64_add_negative - Add and test if negative
- * @i: integer value to add
- * @v: pointer of type atomic64_t
- *
- * Atomically adds @i to @v and returns true if the result is negative,
- * or false when the result is greater than or equal to zero.
- */
 static __always_inline bool
 arch_atomic64_add_negative(s64 i, atomic64_t *v)
 {
@@ -3305,14 +3190,6 @@ arch_atomic64_add_negative_acquire(s64 i, atomic64_t *v)
 #elif defined(arch_atomic64_add_negative)
 #define arch_atomic64_add_negative_acquire arch_atomic64_add_negative
 #else
-/**
- * arch_atomic64_add_negative_acquire - Add and test if negative
- * @i: integer value to add
- * @v: pointer of type atomic64_t
- *
- * Atomically adds @i to @v and returns true if the result is negative,
- * or false when the result is greater than or equal to zero.
- */
 static __always_inline bool
 arch_atomic64_add_negative_acquire(s64 i, atomic64_t *v)
 {
@@ -3337,14 +3214,6 @@ arch_atomic64_add_negative_release(s64 i, atomic64_t *v)
 #elif defined(arch_atomic64_add_negative)
 #define arch_atomic64_add_negative_release arch_atomic64_add_negative
 #else
-/**
- * arch_atomic64_add_negative_release - Add and test if negative
- * @i: integer value to add
- * @v: pointer of type atomic64_t
- *
- * Atomically adds @i to @v and returns true if the result is negative,
- * or false when the result is greater than or equal to zero.
- */
 static __always_inline bool
 arch_atomic64_add_negative_release(s64 i, atomic64_t *v)
 {
@@ -3361,14 +3230,6 @@ arch_atomic64_add_negative_release(s64 i, atomic64_t *v)
 #elif defined(arch_atomic64_add_negative)
 #define arch_atomic64_add_negative_relaxed arch_atomic64_add_negative
 #else
-/**
- * arch_atomic64_add_negative_relaxed - Add and test if negative
- * @i: integer value to add
- * @v: pointer of type atomic64_t
- *
- * Atomically adds @i to @v and returns true if the result is negative,
- * or false when the result is greater than or equal to zero.
- */
 static __always_inline bool
 arch_atomic64_add_negative_relaxed(s64 i, atomic64_t *v)
 {
@@ -3383,15 +3244,6 @@ arch_atomic64_add_negative_relaxed(s64 i, atomic64_t *v)
 #if defined(arch_atomic64_fetch_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic64_fetch_add_unless - add unless the number is already a given value
- * @v: pointer of type atomic64_t
- * @a: the amount to add to v...
- * @u: ...unless v is equal to u.
- *
- * Atomically adds @a to @v, so long as @v was not already @u.
- * Returns original value of @v
- */
 static __always_inline s64
 arch_atomic64_fetch_add_unless(atomic64_t *v, s64 a, s64 u)
 {
@@ -3413,15 +3265,6 @@ arch_atomic64_fetch_add_unless(atomic64_t *v, s64 a, s64 u)
 #if defined(arch_atomic64_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic64_add_unless - add unless the number is already a given value
- * @v: pointer of type atomic64_t
- * @a: the amount to add to v...
- * @u: ...unless v is equal to u.
- *
- * Atomically adds @a to @v, if @v was not already @u.
- * Returns true if the addition was done.
- */
 static __always_inline bool
 arch_atomic64_add_unless(atomic64_t *v, s64 a, s64 u)
 {
@@ -3436,13 +3279,6 @@ arch_atomic64_add_unless(atomic64_t *v, s64 a, s64 u)
 #if defined(arch_atomic64_inc_not_zero)
 /* Provided directly by arch code -- no fallback necessary. */
 #else
-/**
- * arch_atomic64_inc_not_zero - increment unless the number is zero
- * @v: pointer of type atomic64_t
- *
- * Atomically increments @v by 1, if @v is non-zero.
- * Returns true if the increment was done.
- */
 static __always_inline bool
 arch_atomic64_inc_not_zero(atomic64_t *v)
 {
@@ -3516,4 +3352,4 @@ arch_atomic64_dec_if_positive(atomic64_t *v)
 #endif /* arch_atomic64_dec_if_positive */
 
 #endif /* _LINUX_ATOMIC_FALLBACK_H */
-// 3099bb95b5f0a64a5f24db13a54dbcf53ae90a78
+// 81e71bad7ed5e9d5bdc5591ecb5fa9011baa9356
