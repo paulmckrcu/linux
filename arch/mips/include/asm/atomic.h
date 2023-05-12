@@ -47,9 +47,14 @@ static __always_inline type arch_##pfx##_xchg(pfx##_t *v, type n)	\
 
 ATOMIC_OPS(atomic, int)
 
+#define arch_atomic_xchg	arch_atomic_xchg
+#define arch_atomic_cmpxchg	arch_atomic_cmpxchg
+
 #ifdef CONFIG_64BIT
 # define ATOMIC64_INIT(i)	{ (i) }
 ATOMIC_OPS(atomic64, s64)
+#define arch_atomic64_xchg	arch_atomic64_xchg
+#define arch_atomic64_cmpxchg	arch_atomic64_cmpxchg
 #endif
 
 #define ATOMIC_OP(pfx, op, type, c_op, asm_op, ll, sc)			\
