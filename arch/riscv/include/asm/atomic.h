@@ -307,6 +307,17 @@ ATOMIC_OPS()
 #define arch_atomic_cmpxchg_release	arch_atomic_cmpxchg_release
 #define arch_atomic_cmpxchg		arch_atomic_cmpxchg
 
+#ifndef CONFIG_GENERIC_ATOMIC64
+#define arch_atomic64_xchg_relaxed	arch_atomic64_xchg_relaxed
+#define arch_atomic64_xchg_acquire	arch_atomic64_xchg_acquire
+#define arch_atomic64_xchg_release	arch_atomic64_xchg_release
+#define arch_atomic64_xchg		arch_atomic64_xchg
+#define arch_atomic64_cmpxchg_relaxed	arch_atomic64_cmpxchg_relaxed
+#define arch_atomic64_cmpxchg_acquire	arch_atomic64_cmpxchg_acquire
+#define arch_atomic64_cmpxchg_release	arch_atomic64_cmpxchg_release
+#define arch_atomic64_cmpxchg		arch_atomic64_cmpxchg
+#endif
+
 #undef ATOMIC_OPS
 #undef ATOMIC_OP
 
