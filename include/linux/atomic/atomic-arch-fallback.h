@@ -239,13 +239,25 @@
 })
 #endif /* arch_try_cmpxchg64_local */
 
-/*
- * TODO: add kerneldoc for arch_atomic_read() here
+/**
+ * arch_atomic_read - Atomic load with no ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically load @v, providing no ordering.
+ * Return value loaded.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic_read() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic_read_acquire() here
+/**
+ * arch_atomic_read_acquire - Atomic load with acquire ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically load @v, providing acquire ordering.
+ * Return value loaded.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_read_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -269,13 +281,25 @@ arch_atomic_read_acquire(const atomic_t *v)
 #define arch_atomic_read_acquire arch_atomic_read_acquire
 #endif /* arch_atomic_read_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_set() here
+/**
+ * arch_atomic_set - Atomic store with no ordering
+ * @v: pointer of type atomic_t
+ * @i: value to store
+ *
+ * Atomically store @i to @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic_set() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic_set_release() here
+/**
+ * arch_atomic_set_release - Atomic store with release ordering
+ * @v: pointer of type atomic_t
+ * @i: value to store
+ *
+ * Atomically store @i to @v, providing release ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_set_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -295,13 +319,26 @@ arch_atomic_set_release(atomic_t *v, int i)
 #define arch_atomic_set_release arch_atomic_set_release
 #endif /* arch_atomic_set_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add() here
+/**
+ * arch_atomic_add - Atomic add with no ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic_add() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add_return() here
+/**
+ * arch_atomic_add_return - Atomic add with full ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing full ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_add_return)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -320,8 +357,15 @@ arch_atomic_add_return(int i, atomic_t *v)
 #error "Unable to define arch_atomic_add_return"
 #endif /* arch_atomic_add_return */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add_return_acquire() here
+/**
+ * arch_atomic_add_return_acquire - Atomic add with acquire ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing acquire ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_add_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -340,8 +384,15 @@ arch_atomic_add_return_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_add_return_acquire"
 #endif /* arch_atomic_add_return_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add_return_release() here
+/**
+ * arch_atomic_add_return_release - Atomic add with release ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing release ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_add_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -359,8 +410,15 @@ arch_atomic_add_return_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_add_return_release"
 #endif /* arch_atomic_add_return_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add_return_relaxed() here
+/**
+ * arch_atomic_add_return_relaxed - Atomic add with no ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing no ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_add_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -370,8 +428,15 @@ arch_atomic_add_return_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_add_return_relaxed"
 #endif /* arch_atomic_add_return_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_add() here
+/**
+ * arch_atomic_fetch_add - Atomic add with full ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_add)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -390,8 +455,15 @@ arch_atomic_fetch_add(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_add"
 #endif /* arch_atomic_fetch_add */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_add_acquire() here
+/**
+ * arch_atomic_fetch_add_acquire - Atomic add with acquire ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_add_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -410,8 +482,15 @@ arch_atomic_fetch_add_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_add_acquire"
 #endif /* arch_atomic_fetch_add_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_add_release() here
+/**
+ * arch_atomic_fetch_add_release - Atomic add with release ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_add_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -429,8 +508,15 @@ arch_atomic_fetch_add_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_add_release"
 #endif /* arch_atomic_fetch_add_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_add_relaxed() here
+/**
+ * arch_atomic_fetch_add_relaxed - Atomic add with no ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_add_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -440,13 +526,26 @@ arch_atomic_fetch_add_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_add_relaxed"
 #endif /* arch_atomic_fetch_add_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_sub() here
+/**
+ * arch_atomic_sub - Atomic subtract with no ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic_sub() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic_sub_return() here
+/**
+ * arch_atomic_sub_return - Atomic subtract with full ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing full ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_sub_return)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -465,8 +564,15 @@ arch_atomic_sub_return(int i, atomic_t *v)
 #error "Unable to define arch_atomic_sub_return"
 #endif /* arch_atomic_sub_return */
 
-/*
- * TODO: add kerneldoc for arch_atomic_sub_return_acquire() here
+/**
+ * arch_atomic_sub_return_acquire - Atomic subtract with acquire ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing acquire ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_sub_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -485,8 +591,15 @@ arch_atomic_sub_return_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_sub_return_acquire"
 #endif /* arch_atomic_sub_return_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_sub_return_release() here
+/**
+ * arch_atomic_sub_return_release - Atomic subtract with release ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing release ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_sub_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -504,8 +617,15 @@ arch_atomic_sub_return_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_sub_return_release"
 #endif /* arch_atomic_sub_return_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_sub_return_relaxed() here
+/**
+ * arch_atomic_sub_return_relaxed - Atomic subtract with no ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing no ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_sub_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -515,8 +635,15 @@ arch_atomic_sub_return_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_sub_return_relaxed"
 #endif /* arch_atomic_sub_return_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_sub() here
+/**
+ * arch_atomic_fetch_sub - Atomic subtract with full ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_sub)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -535,8 +662,15 @@ arch_atomic_fetch_sub(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_sub"
 #endif /* arch_atomic_fetch_sub */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_sub_acquire() here
+/**
+ * arch_atomic_fetch_sub_acquire - Atomic subtract with acquire ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_sub_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -555,8 +689,15 @@ arch_atomic_fetch_sub_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_sub_acquire"
 #endif /* arch_atomic_fetch_sub_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_sub_release() here
+/**
+ * arch_atomic_fetch_sub_release - Atomic subtract with release ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_sub_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -574,8 +715,15 @@ arch_atomic_fetch_sub_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_sub_release"
 #endif /* arch_atomic_fetch_sub_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_sub_relaxed() here
+/**
+ * arch_atomic_fetch_sub_relaxed - Atomic subtract with no ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_sub_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -585,8 +733,13 @@ arch_atomic_fetch_sub_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_sub_relaxed"
 #endif /* arch_atomic_fetch_sub_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_inc() here
+/**
+ * arch_atomic_inc - Atomic increment with no ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_inc)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -599,8 +752,14 @@ arch_atomic_inc(atomic_t *v)
 #define arch_atomic_inc arch_atomic_inc
 #endif /* arch_atomic_inc */
 
-/*
- * TODO: add kerneldoc for arch_atomic_inc_return() here
+/**
+ * arch_atomic_inc_return - Atomic increment with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing full ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_inc_return)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -624,8 +783,14 @@ arch_atomic_inc_return(atomic_t *v)
 #define arch_atomic_inc_return arch_atomic_inc_return
 #endif /* arch_atomic_inc_return */
 
-/*
- * TODO: add kerneldoc for arch_atomic_inc_return_acquire() here
+/**
+ * arch_atomic_inc_return_acquire - Atomic increment with acquire ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing acquire ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_inc_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -649,8 +814,14 @@ arch_atomic_inc_return_acquire(atomic_t *v)
 #define arch_atomic_inc_return_acquire arch_atomic_inc_return_acquire
 #endif /* arch_atomic_inc_return_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_inc_return_release() here
+/**
+ * arch_atomic_inc_return_release - Atomic increment with release ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing release ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_inc_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -673,8 +844,14 @@ arch_atomic_inc_return_release(atomic_t *v)
 #define arch_atomic_inc_return_release arch_atomic_inc_return_release
 #endif /* arch_atomic_inc_return_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_inc_return_relaxed() here
+/**
+ * arch_atomic_inc_return_relaxed - Atomic increment with no ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing no ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_inc_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -689,8 +866,14 @@ arch_atomic_inc_return_relaxed(atomic_t *v)
 #define arch_atomic_inc_return_relaxed arch_atomic_inc_return_relaxed
 #endif /* arch_atomic_inc_return_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_inc() here
+/**
+ * arch_atomic_fetch_inc - Atomic increment with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_inc)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -714,8 +897,14 @@ arch_atomic_fetch_inc(atomic_t *v)
 #define arch_atomic_fetch_inc arch_atomic_fetch_inc
 #endif /* arch_atomic_fetch_inc */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_inc_acquire() here
+/**
+ * arch_atomic_fetch_inc_acquire - Atomic increment with acquire ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_inc_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -739,8 +928,14 @@ arch_atomic_fetch_inc_acquire(atomic_t *v)
 #define arch_atomic_fetch_inc_acquire arch_atomic_fetch_inc_acquire
 #endif /* arch_atomic_fetch_inc_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_inc_release() here
+/**
+ * arch_atomic_fetch_inc_release - Atomic increment with release ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_inc_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -763,8 +958,14 @@ arch_atomic_fetch_inc_release(atomic_t *v)
 #define arch_atomic_fetch_inc_release arch_atomic_fetch_inc_release
 #endif /* arch_atomic_fetch_inc_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_inc_relaxed() here
+/**
+ * arch_atomic_fetch_inc_relaxed - Atomic increment with no ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_inc_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -779,8 +980,13 @@ arch_atomic_fetch_inc_relaxed(atomic_t *v)
 #define arch_atomic_fetch_inc_relaxed arch_atomic_fetch_inc_relaxed
 #endif /* arch_atomic_fetch_inc_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_dec() here
+/**
+ * arch_atomic_dec - Atomic decrement with no ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_dec)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -793,8 +999,14 @@ arch_atomic_dec(atomic_t *v)
 #define arch_atomic_dec arch_atomic_dec
 #endif /* arch_atomic_dec */
 
-/*
- * TODO: add kerneldoc for arch_atomic_dec_return() here
+/**
+ * arch_atomic_dec_return - Atomic decrement with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing full ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_dec_return)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -818,8 +1030,14 @@ arch_atomic_dec_return(atomic_t *v)
 #define arch_atomic_dec_return arch_atomic_dec_return
 #endif /* arch_atomic_dec_return */
 
-/*
- * TODO: add kerneldoc for arch_atomic_dec_return_acquire() here
+/**
+ * arch_atomic_dec_return_acquire - Atomic decrement with acquire ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing acquire ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_dec_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -843,8 +1061,14 @@ arch_atomic_dec_return_acquire(atomic_t *v)
 #define arch_atomic_dec_return_acquire arch_atomic_dec_return_acquire
 #endif /* arch_atomic_dec_return_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_dec_return_release() here
+/**
+ * arch_atomic_dec_return_release - Atomic decrement with release ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing release ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_dec_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -867,8 +1091,14 @@ arch_atomic_dec_return_release(atomic_t *v)
 #define arch_atomic_dec_return_release arch_atomic_dec_return_release
 #endif /* arch_atomic_dec_return_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_dec_return_relaxed() here
+/**
+ * arch_atomic_dec_return_relaxed - Atomic decrement with no ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing no ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_dec_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -883,8 +1113,14 @@ arch_atomic_dec_return_relaxed(atomic_t *v)
 #define arch_atomic_dec_return_relaxed arch_atomic_dec_return_relaxed
 #endif /* arch_atomic_dec_return_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_dec() here
+/**
+ * arch_atomic_fetch_dec - Atomic decrement with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_dec)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -908,8 +1144,14 @@ arch_atomic_fetch_dec(atomic_t *v)
 #define arch_atomic_fetch_dec arch_atomic_fetch_dec
 #endif /* arch_atomic_fetch_dec */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_dec_acquire() here
+/**
+ * arch_atomic_fetch_dec_acquire - Atomic decrement with acquire ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_dec_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -933,8 +1175,14 @@ arch_atomic_fetch_dec_acquire(atomic_t *v)
 #define arch_atomic_fetch_dec_acquire arch_atomic_fetch_dec_acquire
 #endif /* arch_atomic_fetch_dec_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_dec_release() here
+/**
+ * arch_atomic_fetch_dec_release - Atomic decrement with release ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_dec_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -957,8 +1205,14 @@ arch_atomic_fetch_dec_release(atomic_t *v)
 #define arch_atomic_fetch_dec_release arch_atomic_fetch_dec_release
 #endif /* arch_atomic_fetch_dec_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_dec_relaxed() here
+/**
+ * arch_atomic_fetch_dec_relaxed - Atomic decrement with no ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_dec_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -973,13 +1227,26 @@ arch_atomic_fetch_dec_relaxed(atomic_t *v)
 #define arch_atomic_fetch_dec_relaxed arch_atomic_fetch_dec_relaxed
 #endif /* arch_atomic_fetch_dec_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_and() here
+/**
+ * arch_atomic_and - Atomic AND with no ordering
+ * @i: value to AND
+ * @v: pointer of type atomic_t
+ *
+ * Atomically AND @i with @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic_and() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_and() here
+/**
+ * arch_atomic_fetch_and - Atomic AND with full ordering
+ * @i: value to AND
+ * @v: pointer of type atomic_t
+ *
+ * Atomically AND @i with @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_and)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -998,8 +1265,15 @@ arch_atomic_fetch_and(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_and"
 #endif /* arch_atomic_fetch_and */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_and_acquire() here
+/**
+ * arch_atomic_fetch_and_acquire - Atomic AND with acquire ordering
+ * @i: value to AND
+ * @v: pointer of type atomic_t
+ *
+ * Atomically AND @i with @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_and_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1018,8 +1292,15 @@ arch_atomic_fetch_and_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_and_acquire"
 #endif /* arch_atomic_fetch_and_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_and_release() here
+/**
+ * arch_atomic_fetch_and_release - Atomic AND with release ordering
+ * @i: value to AND
+ * @v: pointer of type atomic_t
+ *
+ * Atomically AND @i with @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_and_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1037,8 +1318,15 @@ arch_atomic_fetch_and_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_and_release"
 #endif /* arch_atomic_fetch_and_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_and_relaxed() here
+/**
+ * arch_atomic_fetch_and_relaxed - Atomic AND with no ordering
+ * @i: value to AND
+ * @v: pointer of type atomic_t
+ *
+ * Atomically AND @i with @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_and_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1048,8 +1336,14 @@ arch_atomic_fetch_and_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_and_relaxed"
 #endif /* arch_atomic_fetch_and_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_andnot() here
+/**
+ * arch_atomic_andnot - Atomic complement then AND with no ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic_t
+ *
+ * Complement @i, then atomically AND into @v with no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_andnot)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1062,8 +1356,15 @@ arch_atomic_andnot(int i, atomic_t *v)
 #define arch_atomic_andnot arch_atomic_andnot
 #endif /* arch_atomic_andnot */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_andnot() here
+/**
+ * arch_atomic_fetch_andnot - Atomic complement then AND with full ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic_t
+ *
+ * Complement @i, then atomically AND into @v with full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_andnot)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1087,8 +1388,15 @@ arch_atomic_fetch_andnot(int i, atomic_t *v)
 #define arch_atomic_fetch_andnot arch_atomic_fetch_andnot
 #endif /* arch_atomic_fetch_andnot */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_andnot_acquire() here
+/**
+ * arch_atomic_fetch_andnot_acquire - Atomic complement then AND with acquire ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic_t
+ *
+ * Complement @i, then atomically AND into @v with acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_andnot_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1112,8 +1420,15 @@ arch_atomic_fetch_andnot_acquire(int i, atomic_t *v)
 #define arch_atomic_fetch_andnot_acquire arch_atomic_fetch_andnot_acquire
 #endif /* arch_atomic_fetch_andnot_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_andnot_release() here
+/**
+ * arch_atomic_fetch_andnot_release - Atomic complement then AND with release ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic_t
+ *
+ * Complement @i, then atomically AND into @v with release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_andnot_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1136,8 +1451,15 @@ arch_atomic_fetch_andnot_release(int i, atomic_t *v)
 #define arch_atomic_fetch_andnot_release arch_atomic_fetch_andnot_release
 #endif /* arch_atomic_fetch_andnot_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_andnot_relaxed() here
+/**
+ * arch_atomic_fetch_andnot_relaxed - Atomic complement then AND with no ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic_t
+ *
+ * Complement @i, then atomically AND into @v with no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_andnot_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1152,13 +1474,26 @@ arch_atomic_fetch_andnot_relaxed(int i, atomic_t *v)
 #define arch_atomic_fetch_andnot_relaxed arch_atomic_fetch_andnot_relaxed
 #endif /* arch_atomic_fetch_andnot_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_or() here
+/**
+ * arch_atomic_or - Atomic OR with no ordering
+ * @i: value to OR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically OR @i with @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic_or() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_or() here
+/**
+ * arch_atomic_fetch_or - Atomic OR with full ordering
+ * @i: value to OR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically OR @i with @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_or)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1177,8 +1512,15 @@ arch_atomic_fetch_or(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_or"
 #endif /* arch_atomic_fetch_or */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_or_acquire() here
+/**
+ * arch_atomic_fetch_or_acquire - Atomic OR with acquire ordering
+ * @i: value to OR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically OR @i with @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_or_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1197,8 +1539,15 @@ arch_atomic_fetch_or_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_or_acquire"
 #endif /* arch_atomic_fetch_or_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_or_release() here
+/**
+ * arch_atomic_fetch_or_release - Atomic OR with release ordering
+ * @i: value to OR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically OR @i with @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_or_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1216,8 +1565,15 @@ arch_atomic_fetch_or_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_or_release"
 #endif /* arch_atomic_fetch_or_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_or_relaxed() here
+/**
+ * arch_atomic_fetch_or_relaxed - Atomic OR with no ordering
+ * @i: value to OR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically OR @i with @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_or_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1227,13 +1583,26 @@ arch_atomic_fetch_or_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_or_relaxed"
 #endif /* arch_atomic_fetch_or_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_xor() here
+/**
+ * arch_atomic_xor - Atomic XOR with no ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically XOR @i with @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic_xor() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_xor() here
+/**
+ * arch_atomic_fetch_xor - Atomic XOR with full ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically XOR @i with @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_xor)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1252,8 +1621,15 @@ arch_atomic_fetch_xor(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_xor"
 #endif /* arch_atomic_fetch_xor */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_xor_acquire() here
+/**
+ * arch_atomic_fetch_xor_acquire - Atomic XOR with acquire ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically XOR @i with @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_xor_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1272,8 +1648,15 @@ arch_atomic_fetch_xor_acquire(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_xor_acquire"
 #endif /* arch_atomic_fetch_xor_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_xor_release() here
+/**
+ * arch_atomic_fetch_xor_release - Atomic XOR with release ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically XOR @i with @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_xor_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1291,8 +1674,15 @@ arch_atomic_fetch_xor_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_xor_release"
 #endif /* arch_atomic_fetch_xor_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_xor_relaxed() here
+/**
+ * arch_atomic_fetch_xor_relaxed - Atomic XOR with no ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic_t
+ *
+ * Atomically XOR @i with @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_xor_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1302,8 +1692,15 @@ arch_atomic_fetch_xor_release(int i, atomic_t *v)
 #error "Unable to define arch_atomic_fetch_xor_relaxed"
 #endif /* arch_atomic_fetch_xor_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_xchg() here
+/**
+ * arch_atomic_xchg - Atomic exchange with full ordering
+ * @v: pointer of type atomic_t
+ * @i: value to exchange
+ *
+ * Atomically exchange @i with @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_xchg)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1322,8 +1719,15 @@ arch_atomic_xchg(atomic_t *v, int i)
 #error "Unable to define arch_atomic_xchg"
 #endif /* arch_atomic_xchg */
 
-/*
- * TODO: add kerneldoc for arch_atomic_xchg_acquire() here
+/**
+ * arch_atomic_xchg_acquire - Atomic exchange with acquire ordering
+ * @v: pointer of type atomic_t
+ * @i: value to exchange
+ *
+ * Atomically exchange @i with @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_xchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1342,8 +1746,15 @@ arch_atomic_xchg_acquire(atomic_t *v, int i)
 #error "Unable to define arch_atomic_xchg_acquire"
 #endif /* arch_atomic_xchg_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_xchg_release() here
+/**
+ * arch_atomic_xchg_release - Atomic exchange with release ordering
+ * @v: pointer of type atomic_t
+ * @i: value to exchange
+ *
+ * Atomically exchange @i with @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_xchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1361,8 +1772,15 @@ arch_atomic_xchg_release(atomic_t *v, int i)
 #error "Unable to define arch_atomic_xchg_release"
 #endif /* arch_atomic_xchg_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_xchg_relaxed() here
+/**
+ * arch_atomic_xchg_relaxed - Atomic exchange with no ordering
+ * @v: pointer of type atomic_t
+ * @i: value to exchange
+ *
+ * Atomically exchange @i with @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_xchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1372,8 +1790,19 @@ arch_atomic_xchg_release(atomic_t *v, int i)
 #error "Unable to define arch_atomic_xchg_relaxed"
 #endif /* arch_atomic_xchg_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_cmpxchg() here
+/**
+ * arch_atomic_cmpxchg - Atomic compare and exchange with full ordering
+ * @v: pointer of type atomic_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare @old to *@v, and if equal,
+ * store @new to *@v with full ordering.
+ * Return the old value of *@v regardless of the result of
+ * the comparison.  Therefore, if the return value is not
+ * equal to @old, the cmpxchg operation failed.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_cmpxchg)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1392,8 +1821,19 @@ arch_atomic_cmpxchg(atomic_t *v, int old, int new)
 #error "Unable to define arch_atomic_cmpxchg"
 #endif /* arch_atomic_cmpxchg */
 
-/*
- * TODO: add kerneldoc for arch_atomic_cmpxchg_acquire() here
+/**
+ * arch_atomic_cmpxchg_acquire - Atomic compare and exchange with acquire ordering
+ * @v: pointer of type atomic_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare @old to *@v, and if equal,
+ * store @new to *@v with acquire ordering.
+ * Return the old value of *@v regardless of the result of
+ * the comparison.  Therefore, if the return value is not
+ * equal to @old, the cmpxchg operation failed.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_cmpxchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1412,8 +1852,19 @@ arch_atomic_cmpxchg_acquire(atomic_t *v, int old, int new)
 #error "Unable to define arch_atomic_cmpxchg_acquire"
 #endif /* arch_atomic_cmpxchg_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_cmpxchg_release() here
+/**
+ * arch_atomic_cmpxchg_release - Atomic compare and exchange with release ordering
+ * @v: pointer of type atomic_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare @old to *@v, and if equal,
+ * store @new to *@v with release ordering.
+ * Return the old value of *@v regardless of the result of
+ * the comparison.  Therefore, if the return value is not
+ * equal to @old, the cmpxchg operation failed.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_cmpxchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1431,8 +1882,19 @@ arch_atomic_cmpxchg_release(atomic_t *v, int old, int new)
 #error "Unable to define arch_atomic_cmpxchg_release"
 #endif /* arch_atomic_cmpxchg_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_cmpxchg_relaxed() here
+/**
+ * arch_atomic_cmpxchg_relaxed - Atomic compare and exchange with no ordering
+ * @v: pointer of type atomic_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare @old to *@v, and if equal,
+ * store @new to *@v with no ordering.
+ * Return the old value of *@v regardless of the result of
+ * the comparison.  Therefore, if the return value is not
+ * equal to @old, the cmpxchg operation failed.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_cmpxchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1442,8 +1904,20 @@ arch_atomic_cmpxchg_release(atomic_t *v, int old, int new)
 #error "Unable to define arch_atomic_cmpxchg_relaxed"
 #endif /* arch_atomic_cmpxchg_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_try_cmpxchg() here
+/**
+ * arch_atomic_try_cmpxchg - Atomic boolean compare and exchange with full ordering
+ * @v: pointer of type atomic_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare *@old to *@v, and if equal,
+ * store @new to *@v with full ordering.
+ * Return @true if the operation succeeded,
+ * and @false otherwise.  On failure, store the failure-inducing
+ * value of *@v to *@old, which permits a retry without
+ * an explicit reload from *@v.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_try_cmpxchg)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1471,8 +1945,20 @@ arch_atomic_try_cmpxchg(atomic_t *v, int *old, int new)
 #define arch_atomic_try_cmpxchg arch_atomic_try_cmpxchg
 #endif /* arch_atomic_try_cmpxchg */
 
-/*
- * TODO: add kerneldoc for arch_atomic_try_cmpxchg_acquire() here
+/**
+ * arch_atomic_try_cmpxchg_acquire - Atomic boolean compare and exchange with acquire ordering
+ * @v: pointer of type atomic_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare *@old to *@v, and if equal,
+ * store @new to *@v with acquire ordering.
+ * Return @true if the operation succeeded,
+ * and @false otherwise.  On failure, store the failure-inducing
+ * value of *@v to *@old, which permits a retry without
+ * an explicit reload from *@v.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_try_cmpxchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1500,8 +1986,20 @@ arch_atomic_try_cmpxchg_acquire(atomic_t *v, int *old, int new)
 #define arch_atomic_try_cmpxchg_acquire arch_atomic_try_cmpxchg_acquire
 #endif /* arch_atomic_try_cmpxchg_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_try_cmpxchg_release() here
+/**
+ * arch_atomic_try_cmpxchg_release - Atomic boolean compare and exchange with release ordering
+ * @v: pointer of type atomic_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare *@old to *@v, and if equal,
+ * store @new to *@v with release ordering.
+ * Return @true if the operation succeeded,
+ * and @false otherwise.  On failure, store the failure-inducing
+ * value of *@v to *@old, which permits a retry without
+ * an explicit reload from *@v.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_try_cmpxchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1528,8 +2026,20 @@ arch_atomic_try_cmpxchg_release(atomic_t *v, int *old, int new)
 #define arch_atomic_try_cmpxchg_release arch_atomic_try_cmpxchg_release
 #endif /* arch_atomic_try_cmpxchg_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_try_cmpxchg_relaxed() here
+/**
+ * arch_atomic_try_cmpxchg_relaxed - Atomic boolean compare and exchange with no ordering
+ * @v: pointer of type atomic_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare *@old to *@v, and if equal,
+ * store @new to *@v with no ordering.
+ * Return @true if the operation succeeded,
+ * and @false otherwise.  On failure, store the failure-inducing
+ * value of *@v to *@old, which permits a retry without
+ * an explicit reload from *@v.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_try_cmpxchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1548,8 +2058,15 @@ arch_atomic_try_cmpxchg_relaxed(atomic_t *v, int *old, int new)
 #define arch_atomic_try_cmpxchg_relaxed arch_atomic_try_cmpxchg_relaxed
 #endif /* arch_atomic_try_cmpxchg_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_sub_and_test() here
+/**
+ * arch_atomic_sub_and_test - Atomic subtract with full ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic_t
+ *
+ * Atomically subtract @i from @v, providing full ordering.
+ * Return @true if the result is zero and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_sub_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1562,8 +2079,14 @@ arch_atomic_sub_and_test(int i, atomic_t *v)
 #define arch_atomic_sub_and_test arch_atomic_sub_and_test
 #endif /* arch_atomic_sub_and_test */
 
-/*
- * TODO: add kerneldoc for arch_atomic_dec_and_test() here
+/**
+ * arch_atomic_dec_and_test - Atomic decrement with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing full ordering.
+ * Return @true if the result is zero and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_dec_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1576,8 +2099,14 @@ arch_atomic_dec_and_test(atomic_t *v)
 #define arch_atomic_dec_and_test arch_atomic_dec_and_test
 #endif /* arch_atomic_dec_and_test */
 
-/*
- * TODO: add kerneldoc for arch_atomic_inc_and_test() here
+/**
+ * arch_atomic_inc_and_test - Atomic increment with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing full ordering.
+ * Return @true if the result is zero and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_inc_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1590,8 +2119,16 @@ arch_atomic_inc_and_test(atomic_t *v)
 #define arch_atomic_inc_and_test arch_atomic_inc_and_test
 #endif /* arch_atomic_inc_and_test */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add_negative() here
+/**
+ * arch_atomic_add_negative - Atomic add with full ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing full ordering.
+ * Return @true if the result is negative, or @false when
+ * the result is greater than or equal to zero.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_add_negative)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1615,8 +2152,16 @@ arch_atomic_add_negative(int i, atomic_t *v)
 #define arch_atomic_add_negative arch_atomic_add_negative
 #endif /* arch_atomic_add_negative */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add_negative_acquire() here
+/**
+ * arch_atomic_add_negative_acquire - Atomic add with acquire ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing acquire ordering.
+ * Return @true if the result is negative, or @false when
+ * the result is greater than or equal to zero.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_add_negative_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1640,8 +2185,16 @@ arch_atomic_add_negative_acquire(int i, atomic_t *v)
 #define arch_atomic_add_negative_acquire arch_atomic_add_negative_acquire
 #endif /* arch_atomic_add_negative_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add_negative_release() here
+/**
+ * arch_atomic_add_negative_release - Atomic add with release ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing release ordering.
+ * Return @true if the result is negative, or @false when
+ * the result is greater than or equal to zero.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_add_negative_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1664,8 +2217,16 @@ arch_atomic_add_negative_release(int i, atomic_t *v)
 #define arch_atomic_add_negative_release arch_atomic_add_negative_release
 #endif /* arch_atomic_add_negative_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add_negative_relaxed() here
+/**
+ * arch_atomic_add_negative_relaxed - Atomic add with no ordering
+ * @i: value to add
+ * @v: pointer of type atomic_t
+ *
+ * Atomically add @i to @v, providing no ordering.
+ * Return @true if the result is negative, or @false when
+ * the result is greater than or equal to zero.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_add_negative_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1680,8 +2241,17 @@ arch_atomic_add_negative_relaxed(int i, atomic_t *v)
 #define arch_atomic_add_negative_relaxed arch_atomic_add_negative_relaxed
 #endif /* arch_atomic_add_negative_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic_fetch_add_unless() here
+/**
+ * arch_atomic_fetch_add_unless - Atomic add with full ordering
+ * @v: pointer of type atomic_t
+ * @a: the amount to add to @v...
+ * @u: ...unless v is equal to u
+ *
+ * Atomically add @v, providing full ordering,
+ * but only if @v was not already @u.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_fetch_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1701,8 +2271,17 @@ arch_atomic_fetch_add_unless(atomic_t *v, int a, int u)
 #define arch_atomic_fetch_add_unless arch_atomic_fetch_add_unless
 #endif /* arch_atomic_fetch_add_unless */
 
-/*
- * TODO: add kerneldoc for arch_atomic_add_unless() here
+/**
+ * arch_atomic_add_unless - Atomic add with full ordering
+ * @v: pointer of type atomic_t
+ * @a: the amount to add to @v...
+ * @u: ...unless v is equal to u
+ *
+ * Atomically add @v, providing full ordering,
+ * but only if @v was not already @u.
+ * Return @true if the add was executed and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1715,8 +2294,15 @@ arch_atomic_add_unless(atomic_t *v, int a, int u)
 #define arch_atomic_add_unless arch_atomic_add_unless
 #endif /* arch_atomic_add_unless */
 
-/*
- * TODO: add kerneldoc for arch_atomic_inc_not_zero() here
+/**
+ * arch_atomic_inc_not_zero - Atomic increment with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing full ordering,
+ * but only if @v is non-zero.
+ * Return @true if the increment was executed and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_inc_not_zero)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1729,8 +2315,15 @@ arch_atomic_inc_not_zero(atomic_t *v)
 #define arch_atomic_inc_not_zero arch_atomic_inc_not_zero
 #endif /* arch_atomic_inc_not_zero */
 
-/*
- * TODO: add kerneldoc for arch_atomic_inc_unless_negative() here
+/**
+ * arch_atomic_inc_unless_negative - Atomic increment with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically increment @v, providing full ordering,
+ * but only if @v is greater than or equal to zero.
+ * Return @true if the increment was executed and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_inc_unless_negative)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1750,8 +2343,15 @@ arch_atomic_inc_unless_negative(atomic_t *v)
 #define arch_atomic_inc_unless_negative arch_atomic_inc_unless_negative
 #endif /* arch_atomic_inc_unless_negative */
 
-/*
- * TODO: add kerneldoc for arch_atomic_dec_unless_positive() here
+/**
+ * arch_atomic_dec_unless_positive - Atomic decrement with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing full ordering,
+ * but only if @v is less than or equal to zero.
+ * Return @true if the decrement was executed and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_dec_unless_positive)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1771,8 +2371,21 @@ arch_atomic_dec_unless_positive(atomic_t *v)
 #define arch_atomic_dec_unless_positive arch_atomic_dec_unless_positive
 #endif /* arch_atomic_dec_unless_positive */
 
-/*
- * TODO: add kerneldoc for arch_atomic_dec_if_positive() here
+/**
+ * arch_atomic_dec_if_positive - Atomic decrement with full ordering
+ * @v: pointer of type atomic_t
+ *
+ * Atomically decrement @v, providing full ordering,
+ * but only if @v is greater than zero.
+ * Return intended new value, even when the decrement was not
+ * executed.
+ *
+ * For example, if the old value is -3, then @v will not
+ * be decremented, but -4 will be returned.  As a result,
+ * if the return value is greater than or equal to zero,
+ * then @v was in fact decremented.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic_dec_if_positive)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1797,13 +2410,25 @@ arch_atomic_dec_if_positive(atomic_t *v)
 #include <asm-generic/atomic64.h>
 #endif
 
-/*
- * TODO: add kerneldoc for arch_atomic64_read() here
+/**
+ * arch_atomic64_read - Atomic load with no ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically load @v, providing no ordering.
+ * Return value loaded.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic64_read() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_read_acquire() here
+/**
+ * arch_atomic64_read_acquire - Atomic load with acquire ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically load @v, providing acquire ordering.
+ * Return value loaded.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_read_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1827,13 +2452,25 @@ arch_atomic64_read_acquire(const atomic64_t *v)
 #define arch_atomic64_read_acquire arch_atomic64_read_acquire
 #endif /* arch_atomic64_read_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_set() here
+/**
+ * arch_atomic64_set - Atomic store with no ordering
+ * @v: pointer of type atomic64_t
+ * @i: value to store
+ *
+ * Atomically store @i to @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic64_set() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_set_release() here
+/**
+ * arch_atomic64_set_release - Atomic store with release ordering
+ * @v: pointer of type atomic64_t
+ * @i: value to store
+ *
+ * Atomically store @i to @v, providing release ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_set_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1853,13 +2490,26 @@ arch_atomic64_set_release(atomic64_t *v, s64 i)
 #define arch_atomic64_set_release arch_atomic64_set_release
 #endif /* arch_atomic64_set_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add() here
+/**
+ * arch_atomic64_add - Atomic add with no ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic64_add() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add_return() here
+/**
+ * arch_atomic64_add_return - Atomic add with full ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing full ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_add_return)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1878,8 +2528,15 @@ arch_atomic64_add_return(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_add_return"
 #endif /* arch_atomic64_add_return */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add_return_acquire() here
+/**
+ * arch_atomic64_add_return_acquire - Atomic add with acquire ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing acquire ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_add_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1898,8 +2555,15 @@ arch_atomic64_add_return_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_add_return_acquire"
 #endif /* arch_atomic64_add_return_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add_return_release() here
+/**
+ * arch_atomic64_add_return_release - Atomic add with release ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing release ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_add_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1917,8 +2581,15 @@ arch_atomic64_add_return_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_add_return_release"
 #endif /* arch_atomic64_add_return_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add_return_relaxed() here
+/**
+ * arch_atomic64_add_return_relaxed - Atomic add with no ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing no ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_add_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1928,8 +2599,15 @@ arch_atomic64_add_return_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_add_return_relaxed"
 #endif /* arch_atomic64_add_return_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_add() here
+/**
+ * arch_atomic64_fetch_add - Atomic add with full ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_add)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1948,8 +2626,15 @@ arch_atomic64_fetch_add(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_add"
 #endif /* arch_atomic64_fetch_add */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_add_acquire() here
+/**
+ * arch_atomic64_fetch_add_acquire - Atomic add with acquire ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_add_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1968,8 +2653,15 @@ arch_atomic64_fetch_add_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_add_acquire"
 #endif /* arch_atomic64_fetch_add_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_add_release() here
+/**
+ * arch_atomic64_fetch_add_release - Atomic add with release ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_add_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1987,8 +2679,15 @@ arch_atomic64_fetch_add_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_add_release"
 #endif /* arch_atomic64_fetch_add_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_add_relaxed() here
+/**
+ * arch_atomic64_fetch_add_relaxed - Atomic add with no ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_add_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -1998,13 +2697,26 @@ arch_atomic64_fetch_add_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_add_relaxed"
 #endif /* arch_atomic64_fetch_add_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_sub() here
+/**
+ * arch_atomic64_sub - Atomic subtract with no ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic64_sub() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_sub_return() here
+/**
+ * arch_atomic64_sub_return - Atomic subtract with full ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing full ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_sub_return)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2023,8 +2735,15 @@ arch_atomic64_sub_return(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_sub_return"
 #endif /* arch_atomic64_sub_return */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_sub_return_acquire() here
+/**
+ * arch_atomic64_sub_return_acquire - Atomic subtract with acquire ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing acquire ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_sub_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2043,8 +2762,15 @@ arch_atomic64_sub_return_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_sub_return_acquire"
 #endif /* arch_atomic64_sub_return_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_sub_return_release() here
+/**
+ * arch_atomic64_sub_return_release - Atomic subtract with release ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing release ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_sub_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2062,8 +2788,15 @@ arch_atomic64_sub_return_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_sub_return_release"
 #endif /* arch_atomic64_sub_return_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_sub_return_relaxed() here
+/**
+ * arch_atomic64_sub_return_relaxed - Atomic subtract with no ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing no ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_sub_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2073,8 +2806,15 @@ arch_atomic64_sub_return_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_sub_return_relaxed"
 #endif /* arch_atomic64_sub_return_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_sub() here
+/**
+ * arch_atomic64_fetch_sub - Atomic subtract with full ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_sub)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2093,8 +2833,15 @@ arch_atomic64_fetch_sub(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_sub"
 #endif /* arch_atomic64_fetch_sub */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_sub_acquire() here
+/**
+ * arch_atomic64_fetch_sub_acquire - Atomic subtract with acquire ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_sub_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2113,8 +2860,15 @@ arch_atomic64_fetch_sub_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_sub_acquire"
 #endif /* arch_atomic64_fetch_sub_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_sub_release() here
+/**
+ * arch_atomic64_fetch_sub_release - Atomic subtract with release ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_sub_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2132,8 +2886,15 @@ arch_atomic64_fetch_sub_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_sub_release"
 #endif /* arch_atomic64_fetch_sub_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_sub_relaxed() here
+/**
+ * arch_atomic64_fetch_sub_relaxed - Atomic subtract with no ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_sub_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2143,8 +2904,13 @@ arch_atomic64_fetch_sub_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_sub_relaxed"
 #endif /* arch_atomic64_fetch_sub_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_inc() here
+/**
+ * arch_atomic64_inc - Atomic increment with no ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_inc)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2157,8 +2923,14 @@ arch_atomic64_inc(atomic64_t *v)
 #define arch_atomic64_inc arch_atomic64_inc
 #endif /* arch_atomic64_inc */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_inc_return() here
+/**
+ * arch_atomic64_inc_return - Atomic increment with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing full ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_inc_return)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2182,8 +2954,14 @@ arch_atomic64_inc_return(atomic64_t *v)
 #define arch_atomic64_inc_return arch_atomic64_inc_return
 #endif /* arch_atomic64_inc_return */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_inc_return_acquire() here
+/**
+ * arch_atomic64_inc_return_acquire - Atomic increment with acquire ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing acquire ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_inc_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2207,8 +2985,14 @@ arch_atomic64_inc_return_acquire(atomic64_t *v)
 #define arch_atomic64_inc_return_acquire arch_atomic64_inc_return_acquire
 #endif /* arch_atomic64_inc_return_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_inc_return_release() here
+/**
+ * arch_atomic64_inc_return_release - Atomic increment with release ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing release ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_inc_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2231,8 +3015,14 @@ arch_atomic64_inc_return_release(atomic64_t *v)
 #define arch_atomic64_inc_return_release arch_atomic64_inc_return_release
 #endif /* arch_atomic64_inc_return_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_inc_return_relaxed() here
+/**
+ * arch_atomic64_inc_return_relaxed - Atomic increment with no ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing no ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_inc_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2247,8 +3037,14 @@ arch_atomic64_inc_return_relaxed(atomic64_t *v)
 #define arch_atomic64_inc_return_relaxed arch_atomic64_inc_return_relaxed
 #endif /* arch_atomic64_inc_return_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_inc() here
+/**
+ * arch_atomic64_fetch_inc - Atomic increment with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_inc)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2272,8 +3068,14 @@ arch_atomic64_fetch_inc(atomic64_t *v)
 #define arch_atomic64_fetch_inc arch_atomic64_fetch_inc
 #endif /* arch_atomic64_fetch_inc */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_inc_acquire() here
+/**
+ * arch_atomic64_fetch_inc_acquire - Atomic increment with acquire ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_inc_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2297,8 +3099,14 @@ arch_atomic64_fetch_inc_acquire(atomic64_t *v)
 #define arch_atomic64_fetch_inc_acquire arch_atomic64_fetch_inc_acquire
 #endif /* arch_atomic64_fetch_inc_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_inc_release() here
+/**
+ * arch_atomic64_fetch_inc_release - Atomic increment with release ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_inc_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2321,8 +3129,14 @@ arch_atomic64_fetch_inc_release(atomic64_t *v)
 #define arch_atomic64_fetch_inc_release arch_atomic64_fetch_inc_release
 #endif /* arch_atomic64_fetch_inc_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_inc_relaxed() here
+/**
+ * arch_atomic64_fetch_inc_relaxed - Atomic increment with no ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_inc_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2337,8 +3151,13 @@ arch_atomic64_fetch_inc_relaxed(atomic64_t *v)
 #define arch_atomic64_fetch_inc_relaxed arch_atomic64_fetch_inc_relaxed
 #endif /* arch_atomic64_fetch_inc_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_dec() here
+/**
+ * arch_atomic64_dec - Atomic decrement with no ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_dec)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2351,8 +3170,14 @@ arch_atomic64_dec(atomic64_t *v)
 #define arch_atomic64_dec arch_atomic64_dec
 #endif /* arch_atomic64_dec */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_dec_return() here
+/**
+ * arch_atomic64_dec_return - Atomic decrement with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing full ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_dec_return)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2376,8 +3201,14 @@ arch_atomic64_dec_return(atomic64_t *v)
 #define arch_atomic64_dec_return arch_atomic64_dec_return
 #endif /* arch_atomic64_dec_return */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_dec_return_acquire() here
+/**
+ * arch_atomic64_dec_return_acquire - Atomic decrement with acquire ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing acquire ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_dec_return_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2401,8 +3232,14 @@ arch_atomic64_dec_return_acquire(atomic64_t *v)
 #define arch_atomic64_dec_return_acquire arch_atomic64_dec_return_acquire
 #endif /* arch_atomic64_dec_return_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_dec_return_release() here
+/**
+ * arch_atomic64_dec_return_release - Atomic decrement with release ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing release ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_dec_return_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2425,8 +3262,14 @@ arch_atomic64_dec_return_release(atomic64_t *v)
 #define arch_atomic64_dec_return_release arch_atomic64_dec_return_release
 #endif /* arch_atomic64_dec_return_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_dec_return_relaxed() here
+/**
+ * arch_atomic64_dec_return_relaxed - Atomic decrement with no ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing no ordering.
+ * Return new value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_dec_return_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2441,8 +3284,14 @@ arch_atomic64_dec_return_relaxed(atomic64_t *v)
 #define arch_atomic64_dec_return_relaxed arch_atomic64_dec_return_relaxed
 #endif /* arch_atomic64_dec_return_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_dec() here
+/**
+ * arch_atomic64_fetch_dec - Atomic decrement with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_dec)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2466,8 +3315,14 @@ arch_atomic64_fetch_dec(atomic64_t *v)
 #define arch_atomic64_fetch_dec arch_atomic64_fetch_dec
 #endif /* arch_atomic64_fetch_dec */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_dec_acquire() here
+/**
+ * arch_atomic64_fetch_dec_acquire - Atomic decrement with acquire ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_dec_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2491,8 +3346,14 @@ arch_atomic64_fetch_dec_acquire(atomic64_t *v)
 #define arch_atomic64_fetch_dec_acquire arch_atomic64_fetch_dec_acquire
 #endif /* arch_atomic64_fetch_dec_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_dec_release() here
+/**
+ * arch_atomic64_fetch_dec_release - Atomic decrement with release ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_dec_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2515,8 +3376,14 @@ arch_atomic64_fetch_dec_release(atomic64_t *v)
 #define arch_atomic64_fetch_dec_release arch_atomic64_fetch_dec_release
 #endif /* arch_atomic64_fetch_dec_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_dec_relaxed() here
+/**
+ * arch_atomic64_fetch_dec_relaxed - Atomic decrement with no ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_dec_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2531,13 +3398,26 @@ arch_atomic64_fetch_dec_relaxed(atomic64_t *v)
 #define arch_atomic64_fetch_dec_relaxed arch_atomic64_fetch_dec_relaxed
 #endif /* arch_atomic64_fetch_dec_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_and() here
+/**
+ * arch_atomic64_and - Atomic AND with no ordering
+ * @i: value to AND
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically AND @i with @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic64_and() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_and() here
+/**
+ * arch_atomic64_fetch_and - Atomic AND with full ordering
+ * @i: value to AND
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically AND @i with @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_and)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2556,8 +3436,15 @@ arch_atomic64_fetch_and(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_and"
 #endif /* arch_atomic64_fetch_and */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_and_acquire() here
+/**
+ * arch_atomic64_fetch_and_acquire - Atomic AND with acquire ordering
+ * @i: value to AND
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically AND @i with @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_and_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2576,8 +3463,15 @@ arch_atomic64_fetch_and_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_and_acquire"
 #endif /* arch_atomic64_fetch_and_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_and_release() here
+/**
+ * arch_atomic64_fetch_and_release - Atomic AND with release ordering
+ * @i: value to AND
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically AND @i with @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_and_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2595,8 +3489,15 @@ arch_atomic64_fetch_and_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_and_release"
 #endif /* arch_atomic64_fetch_and_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_and_relaxed() here
+/**
+ * arch_atomic64_fetch_and_relaxed - Atomic AND with no ordering
+ * @i: value to AND
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically AND @i with @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_and_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2606,8 +3507,14 @@ arch_atomic64_fetch_and_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_and_relaxed"
 #endif /* arch_atomic64_fetch_and_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_andnot() here
+/**
+ * arch_atomic64_andnot - Atomic complement then AND with no ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic64_t
+ *
+ * Complement @i, then atomically AND into @v with no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_andnot)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2620,8 +3527,15 @@ arch_atomic64_andnot(s64 i, atomic64_t *v)
 #define arch_atomic64_andnot arch_atomic64_andnot
 #endif /* arch_atomic64_andnot */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_andnot() here
+/**
+ * arch_atomic64_fetch_andnot - Atomic complement then AND with full ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic64_t
+ *
+ * Complement @i, then atomically AND into @v with full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_andnot)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2645,8 +3559,15 @@ arch_atomic64_fetch_andnot(s64 i, atomic64_t *v)
 #define arch_atomic64_fetch_andnot arch_atomic64_fetch_andnot
 #endif /* arch_atomic64_fetch_andnot */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_andnot_acquire() here
+/**
+ * arch_atomic64_fetch_andnot_acquire - Atomic complement then AND with acquire ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic64_t
+ *
+ * Complement @i, then atomically AND into @v with acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_andnot_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2670,8 +3591,15 @@ arch_atomic64_fetch_andnot_acquire(s64 i, atomic64_t *v)
 #define arch_atomic64_fetch_andnot_acquire arch_atomic64_fetch_andnot_acquire
 #endif /* arch_atomic64_fetch_andnot_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_andnot_release() here
+/**
+ * arch_atomic64_fetch_andnot_release - Atomic complement then AND with release ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic64_t
+ *
+ * Complement @i, then atomically AND into @v with release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_andnot_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2694,8 +3622,15 @@ arch_atomic64_fetch_andnot_release(s64 i, atomic64_t *v)
 #define arch_atomic64_fetch_andnot_release arch_atomic64_fetch_andnot_release
 #endif /* arch_atomic64_fetch_andnot_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_andnot_relaxed() here
+/**
+ * arch_atomic64_fetch_andnot_relaxed - Atomic complement then AND with no ordering
+ * @i: value to complement then AND
+ * @v: pointer of type atomic64_t
+ *
+ * Complement @i, then atomically AND into @v with no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_andnot_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2710,13 +3645,26 @@ arch_atomic64_fetch_andnot_relaxed(s64 i, atomic64_t *v)
 #define arch_atomic64_fetch_andnot_relaxed arch_atomic64_fetch_andnot_relaxed
 #endif /* arch_atomic64_fetch_andnot_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_or() here
+/**
+ * arch_atomic64_or - Atomic OR with no ordering
+ * @i: value to OR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically OR @i with @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic64_or() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_or() here
+/**
+ * arch_atomic64_fetch_or - Atomic OR with full ordering
+ * @i: value to OR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically OR @i with @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_or)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2735,8 +3683,15 @@ arch_atomic64_fetch_or(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_or"
 #endif /* arch_atomic64_fetch_or */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_or_acquire() here
+/**
+ * arch_atomic64_fetch_or_acquire - Atomic OR with acquire ordering
+ * @i: value to OR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically OR @i with @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_or_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2755,8 +3710,15 @@ arch_atomic64_fetch_or_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_or_acquire"
 #endif /* arch_atomic64_fetch_or_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_or_release() here
+/**
+ * arch_atomic64_fetch_or_release - Atomic OR with release ordering
+ * @i: value to OR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically OR @i with @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_or_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2774,8 +3736,15 @@ arch_atomic64_fetch_or_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_or_release"
 #endif /* arch_atomic64_fetch_or_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_or_relaxed() here
+/**
+ * arch_atomic64_fetch_or_relaxed - Atomic OR with no ordering
+ * @i: value to OR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically OR @i with @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_or_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2785,13 +3754,26 @@ arch_atomic64_fetch_or_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_or_relaxed"
 #endif /* arch_atomic64_fetch_or_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_xor() here
+/**
+ * arch_atomic64_xor - Atomic XOR with no ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically XOR @i with @v, providing no ordering.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 /* arch_atomic64_xor() is mandatory */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_xor() here
+/**
+ * arch_atomic64_fetch_xor - Atomic XOR with full ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically XOR @i with @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_xor)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2810,8 +3792,15 @@ arch_atomic64_fetch_xor(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_xor"
 #endif /* arch_atomic64_fetch_xor */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_xor_acquire() here
+/**
+ * arch_atomic64_fetch_xor_acquire - Atomic XOR with acquire ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically XOR @i with @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_xor_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2830,8 +3819,15 @@ arch_atomic64_fetch_xor_acquire(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_xor_acquire"
 #endif /* arch_atomic64_fetch_xor_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_xor_release() here
+/**
+ * arch_atomic64_fetch_xor_release - Atomic XOR with release ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically XOR @i with @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_xor_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2849,8 +3845,15 @@ arch_atomic64_fetch_xor_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_xor_release"
 #endif /* arch_atomic64_fetch_xor_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_xor_relaxed() here
+/**
+ * arch_atomic64_fetch_xor_relaxed - Atomic XOR with no ordering
+ * @i: value to XOR
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically XOR @i with @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_xor_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2860,8 +3863,15 @@ arch_atomic64_fetch_xor_release(s64 i, atomic64_t *v)
 #error "Unable to define arch_atomic64_fetch_xor_relaxed"
 #endif /* arch_atomic64_fetch_xor_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_xchg() here
+/**
+ * arch_atomic64_xchg - Atomic exchange with full ordering
+ * @v: pointer of type atomic64_t
+ * @i: value to exchange
+ *
+ * Atomically exchange @i with @v, providing full ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_xchg)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2880,8 +3890,15 @@ arch_atomic64_xchg(atomic64_t *v, s64 i)
 #error "Unable to define arch_atomic64_xchg"
 #endif /* arch_atomic64_xchg */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_xchg_acquire() here
+/**
+ * arch_atomic64_xchg_acquire - Atomic exchange with acquire ordering
+ * @v: pointer of type atomic64_t
+ * @i: value to exchange
+ *
+ * Atomically exchange @i with @v, providing acquire ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_xchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2900,8 +3917,15 @@ arch_atomic64_xchg_acquire(atomic64_t *v, s64 i)
 #error "Unable to define arch_atomic64_xchg_acquire"
 #endif /* arch_atomic64_xchg_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_xchg_release() here
+/**
+ * arch_atomic64_xchg_release - Atomic exchange with release ordering
+ * @v: pointer of type atomic64_t
+ * @i: value to exchange
+ *
+ * Atomically exchange @i with @v, providing release ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_xchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2919,8 +3943,15 @@ arch_atomic64_xchg_release(atomic64_t *v, s64 i)
 #error "Unable to define arch_atomic64_xchg_release"
 #endif /* arch_atomic64_xchg_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_xchg_relaxed() here
+/**
+ * arch_atomic64_xchg_relaxed - Atomic exchange with no ordering
+ * @v: pointer of type atomic64_t
+ * @i: value to exchange
+ *
+ * Atomically exchange @i with @v, providing no ordering.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_xchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2930,8 +3961,19 @@ arch_atomic64_xchg_release(atomic64_t *v, s64 i)
 #error "Unable to define arch_atomic64_xchg_relaxed"
 #endif /* arch_atomic64_xchg_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_cmpxchg() here
+/**
+ * arch_atomic64_cmpxchg - Atomic compare and exchange with full ordering
+ * @v: pointer of type atomic64_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare @old to *@v, and if equal,
+ * store @new to *@v with full ordering.
+ * Return the old value of *@v regardless of the result of
+ * the comparison.  Therefore, if the return value is not
+ * equal to @old, the cmpxchg operation failed.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_cmpxchg)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2950,8 +3992,19 @@ arch_atomic64_cmpxchg(atomic64_t *v, s64 old, s64 new)
 #error "Unable to define arch_atomic64_cmpxchg"
 #endif /* arch_atomic64_cmpxchg */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_cmpxchg_acquire() here
+/**
+ * arch_atomic64_cmpxchg_acquire - Atomic compare and exchange with acquire ordering
+ * @v: pointer of type atomic64_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare @old to *@v, and if equal,
+ * store @new to *@v with acquire ordering.
+ * Return the old value of *@v regardless of the result of
+ * the comparison.  Therefore, if the return value is not
+ * equal to @old, the cmpxchg operation failed.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_cmpxchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2970,8 +4023,19 @@ arch_atomic64_cmpxchg_acquire(atomic64_t *v, s64 old, s64 new)
 #error "Unable to define arch_atomic64_cmpxchg_acquire"
 #endif /* arch_atomic64_cmpxchg_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_cmpxchg_release() here
+/**
+ * arch_atomic64_cmpxchg_release - Atomic compare and exchange with release ordering
+ * @v: pointer of type atomic64_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare @old to *@v, and if equal,
+ * store @new to *@v with release ordering.
+ * Return the old value of *@v regardless of the result of
+ * the comparison.  Therefore, if the return value is not
+ * equal to @old, the cmpxchg operation failed.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_cmpxchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -2989,8 +4053,19 @@ arch_atomic64_cmpxchg_release(atomic64_t *v, s64 old, s64 new)
 #error "Unable to define arch_atomic64_cmpxchg_release"
 #endif /* arch_atomic64_cmpxchg_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_cmpxchg_relaxed() here
+/**
+ * arch_atomic64_cmpxchg_relaxed - Atomic compare and exchange with no ordering
+ * @v: pointer of type atomic64_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare @old to *@v, and if equal,
+ * store @new to *@v with no ordering.
+ * Return the old value of *@v regardless of the result of
+ * the comparison.  Therefore, if the return value is not
+ * equal to @old, the cmpxchg operation failed.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_cmpxchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3000,8 +4075,20 @@ arch_atomic64_cmpxchg_release(atomic64_t *v, s64 old, s64 new)
 #error "Unable to define arch_atomic64_cmpxchg_relaxed"
 #endif /* arch_atomic64_cmpxchg_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_try_cmpxchg() here
+/**
+ * arch_atomic64_try_cmpxchg - Atomic boolean compare and exchange with full ordering
+ * @v: pointer of type atomic64_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare *@old to *@v, and if equal,
+ * store @new to *@v with full ordering.
+ * Return @true if the operation succeeded,
+ * and @false otherwise.  On failure, store the failure-inducing
+ * value of *@v to *@old, which permits a retry without
+ * an explicit reload from *@v.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_try_cmpxchg)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3029,8 +4116,20 @@ arch_atomic64_try_cmpxchg(atomic64_t *v, s64 *old, s64 new)
 #define arch_atomic64_try_cmpxchg arch_atomic64_try_cmpxchg
 #endif /* arch_atomic64_try_cmpxchg */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_try_cmpxchg_acquire() here
+/**
+ * arch_atomic64_try_cmpxchg_acquire - Atomic boolean compare and exchange with acquire ordering
+ * @v: pointer of type atomic64_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare *@old to *@v, and if equal,
+ * store @new to *@v with acquire ordering.
+ * Return @true if the operation succeeded,
+ * and @false otherwise.  On failure, store the failure-inducing
+ * value of *@v to *@old, which permits a retry without
+ * an explicit reload from *@v.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_try_cmpxchg_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3058,8 +4157,20 @@ arch_atomic64_try_cmpxchg_acquire(atomic64_t *v, s64 *old, s64 new)
 #define arch_atomic64_try_cmpxchg_acquire arch_atomic64_try_cmpxchg_acquire
 #endif /* arch_atomic64_try_cmpxchg_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_try_cmpxchg_release() here
+/**
+ * arch_atomic64_try_cmpxchg_release - Atomic boolean compare and exchange with release ordering
+ * @v: pointer of type atomic64_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare *@old to *@v, and if equal,
+ * store @new to *@v with release ordering.
+ * Return @true if the operation succeeded,
+ * and @false otherwise.  On failure, store the failure-inducing
+ * value of *@v to *@old, which permits a retry without
+ * an explicit reload from *@v.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_try_cmpxchg_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3086,8 +4197,20 @@ arch_atomic64_try_cmpxchg_release(atomic64_t *v, s64 *old, s64 new)
 #define arch_atomic64_try_cmpxchg_release arch_atomic64_try_cmpxchg_release
 #endif /* arch_atomic64_try_cmpxchg_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_try_cmpxchg_relaxed() here
+/**
+ * arch_atomic64_try_cmpxchg_relaxed - Atomic boolean compare and exchange with no ordering
+ * @v: pointer of type atomic64_t
+ * @old: desired old value to match
+ * @new: new value to put in
+ *
+ * Atomically compare *@old to *@v, and if equal,
+ * store @new to *@v with no ordering.
+ * Return @true if the operation succeeded,
+ * and @false otherwise.  On failure, store the failure-inducing
+ * value of *@v to *@old, which permits a retry without
+ * an explicit reload from *@v.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_try_cmpxchg_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3106,8 +4229,15 @@ arch_atomic64_try_cmpxchg_relaxed(atomic64_t *v, s64 *old, s64 new)
 #define arch_atomic64_try_cmpxchg_relaxed arch_atomic64_try_cmpxchg_relaxed
 #endif /* arch_atomic64_try_cmpxchg_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_sub_and_test() here
+/**
+ * arch_atomic64_sub_and_test - Atomic subtract with full ordering
+ * @i: value to subtract
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically subtract @i from @v, providing full ordering.
+ * Return @true if the result is zero and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_sub_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3120,8 +4250,14 @@ arch_atomic64_sub_and_test(s64 i, atomic64_t *v)
 #define arch_atomic64_sub_and_test arch_atomic64_sub_and_test
 #endif /* arch_atomic64_sub_and_test */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_dec_and_test() here
+/**
+ * arch_atomic64_dec_and_test - Atomic decrement with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing full ordering.
+ * Return @true if the result is zero and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_dec_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3134,8 +4270,14 @@ arch_atomic64_dec_and_test(atomic64_t *v)
 #define arch_atomic64_dec_and_test arch_atomic64_dec_and_test
 #endif /* arch_atomic64_dec_and_test */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_inc_and_test() here
+/**
+ * arch_atomic64_inc_and_test - Atomic increment with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing full ordering.
+ * Return @true if the result is zero and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_inc_and_test)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3148,8 +4290,16 @@ arch_atomic64_inc_and_test(atomic64_t *v)
 #define arch_atomic64_inc_and_test arch_atomic64_inc_and_test
 #endif /* arch_atomic64_inc_and_test */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add_negative() here
+/**
+ * arch_atomic64_add_negative - Atomic add with full ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing full ordering.
+ * Return @true if the result is negative, or @false when
+ * the result is greater than or equal to zero.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_add_negative)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3173,8 +4323,16 @@ arch_atomic64_add_negative(s64 i, atomic64_t *v)
 #define arch_atomic64_add_negative arch_atomic64_add_negative
 #endif /* arch_atomic64_add_negative */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add_negative_acquire() here
+/**
+ * arch_atomic64_add_negative_acquire - Atomic add with acquire ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing acquire ordering.
+ * Return @true if the result is negative, or @false when
+ * the result is greater than or equal to zero.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_add_negative_acquire)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3198,8 +4356,16 @@ arch_atomic64_add_negative_acquire(s64 i, atomic64_t *v)
 #define arch_atomic64_add_negative_acquire arch_atomic64_add_negative_acquire
 #endif /* arch_atomic64_add_negative_acquire */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add_negative_release() here
+/**
+ * arch_atomic64_add_negative_release - Atomic add with release ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing release ordering.
+ * Return @true if the result is negative, or @false when
+ * the result is greater than or equal to zero.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_add_negative_release)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3222,8 +4388,16 @@ arch_atomic64_add_negative_release(s64 i, atomic64_t *v)
 #define arch_atomic64_add_negative_release arch_atomic64_add_negative_release
 #endif /* arch_atomic64_add_negative_release */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add_negative_relaxed() here
+/**
+ * arch_atomic64_add_negative_relaxed - Atomic add with no ordering
+ * @i: value to add
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically add @i to @v, providing no ordering.
+ * Return @true if the result is negative, or @false when
+ * the result is greater than or equal to zero.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_add_negative_relaxed)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3238,8 +4412,17 @@ arch_atomic64_add_negative_relaxed(s64 i, atomic64_t *v)
 #define arch_atomic64_add_negative_relaxed arch_atomic64_add_negative_relaxed
 #endif /* arch_atomic64_add_negative_relaxed */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_fetch_add_unless() here
+/**
+ * arch_atomic64_fetch_add_unless - Atomic add with full ordering
+ * @v: pointer of type atomic64_t
+ * @a: the amount to add to @v...
+ * @u: ...unless v is equal to u
+ *
+ * Atomically add @v, providing full ordering,
+ * but only if @v was not already @u.
+ * Return old value.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_fetch_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3259,8 +4442,17 @@ arch_atomic64_fetch_add_unless(atomic64_t *v, s64 a, s64 u)
 #define arch_atomic64_fetch_add_unless arch_atomic64_fetch_add_unless
 #endif /* arch_atomic64_fetch_add_unless */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_add_unless() here
+/**
+ * arch_atomic64_add_unless - Atomic add with full ordering
+ * @v: pointer of type atomic64_t
+ * @a: the amount to add to @v...
+ * @u: ...unless v is equal to u
+ *
+ * Atomically add @v, providing full ordering,
+ * but only if @v was not already @u.
+ * Return @true if the add was executed and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_add_unless)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3273,8 +4465,15 @@ arch_atomic64_add_unless(atomic64_t *v, s64 a, s64 u)
 #define arch_atomic64_add_unless arch_atomic64_add_unless
 #endif /* arch_atomic64_add_unless */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_inc_not_zero() here
+/**
+ * arch_atomic64_inc_not_zero - Atomic increment with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing full ordering,
+ * but only if @v is non-zero.
+ * Return @true if the increment was executed and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_inc_not_zero)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3287,8 +4486,15 @@ arch_atomic64_inc_not_zero(atomic64_t *v)
 #define arch_atomic64_inc_not_zero arch_atomic64_inc_not_zero
 #endif /* arch_atomic64_inc_not_zero */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_inc_unless_negative() here
+/**
+ * arch_atomic64_inc_unless_negative - Atomic increment with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically increment @v, providing full ordering,
+ * but only if @v is greater than or equal to zero.
+ * Return @true if the increment was executed and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_inc_unless_negative)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3308,8 +4514,15 @@ arch_atomic64_inc_unless_negative(atomic64_t *v)
 #define arch_atomic64_inc_unless_negative arch_atomic64_inc_unless_negative
 #endif /* arch_atomic64_inc_unless_negative */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_dec_unless_positive() here
+/**
+ * arch_atomic64_dec_unless_positive - Atomic decrement with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing full ordering,
+ * but only if @v is less than or equal to zero.
+ * Return @true if the decrement was executed and @false otherwise.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_dec_unless_positive)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3329,8 +4542,21 @@ arch_atomic64_dec_unless_positive(atomic64_t *v)
 #define arch_atomic64_dec_unless_positive arch_atomic64_dec_unless_positive
 #endif /* arch_atomic64_dec_unless_positive */
 
-/*
- * TODO: add kerneldoc for arch_atomic64_dec_if_positive() here
+/**
+ * arch_atomic64_dec_if_positive - Atomic decrement with full ordering
+ * @v: pointer of type atomic64_t
+ *
+ * Atomically decrement @v, providing full ordering,
+ * but only if @v is greater than zero.
+ * Return intended new value, even when the decrement was not
+ * executed.
+ *
+ * For example, if the old value is -3, then @v will not
+ * be decremented, but -4 will be returned.  As a result,
+ * if the return value is greater than or equal to zero,
+ * then @v was in fact decremented.
+ *
+ * For more information, see Documentation/atomic_t.txt.
  */
 #if defined(arch_atomic64_dec_if_positive)
 /* Provided directly by arch code -- no fallback necessary. */
@@ -3352,4 +4578,4 @@ arch_atomic64_dec_if_positive(atomic64_t *v)
 #endif /* arch_atomic64_dec_if_positive */
 
 #endif /* _LINUX_ATOMIC_FALLBACK_H */
-// 81e71bad7ed5e9d5bdc5591ecb5fa9011baa9356
+// aa9dc0ac7db90aeaef412c3b38444806c540c089
