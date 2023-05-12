@@ -184,3 +184,163 @@ gen_proto() {
 		gen_proto_variants "${m}" "$@"
 	done
 }
+
+#gen_kerneldoc(meta, atomicname, pfx, name, sfx, order, atomic, int, args...)
+gen_kerneldoc()
+{
+	local meta="$1"; shift
+	local atomicname="$1"; shift
+	local pfx="$1"; shift
+	local name="$1"; shift
+	local sfx="$1"; shift
+	local order="$1"; shift
+	local atomic="$1"; shift
+
+	local params="$(gen_params "$@")"
+	shift;shift # discard types
+	local args="$(gen_args "$@")"
+
+	# Compute the order outside of awk because we need meta_has_ret.
+	local kd_ord=full
+	case "${order}" in
+	_relaxed) kd_ord=no;;
+	?*)	kd_ord="`echo $order | sed -e 's/_//'`";;
+	*)	if ! meta_has_ret ${meta} || test "${name}" = read
+		then
+			kd_ord=no
+		fi
+		;;
+	esac
+
+	echo ${args} | tr -d ' ' | tr ',' '\012' |
+	awk -v atomic=${atomic} \
+	    -v basefuncname=arch_${atomic}_${pfx}${name}${sfx} \
+	    -v name_op=${name} \
+	    -v ord=${kd_ord} \
+	    -v order=${order} \
+	    -v pfx=${pfx} \
+	    -v sfx=${sfx} '
+	BEGIN {
+		sfxord = "_" order;
+		if (ord == "full")
+			sfxord = "";
+
+		fdesc["add"] = fdesc["add_negative"] = fdesc["add_unless"] = "add";
+		fdesc["and"] = "AND";
+		fdesc["andnot"] = "complement then AND";
+		fdesc["cmpxchg"] = "compare and exchange";
+		fdesc["dec"] = fdesc["dec_and_test"] = fdesc["dec_if_positive"] = fdesc["dec_unless_positive"] = "decrement";
+		fdesc["inc"] = fdesc["inc_and_test"] = fdesc["inc_not_zero"] = fdesc["inc_unless_negative"] = "increment";
+		fdesc["or"] = "OR";
+		fdesc["read"] = "load";
+		fdesc["set"] = "store";
+		fdesc["sub"] = fdesc["sub_and_test"] = "subtract";
+		fdesc["try_cmpxchg"] = "boolean compare and exchange";
+		fdesc["xchg"] = "exchange";
+		fdesc["xor"] = "XOR";
+		opmod = "with";
+		if (name_op ~ /add/ || name_op ~ /set/)
+			opmod = "to";
+		else if (name_op ~ /sub/ || name_op ~ /read/)
+			opmod = "from";
+
+		pdesc["a"] = "the amount to add to @v...";
+		pdesc["i"] = "value to " fdesc[name_op];
+		pdesc["u"] = "...unless v is equal to u";
+		pdesc["v"] = "pointer of type " atomic "_t";
+		pdesc["old"] = "desired old value to match";
+		pdesc["new"] = "new value to put in";
+
+		# kernel-doc header.
+		print "/**";
+		print " * " basefuncname order " - Atomic " fdesc[name_op] " with " ord " ordering";
+	}
+
+	{
+		# Function parameters.
+		print " * @" $1 ": " pdesc[$1];
+		parm[$1] = 1;
+		if (pdesc[$i] == "") {
+			print " * ??? Need parameter description for " $1 ".";
+		}
+	}
+
+	END {
+		if (fdesc[name_op] == "") {
+			print " * ??? Need function description for " name_op ".";
+		}
+		fcond=""
+
+		# Conditional action?
+		if (name_op ~ /_if_positive$/)
+			fcond = ",\n * but only if @v is greater than zero"
+		if (name_op ~ /_not_zero$/)
+			fcond = ",\n * but only if @v is non-zero"
+		if (name_op ~ /_unless$/)
+			fcond = ",\n * but only if @v was not already @u"
+		if (name_op ~ /_unless_negative$/)
+			fcond = ",\n * but only if @v is greater than or equal to zero"
+		if (name_op ~ /_unless_positive$/)
+			fcond = ",\n * but only if @v is less than or equal to zero"
+
+		# Description.
+		print " *";
+		indirect = "";
+		if (name_op ~ /try_cmpxchg/) {
+			indirect = "*";
+		}
+		if (name_op == "andnot") {
+			print " * Complement @i, then atomically AND into @v with " ord " ordering" fcond ".";
+		} else if (name_op ~ /cmpxchg/) {
+			print " * Atomically compare " indirect "@old to *@v, and if equal,";
+			print " * store @new to *@v with " ord " ordering.";
+		} else if (parm["i"]) {
+			print " * Atomically " fdesc[name_op] " @i " opmod " @v, providing " ord " ordering" fcond ".";
+		} else {
+			print " * Atomically " fdesc[name_op] " @v, providing " ord " ordering" fcond ".";
+		}
+
+		# Return value?
+		if (name_op == "add_negative") {
+			print " * Return @true if the result is negative, or @false when"
+			print " * the result is greater than or equal to zero.";
+		} else if (name_op ~ /^add_unless$/) {
+			print " * Either way, return old value.";
+		} else if (name_op ~ /try_cmpxchg/) {
+			print " * Return @true if the operation succeeded,";
+			print " * and @false otherwise.  On failure, store the failure-inducing";
+			print " * value of *@v to *@old, which permits a retry without";
+			print " * an explicit reload from *@v.";
+		} else if (name_op == "cmpxchg") {
+			print " * Return the old value of *@v regardless of the result of";
+			print " * the comparison.  Therefore, if the return value is not";
+			print " * equal to @old, the cmpxchg operation failed.";
+		} else if (pfx == "fetch_" || name_op ~ /^cmpxchg$|^xchg$/) {
+			print " * Return old value.";
+		} else if (sfx == "_return") {
+			print " * Return new value.";
+		} else if (name_op ~ /^read$/) {
+			print " * Return value loaded.";
+		} else if (name_op ~ /^dec_and_test$|^inc_and_test$|^sub_and_test$/) {
+			print " * Return @true if the result is zero and @false otherwise.";
+		} else if (name_op ~ /^dec_unless_positive$|^inc_not_zero$|^inc_unless_negative$/) {
+			print " * Return @true if the " fdesc[name_op] " was executed and @false otherwise.";
+		} else if (name_op ~ /^dec_if_positive$/) {
+			print " * Return intended new value, even when the decrement was not"
+			print " * executed.";
+			print " *";
+			print " * For example, if the old value is -3, then @v will not";
+			print " * be decremented, but -4 will be returned.  As a result,";
+			print " * if the return value is greater than or equal to zero,";
+			print " * then @v was in fact decremented.";
+		} else if (name_op ~ /^add$|^and$|^andnot$|^dec$|^inc$|^or$|^set$|^sub$|^xor$/) {
+			# No return value, so print nothing.
+		} else {
+			print " * ??? Need return value definition.";
+		}
+
+		print " *";
+		print " * For more information, see Documentation/atomic_t.txt.";
+		print " */";
+	}'
+}
