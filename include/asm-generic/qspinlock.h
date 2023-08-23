@@ -98,6 +98,7 @@ static __always_inline int queued_spin_trylock(struct qspinlock *lock)
 }
 
 extern void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val);
+extern void spinlock_dump(spinlock_t *sp, bool full);
 
 #ifndef queued_spin_lock
 /**
