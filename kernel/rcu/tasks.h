@@ -991,6 +991,7 @@ static void rcu_tasks_postscan(struct list_head *hop)
 			raw_spin_unlock_irq_rcu_node(rtpcp);
 			cond_resched(); // For CONFIG_PREEMPT=n kernels
 			raw_spin_lock_irq_rcu_node(rtpcp);
+			t1 = list_entry(tmp.next, struct task_struct, rcu_tasks_exit_list);
 			list_del(&tmp);
 			j = jiffies + 1;
 		}
