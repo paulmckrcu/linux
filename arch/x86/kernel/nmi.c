@@ -582,7 +582,7 @@ EXPORT_SYMBOL_GPL(asm_exc_nmi_kvm_vmx);
 
 static char *nmi_check_stall_msg[] = {
 /*									*/
-/* +--------- nsp->idt_seq_snap & 0x1: CPU is in NMI handler.		*/
+/* +--------- nmi_seq & 0x1: CPU is currently in NMI handler.		*/
 /* | +------ cpu_is_offline(cpu)					*/
 /* | | +--- nsp->idt_calls_snap != atomic_long_read(&nsp->idt_calls):	*/
 /* | | |	NMI handler has been invoked.				*/
@@ -632,7 +632,7 @@ void nmi_backtrace_stall_check(const struct cpumask *btp)
 			msgp = "CPU entered NMI handler function, but has not exited";
 		} else if (nsp->idt_nmi_seq_snap == nmi_seq ||
 			   nsp->idt_nmi_seq_snap + 1 == nmi_seq) {
-			idx = ((nsp->idt_seq_snap & 0x1) << 2) |
+			idx = ((nmi_seq & 0x1) << 2) |
 			      (cpu_is_offline(cpu) << 1) |
 			      (nsp->idt_calls_snap != atomic_long_read(&nsp->idt_calls));
 			msgp = nmi_check_stall_msg[idx];
