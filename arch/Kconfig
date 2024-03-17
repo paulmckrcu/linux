@@ -1506,4 +1506,7 @@ config FUNCTION_ALIGNMENT
 	default 4 if FUNCTION_ALIGNMENT_4B
 	default 0
 
+config ARCH_NEED_CMPXCHG_1_2_EMU
+	bool
+
 endmenu
