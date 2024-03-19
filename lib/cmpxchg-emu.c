@@ -11,6 +11,8 @@
 #include <linux/export.h>
 #include <linux/instrumented.h>
 #include <linux/atomic.h>
+#include <linux/panic.h>
+#include <linux/bug.h>
 #include <asm-generic/rwonce.h>
 
 union u8_32 {
@@ -34,7 +36,7 @@ uintptr_t cmpxchg_emu_u8(volatile u8 *p, uintptr_t old, uintptr_t new)
 		new32.w = old32.w;
 		new32.b[i] = new;
 		instrument_atomic_read_write(p, 1);
-		ret = cmpxchg(p32, old32.w, new32.w);
+		ret = data_race(cmpxchg(p32, old32.w, new32.w));
 	} while (ret != old32.w);
 	return old;
 }
@@ -48,12 +50,13 @@ union u16_32 {
 /* Emulate two-byte cmpxchg() in terms of 4-byte cmpxchg. */
 uintptr_t cmpxchg_emu_u16(volatile u16 *p, uintptr_t old, uintptr_t new)
 {
-	u32 *p32 = (u32 *)(((uintptr_t)p) & ~0x1);
-	int i = ((uintptr_t)p) & 0x1;
+	u32 *p32 = (u32 *)(((uintptr_t)p) & ~0x3);
+	int i = (((uintptr_t)p) & 0x2) / 2;
 	union u16_32 old32;
 	union u16_32 new32;
 	u32 ret;
 
+	WARN_ON_ONCE(((uintptr_t)p) & 0x1);
 	old32.w = READ_ONCE(*p32);
 	do {
 		if (old32.h[i] != old)
@@ -61,7 +64,7 @@ uintptr_t cmpxchg_emu_u16(volatile u16 *p, uintptr_t old, uintptr_t new)
 		new32.w = old32.w;
 		new32.h[i] = new;
 		instrument_atomic_read_write(p, 2);
-		ret = cmpxchg(p32, old32.w, new32.w);
+		ret = data_race(cmpxchg(p32, old32.w, new32.w));
 	} while (ret != old32.w);
 	return old;
 }
