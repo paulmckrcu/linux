@@ -74,6 +74,23 @@
 #endif
 #define MODULE_PARAM_PREFIX "rcutree."
 
+// 0: Do nothing
+// 1: Grab the wrong lock, Jacques!  (simple ABA deadlock)
+// 2: Never release, Reece!  (spinlock across sleep)
+// 3: Turn the interrupts on, John!  (spinlock from task and irq handler)
+// 4: A softirq, Hugh! (spinlock from task and softirq handler)
+// 1001: Grab the wrong lock, Jacques!  (simple ABA deadlock, but same task)
+// 1002: Grab the wrong lock, Jacques!  (spinlock while holding raw spinlock)
+// 1003: Grab the wrong lock, Jacques!  (spinlock while preemption disabled)
+// 2001: Never release, Reece!  (arch_spin_lock() self-deadlock)
+static int whichverse;
+module_param(whichverse, int, 0444);
+
+static DEFINE_SPINLOCK(spinlock_a);
+static DEFINE_SPINLOCK(spinlock_b);
+static DEFINE_RAW_SPINLOCK(raw_spinlock_a);
+static arch_spinlock_t arch_spinlock_a = __ARCH_SPIN_LOCK_UNLOCKED;
+
 /* Data structures. */
 static void rcu_sr_normal_gp_cleanup_work(struct work_struct *);
 
@@ -2194,12 +2211,59 @@ static noinline void rcu_gp_cleanup(void)
 		on_each_cpu(rcu_strict_gp_boundary, NULL, 0);
 }
 
+static void deadlock_work_fn(struct work_struct *wp)
+{
+	arch_spin_lock(&arch_spinlock_a);
+	arch_spin_lock(&arch_spinlock_a);
+	arch_spin_unlock(&arch_spinlock_a);
+	arch_spin_unlock(&arch_spinlock_a);
+}
+
 /*
  * Body of kthread that handles grace periods.
  */
 static int __noreturn rcu_gp_kthread(void *unused)
 {
+	static DECLARE_WORK(deadlock_work, deadlock_work_fn);
+
 	rcu_bind_gp_kthread();
+	if (whichverse == 2 || whichverse == 3 || whichverse == 4) {
+		spin_lock(&spinlock_a);
+		spin_unlock(&spinlock_a);
+	}
+	if (whichverse == 1 || whichverse == 1001) {
+		spin_lock(&spinlock_a);
+		spin_lock(&spinlock_b);
+		spin_unlock(&spinlock_b);
+		spin_unlock(&spinlock_a);
+	}
+	if (whichverse == 2) {
+		spin_lock(&spinlock_a);
+		schedule();
+		spin_unlock(&spinlock_a);
+	}
+	if (whichverse == 1001) {
+		spin_lock(&spinlock_b);
+		spin_lock(&spinlock_a);
+		spin_unlock(&spinlock_a);
+		spin_unlock(&spinlock_b);
+	}
+	if (whichverse == 1002) {
+		raw_spin_lock(&raw_spinlock_a);
+		spin_lock(&spinlock_a);
+		spin_unlock(&spinlock_a);
+		raw_spin_unlock(&raw_spinlock_a);
+	}
+	if (whichverse == 1003) {
+		preempt_disable();
+		spin_lock(&spinlock_a);
+		spin_unlock(&spinlock_a);
+		preempt_enable();
+		spin_lock(&spinlock_a);
+		spin_unlock(&spinlock_a);
+	}
+	if (whichverse == 2001)
+		queue_work(system_unbound_wq, &deadlock_work);
 	for (;;) {
 
 		/* Handle grace-period start. */
@@ -2645,6 +2709,15 @@ void rcu_sched_clock_irq(int user)
 		__this_cpu_write(rcu_data.last_sched_clock, j);
 	}
 	trace_rcu_utilization(TPS("Start scheduler-tick"));
+	if (whichverse == 3) {
+		spin_lock(&spinlock_a);
+		spin_unlock(&spinlock_a);
+	}
+	if (whichverse == 1 || whichverse == 1001) {
+		spin_lock(&spinlock_a);
+		spin_lock(&spinlock_b);
+		spin_unlock(&spinlock_b);
+	}
 	lockdep_assert_irqs_disabled();
 	raw_cpu_inc(rcu_data.ticks_this_gp);
 	/* The load-acquire pairs with the store-release setting to true. */
@@ -2804,6 +2877,11 @@ static __latent_entropy void rcu_core(void)
 		return;
 	trace_rcu_utilization(TPS("Start RCU core"));
 	WARN_ON_ONCE(!rdp->beenonline);
+
+	if (whichverse == 4) {
+		spin_lock(&spinlock_a);
+		spin_unlock(&spinlock_a);
+	}
 
 	/* Report any deferred quiescent states if preemption enabled. */
 	if (IS_ENABLED(CONFIG_PREEMPT_COUNT) && (!(preempt_count() & PREEMPT_MASK))) {
@@ -4005,6 +4083,12 @@ void synchronize_rcu(void)
 			 lock_is_held(&rcu_lock_map) ||
 			 lock_is_held(&rcu_sched_lock_map),
 			 "Illegal synchronize_rcu() in RCU read-side critical section");
+	if (whichverse == 1) {
+		spin_lock(&spinlock_b);
+		spin_lock(&spinlock_a);
+		spin_unlock(&spinlock_a);
+		spin_unlock(&spinlock_b);
+	}
 	if (!rcu_blocking_is_gp()) {
 		if (rcu_gp_is_expedited())
 			synchronize_rcu_expedited();
