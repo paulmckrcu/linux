@@ -2002,7 +2002,7 @@ static int __init rcu_spawn_tasks_trace_kthread(void)
 #if !defined(CONFIG_TINY_RCU)
 void show_rcu_tasks_trace_gp_kthread(void)
 {
-	char buf[87];
+	char buf[64];
 
 	sprintf(buf, "N%lu h:%lu/%lu/%lu",
 		data_race(n_trc_holdouts),
