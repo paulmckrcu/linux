@@ -29,8 +29,9 @@ uintptr_t cmpxchg_emu_u8(volatile u8 *p, uintptr_t old, uintptr_t new)
 	union u8_32 new32;
 	u32 ret;
 
-	old32.w = READ_ONCE(*p32);
+	ret = READ_ONCE(*p32);
 	do {
+		old32.w = ret;
 		if (old32.b[i] != old)
 			return old32.b[i];
 		new32.w = old32.w;
@@ -57,8 +58,9 @@ uintptr_t cmpxchg_emu_u16(volatile u16 *p, uintptr_t old, uintptr_t new)
 	u32 ret;
 
 	WARN_ON_ONCE(((uintptr_t)p) & 0x1);
-	old32.w = READ_ONCE(*p32);
+	ret = READ_ONCE(*p32);
 	do {
+		old32.w = ret;
 		if (old32.h[i] != old)
 			return old32.h[i];
 		new32.w = old32.w;
