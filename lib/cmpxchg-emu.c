@@ -14,6 +14,7 @@
 #include <linux/panic.h>
 #include <linux/bug.h>
 #include <asm-generic/rwonce.h>
+#include <linux/cmpxchg-emu.h>
 
 union u8_32 {
 	u8 b[4];
