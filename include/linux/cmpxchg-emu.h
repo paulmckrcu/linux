@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * Emulated 1-byte and 2-byte cmpxchg operations for architectures
  * lacking direct support for these sizes.  These are implemented in terms

@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * Emulated 1-byte and 2-byte cmpxchg operations for architectures
  * lacking direct support for these sizes.  These are implemented in terms
@@ -38,7 +38,7 @@ uintptr_t cmpxchg_emu_u8(volatile u8 *p, uintptr_t old, uintptr_t new)
 		new32.w = old32.w;
 		new32.b[i] = new;
 		instrument_atomic_read_write(p, 1);
-		ret = data_race(cmpxchg(p32, old32.w, new32.w));
+		ret = data_race(cmpxchg(p32, old32.w, new32.w)); // Overridden above.
 	} while (ret != old32.w);
 	return old;
 }
@@ -67,7 +67,7 @@ uintptr_t cmpxchg_emu_u16(volatile u16 *p, uintptr_t old, uintptr_t new)
 		new32.w = old32.w;
 		new32.h[i] = new;
 		instrument_atomic_read_write(p, 2);
-		ret = data_race(cmpxchg(p32, old32.w, new32.w));
+		ret = data_race(cmpxchg(p32, old32.w, new32.w)); // Overridden above.
 	} while (ret != old32.w);
 	return old;
 }
