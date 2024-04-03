@@ -64,9 +64,6 @@
 	case 1:							\
 		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
 		break;						\
-	case 2:							\
-		__ret = cmpxchg_emu_u16((volatile u16 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
-		break;						\
 	case 4:							\
 		asm volatile (					\
 		"1:	ldex.w		%0, (%3) \n"		\
@@ -99,9 +96,6 @@
 	switch (size) {						\
 	case 1:							\
 		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
-		break;						\
-	case 2:							\
-		__ret = cmpxchg_emu_u16((volatile u16 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
 		break;						\
 	case 4:							\
 		asm volatile (					\
@@ -136,9 +130,6 @@
 	switch (size) {						\
 	case 1:							\
 		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
-		break;						\
-	case 2:							\
-		__ret = cmpxchg_emu_u16((volatile u16 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
 		break;						\
 	case 4:							\
 		asm volatile (					\
