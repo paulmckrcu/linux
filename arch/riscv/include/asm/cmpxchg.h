@@ -172,7 +172,7 @@
 	register unsigned int __rc;					\
 	switch (size) {							\
 	case 1:								\
-		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
+		__ret = (__typeof__(*(ptr)))cmpxchg_emu_u8((volatile u8 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
 		break;							\
 	case 4:								\
 		__asm__ __volatile__ (					\
@@ -219,7 +219,7 @@
 	register unsigned int __rc;					\
 	switch (size) {							\
 	case 1:								\
-		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, __old, __new); \
+		__ret = (__typeof__(*(ptr)))cmpxchg_emu_u8((volatile u8 *)__ptr, __old, __new); \
 		break;							\
 	case 4:								\
 		__asm__ __volatile__ (					\
@@ -268,7 +268,7 @@
 	register unsigned int __rc;					\
 	switch (size) {							\
 	case 1:								\
-		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, __old, __new); \
+		__ret = (__typeof__(*(ptr)))cmpxchg_emu_u8((volatile u8 *)__ptr, __old, __new); \
 		break;							\
 	case 4:								\
 		__asm__ __volatile__ (					\
@@ -317,7 +317,7 @@
 	register unsigned int __rc;					\
 	switch (size) {							\
 	case 1:								\
-		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, __old, __new); \
+		__ret = (__typeof__(*(ptr)))cmpxchg_emu_u8((volatile u8 *)__ptr, __old, __new); \
 		break;							\
 	case 4:								\
 		__asm__ __volatile__ (					\
