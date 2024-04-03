@@ -174,9 +174,6 @@
 	case 1:								\
 		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
 		break;							\
-	case 2:								\
-		break;							\
-		__ret = cmpxchg_emu_u16((volatile u16 *)__ptr, (uintptr_t)__old, (uintptr_t)__new); \
 	case 4:								\
 		__asm__ __volatile__ (					\
 			"0:	lr.w %0, %2\n"				\
@@ -224,9 +221,6 @@
 	case 1:								\
 		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, __old, __new); \
 		break;							\
-	case 2:								\
-		break;							\
-		__ret = cmpxchg_emu_u16((volatile u16 *)__ptr, __old, __new); \
 	case 4:								\
 		__asm__ __volatile__ (					\
 			"0:	lr.w %0, %2\n"				\
@@ -276,9 +270,6 @@
 	case 1:								\
 		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, __old, __new); \
 		break;							\
-	case 2:								\
-		break;							\
-		__ret = cmpxchg_emu_u16((volatile u16 *)__ptr, __old, __new); \
 	case 4:								\
 		__asm__ __volatile__ (					\
 			RISCV_RELEASE_BARRIER				\
@@ -328,9 +319,6 @@
 	case 1:								\
 		__ret = cmpxchg_emu_u8((volatile u8 *)__ptr, __old, __new); \
 		break;							\
-	case 2:								\
-		break;							\
-		__ret = cmpxchg_emu_u16((volatile u16 *)__ptr, __old, __new); \
 	case 4:								\
 		__asm__ __volatile__ (					\
 			"0:	lr.w %0, %2\n"				\
