@@ -71,5 +71,4 @@ unsigned long notrace __xchg8(char x, volatile char *ptr)
 
 CMPXCHG(u64)
 CMPXCHG(u32)
-CMPXCHG(u16)
 CMPXCHG(u8)
