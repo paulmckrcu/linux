@@ -99,7 +99,10 @@ extern void __add_wrong_size(void)
 	case __X86_CASE_W:						\
 	{								\
 		volatile u16 *__ptr = (volatile u16 *)(ptr);		\
-		__ret = (__typeof__(*(ptr)))cmpxchg_emu_u16(__ptr, (uintptr_t)__old, (uintptr_t)__new);	\
+		asm volatile(lock "cmpxchgw %2,%1"			\
+			     : "=a" (__ret), "+m" (*__ptr)		\
+			     : "r" (__new), "0" (__old)			\
+			     : "memory");				\
 		break;							\
 	}								\
 	case __X86_CASE_L:						\
