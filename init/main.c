@@ -1572,3 +1572,8 @@ static noinline void __init kernel_init_freeable(void)
 
 	integrity_load_keys();
 }
+
+int bootconfig_is_present(void)
+{
+	return bootconfig_found || IS_ENABLED(CONFIG_BOOT_CONFIG_FORCE);
+}
