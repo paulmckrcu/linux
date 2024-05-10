@@ -178,6 +178,7 @@ static int gp_cleanup_delay;
 module_param(gp_cleanup_delay, int, 0444);
 static int nocb_patience_delay;
 module_param(nocb_patience_delay, int, 0444);
+static int nocb_patience_delay_jiffies;
 
 // Add delay to rcu_read_unlock() for strict grace periods.
 static int rcu_unlock_delay;
@@ -4336,8 +4337,6 @@ EXPORT_SYMBOL_GPL(cond_synchronize_rcu_full);
 static int rcu_pending(int user)
 {
 	bool gp_in_progress;
-	unsigned long j = jiffies;
-	unsigned int patience = msecs_to_jiffies(nocb_patience_delay);
 	struct rcu_data *rdp = this_cpu_ptr(&rcu_data);
 	struct rcu_node *rnp = rdp->mynode;
 
@@ -4353,7 +4352,8 @@ static int rcu_pending(int user)
 	/* Is this a nohz_full CPU in userspace or idle?  (Ignore RCU if so.) */
 	gp_in_progress = rcu_gp_in_progress();
 	if ((user || rcu_is_cpu_rrupt_from_idle() ||
-	     (gp_in_progress && time_before(j + patience, rcu_state.gp_start))) &&
+	     (gp_in_progress &&
+	      time_before(jiffies, READ_ONCE(rcu_state.gp_start) + nocb_patience_delay_jiffies))) &&
 	    rcu_nohz_full_cpu())
 		return 0;
 

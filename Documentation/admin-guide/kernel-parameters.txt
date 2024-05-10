@@ -4986,7 +4986,8 @@
 			disturbing RCU unless the grace period has
 			reached the specified age in milliseconds.
 			Defaults to zero.  Large values will be capped
-			at five seconds.
+			at five seconds.  All values will be rounded down
+			to the nearest value representable by jiffies.
 
 	rcutree.qhimark= [KNL]
 			Set threshold of queued RCU callbacks beyond which

@@ -102,6 +102,7 @@ static void __init rcu_bootup_announce_oddness(void)
 	} else if (nocb_patience_delay) {
 		pr_info("\tRCU NOCB CPU patience set to %d milliseconds.\n", nocb_patience_delay);
 	}
+	nocb_patience_delay_jiffies = msecs_to_jiffies(nocb_patience_delay);
 	if (!use_softirq)
 		pr_info("\tRCU_SOFTIRQ processing moved to rcuc kthreads.\n");
 	if (IS_ENABLED(CONFIG_RCU_EQS_DEBUG))
