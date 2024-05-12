@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: GPL-2.0+
 #
 # Run bpftrace to obtain a histogram of the types of primitives used to
-# initiate RCU grace periods.
+# initiate RCU grace periods.  The count associated with rcu_gp_init()
+# is the number of normal (non-expedited) grace periods.
 #
 # Usage: rcu-updaters.sh [ duration-in-seconds ]
 
@@ -42,5 +43,6 @@ bpftrace -e 'kprobe:kvfree_call_rcu,
 	     kprobe:cond_synchronize_rcu,
 	     kprobe:cond_synchronize_rcu_full,
 	     kprobe:start_poll_synchronize_srcu,
-	     kprobe:poll_state_synchronize_srcu
+	     kprobe:poll_state_synchronize_srcu,
+	     kprobe:rcu_gp_init
 	     	{ @counts[func] = count(); } '"${exitclause}"
