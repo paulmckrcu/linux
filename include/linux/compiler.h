@@ -201,9 +201,9 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
  * accesses to that variable are introduced, even if the buggy accesses
  * are protected by READ_ONCE() or WRITE_ONCE().
  *
- * This macro *does not* affect normal code generation, but is a hint to
- * tooling that data races here are to be ignored.  If code generation must
- * be protected *and* KCSAN should ignore the access, use both data_race()
+ * This macro *does not* affect normal code generation, but is a hint
+ * to tooling that data races here are to be ignored.  If the access must
+ * be atomic *and* KCSAN should ignore the access, use both data_race()
  * and READ_ONCE(), for example, data_race(READ_ONCE(x)).
  */
 #define data_race(expr)							\
