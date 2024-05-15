@@ -1723,6 +1723,11 @@ static void rcu_tasks_trace_pregp_step(struct list_head *hop)
 	for_each_possible_cpu(cpu)
 		WARN_ON_ONCE(per_cpu(trc_ipi_to_cpu, cpu));
 
+	// Force any concurrent rq->curr stores to complete, relying on
+	// the fact that a store instruction is a tiny region with preemption
+	// disabled, and thus an RCU read-side critical section.
+	synchronize_rcu();
+
 	// Disable CPU hotplug across the CPU scan for the benefit of
 	// any IPIs that might be needed.  This also waits for all readers
 	// in CPU-hotplug code paths.
