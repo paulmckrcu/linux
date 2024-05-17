@@ -24,10 +24,11 @@ The Linux kernel provides the following access-marking options:
 4.	WRITE_ONCE(), for example, "WRITE_ONCE(a, b);"
 	The various forms of atomic_set() also fit in here.
 
-5.	ASSERT_EXCLUSIVE_ACCESS() and ASSERT_EXCLUSIVE_WRITER().
+5.	__data_racy, for example "int __data_racy a;"
 
-6.	__data_racy, for example "int __data_racy a;"
-
+6.	KCSAN's negative-marking assertions, ASSERT_EXCLUSIVE_ACCESS()
+	and ASSERT_EXCLUSIVE_WRITER(), are described in the
+	"ACCESS-DOCUMENTATION OPTIONS" section below.
 
 These may be used in combination, as shown in this admittedly improbable
 example:
