@@ -6,6 +6,10 @@
 # is the number of normal (non-expedited) grace periods.
 #
 # Usage: rcu-updaters.sh [ duration-in-seconds ]
+#
+# Note that not all kernel builds have all of these functions.  In those
+# that do not, this script will issue a diagnostic for each that is not
+# found, but continue normally for the rest of the functions.
 
 duration=${1}
 if test -n "${duration}"
