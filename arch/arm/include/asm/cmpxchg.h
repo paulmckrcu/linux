@@ -5,6 +5,7 @@
 #include <linux/irqflags.h>
 #include <linux/prefetch.h>
 #include <asm/barrier.h>
+#include <linux/cmpxchg-emu.h>
 
 #if defined(CONFIG_CPU_SA1100) || defined(CONFIG_CPU_SA110)
 /*
