@@ -249,7 +249,7 @@ static bool csd_lock_wait_toolong(call_single_data_t *csd, u64 ts0, u64 *ts1, in
 	/* How long since we last checked for a stuck CSD lock.*/
 	ts_delta = ts2 - *ts1;
 	if (likely(ts_delta <= csd_lock_timeout_ns * (*nmessages + 1) *
-			       (!nmessages ? 1 : (ilog2(num_online_cpus()) / 2 + 1)) ||
+			       (!*nmessages ? 1 : (ilog2(num_online_cpus()) / 2 + 1)) ||
 		   csd_lock_timeout_ns == 0))
 		return false;
 
