@@ -1317,7 +1317,7 @@ static void call_rcu_tasks_rude(struct rcu_head *rhp, rcu_callback_t func)
  */
 void synchronize_rcu_tasks_rude(void)
 {
-	if (!IS_ENABLED(CONFIG_ARCH_HAS_NOINSTR_MARKINGS))
+	if (IS_ENABLED(ARCH_WANTS_NO_INSTR))
 		synchronize_rcu_tasks_generic(&rcu_tasks_rude);
 }
 EXPORT_SYMBOL_GPL(synchronize_rcu_tasks_rude);
