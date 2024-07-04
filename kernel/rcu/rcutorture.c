@@ -923,7 +923,7 @@ static struct rcu_torture_ops tasks_ops = {
 
 static void torture_synchronize_rcu_tasks_rude(void)
 {
-	if (IS_ENABLED(CONFIG_ARCH_HAS_NOINSTR_MARKINGS))
+	if (IS_ENABLED(ARCH_WANTS_NO_INSTR))
 		synchronize_rcu();
 	else
 		synchronize_rcu_tasks_rude();
