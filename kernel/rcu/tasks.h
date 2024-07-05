@@ -396,7 +396,7 @@ static void rcu_barrier_tasks_generic_cb(struct rcu_head *rhp)
 
 // Wait for all in-flight callbacks for the specified RCU Tasks flavor.
 // Operates in a manner similar to rcu_barrier().
-static void rcu_barrier_tasks_generic(struct rcu_tasks *rtp)
+static void __maybe_unused rcu_barrier_tasks_generic(struct rcu_tasks *rtp)
 {
 	int cpu;
 	unsigned long flags;
