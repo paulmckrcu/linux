@@ -2046,6 +2046,7 @@ static struct rcu_tasks_test_desc tests[] = {
 	}
 };
 
+#if defined(CONFIG_TASKS_RCU) || defined(CONFIG_TASKS_TRACE_RCU)
 static void test_rcu_tasks_callback(struct rcu_head *rhp)
 {
 	struct rcu_tasks_test_desc *rttd =
@@ -2055,6 +2056,7 @@ static void test_rcu_tasks_callback(struct rcu_head *rhp)
 
 	rttd->notrun = false;
 }
+#endif // #if defined(CONFIG_TASKS_RCU) || defined(CONFIG_TASKS_TRACE_RCU)
 
 static void rcu_tasks_initiate_self_tests(void)
 {
