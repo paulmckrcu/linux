@@ -39,6 +39,7 @@
 #include <linux/torture.h>
 #include <linux/vmalloc.h>
 #include <linux/rcupdate_trace.h>
+#include <linux/sched/debug.h>
 
 #include "rcu.h"
 
@@ -722,6 +723,21 @@ kfree_scale_cleanup(void)
 static int
 kfree_scale_shutdown(void *arg)
 {
+	int i;
+
+	wait_event_idle_timeout(shutdown_wq,
+			atomic_read(&n_kfree_scale_thread_ended) >= kfree_nrealthreads,
+			180 * HZ);
+
+	for (i = 0; i < nrealreaders; i++) {
+		pr_info("%s: Reader %d:\n", __func__, i);
+		sched_show_task(reader_tasks[i]);
+	}
+	for (i = 0; i < nrealwriters; i++) {
+		pr_info("%s: Writer %d:\n", __func__, i);
+		sched_show_task(writer_tasks[i]);
+	}
+
 	wait_event_idle(shutdown_wq,
 			atomic_read(&n_kfree_scale_thread_ended) >= kfree_nrealthreads);
 
