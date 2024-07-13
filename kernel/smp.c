@@ -269,7 +269,7 @@ static bool csd_lock_wait_toolong(call_single_data_t *csd, u64 ts0, u64 *ts1, in
 		 cpu, csd->func, csd->info);
 	(*nmessages)++;
 	if (firsttime)
-		atomic_dec(&n_csd_lock_stuck);
+		atomic_inc(&n_csd_lock_stuck);
 	/*
 	 * If the CSD lock is still stuck after 5 minutes, it is unlikely
 	 * to become unstuck. Use a signed comparison to avoid triggering
