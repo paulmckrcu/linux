@@ -1480,6 +1480,7 @@ void wq_worker_tick(struct task_struct *task)
 	 * If the current worker is concurrency managed and hogged the CPU for
 	 * longer than wq_cpu_intensive_thresh_us, it's automatically marked
 	 * CPU_INTENSIVE to avoid stalling other concurrency-managed work items.
+	 * If the time is negative, ignore, assuming a backwards clock.
 	 *
 	 * Set @worker->sleeping means that @worker is in the process of
 	 * switching out voluntarily and won't be contributing to
@@ -1489,6 +1490,7 @@ void wq_worker_tick(struct task_struct *task)
 	 * We probably want to make this prettier in the future.
 	 */
 	if ((worker->flags & WORKER_NOT_RUNNING) || READ_ONCE(worker->sleeping) ||
+	    (s64)(worker->task->se.sum_exec_runtime - worker->current_at) < 0 ||
 	    worker->task->se.sum_exec_runtime - worker->current_at <
 	    wq_cpu_intensive_thresh_us * NSEC_PER_USEC)
 		return;
