@@ -594,9 +594,9 @@ retry:
 					cur_ops->stats();
 			}
 		}
-		if (!selfreport && time_after(jiffies, jdone + HZ * 70 + me)) {
-			pr_info("%s: Writer %ld self-report: started %d i %d.\n",
-				__func__, me, started, i);
+		if (!selfreport && time_after(jiffies, jdone + HZ * (70 + me))) {
+			pr_info("%s: Writer %ld self-report: started %d done %d/%d->%d i %d jdone %lu.\n",
+				__func__, me, started, done, writer_done[me], atomic_read(&n_rcu_scale_writer_finished), i, jiffies - jdone);
 			selfreport = true;
 		}
 		if (started && !alldone && i < MAX_MEAS - 1)
