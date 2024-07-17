@@ -315,7 +315,7 @@ static struct rcu_scale_ops tasks_ops = {
 	.sync		= synchronize_rcu_tasks,
 	.exp_sync	= synchronize_rcu_tasks,
 	.rso_gp_kthread	= get_rcu_tasks_gp_kthread,
-	.stats		= rcu_tasks_scale_stats,
+	.stats		= IS_ENABLED(CONFIG_TINY_RCU) ? NULL : rcu_tasks_scale_stats,
 	.name		= "tasks"
 };
 
@@ -357,7 +357,7 @@ static struct rcu_scale_ops tasks_rude_ops = {
 	.sync		= synchronize_rcu_tasks_rude,
 	.exp_sync	= synchronize_rcu_tasks_rude,
 	.rso_gp_kthread	= get_rcu_tasks_rude_gp_kthread,
-	.stats		= rcu_tasks_rude_scale_stats,
+	.stats		= IS_ENABLED(CONFIG_TINY_RCU) ? NULL : rcu_tasks_rude_scale_stats,
 	.name		= "tasks-rude"
 };
 
@@ -403,7 +403,7 @@ static struct rcu_scale_ops tasks_tracing_ops = {
 	.sync		= synchronize_rcu_tasks_trace,
 	.exp_sync	= synchronize_rcu_tasks_trace,
 	.rso_gp_kthread	= get_rcu_tasks_trace_gp_kthread,
-	.stats		= rcu_tasks_trace_scale_stats,
+	.stats		= IS_ENABLED(CONFIG_TINY_RCU) ? NULL : rcu_tasks_trace_scale_stats,
 	.name		= "tasks-tracing"
 };
 
