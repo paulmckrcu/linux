@@ -578,7 +578,7 @@ retry:
 		if (done && !alldone &&
 		    atomic_read(&n_rcu_scale_writer_finished) >= nrealwriters)
 			alldone = true;
-		if (done && !alldone && time_after(jiffies, jdone + HZ * 180)) {
+		if (done && !alldone && time_after(jiffies, jdone + HZ * 60)) {
 			static atomic_t dumped;
 			int i;
 
