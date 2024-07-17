@@ -586,7 +586,7 @@ retry:
 				for (i = 0; i < nrealwriters; i++) {
 					if (writer_done[i])
 						continue;
-					pr_info("%s: Writer %d:\n", __func__, i);
+					pr_info("%s: Task %ld flags writer %d:\n", __func__, me, i);
 					sched_show_task(writer_tasks[i]);
 				}
 				if (cur_ops->stats)
