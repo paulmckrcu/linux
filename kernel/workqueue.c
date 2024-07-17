@@ -1490,7 +1490,7 @@ void wq_worker_tick(struct task_struct *task)
 	 * We probably want to make this prettier in the future.
 	 */
 	if ((worker->flags & WORKER_NOT_RUNNING) || READ_ONCE(worker->sleeping) ||
-	    (s64)(worker->task->se.sum_exec_runtime - worker->current_at) < 0 ||
+	    WARN_ON_ONCE((s64)(worker->task->se.sum_exec_runtime - worker->current_at) < 0) ||
 	    worker->task->se.sum_exec_runtime - worker->current_at <
 	    wq_cpu_intensive_thresh_us * NSEC_PER_USEC)
 		return;
