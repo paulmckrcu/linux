@@ -136,7 +136,7 @@ struct ref_scale_ops {
 	const char *name;
 };
 
-static struct ref_scale_ops *cur_ops;
+static const struct ref_scale_ops *cur_ops;
 
 static void un_delay(const int udl, const int ndl)
 {
@@ -172,7 +172,7 @@ static bool rcu_sync_scale_init(void)
 	return true;
 }
 
-static struct ref_scale_ops rcu_ops = {
+static const struct ref_scale_ops rcu_ops = {
 	.init		= rcu_sync_scale_init,
 	.readsection	= ref_rcu_read_section,
 	.delaysection	= ref_rcu_delay_section,
@@ -206,7 +206,7 @@ static void srcu_ref_scale_delay_section(const int nloops, const int udl, const 
 	}
 }
 
-static struct ref_scale_ops srcu_ops = {
+static const struct ref_scale_ops srcu_ops = {
 	.init		= rcu_sync_scale_init,
 	.readsection	= srcu_ref_scale_read_section,
 	.delaysection	= srcu_ref_scale_delay_section,
@@ -233,7 +233,7 @@ static void rcu_tasks_ref_scale_delay_section(const int nloops, const int udl, c
 		un_delay(udl, ndl);
 }
 
-static struct ref_scale_ops rcu_tasks_ops = {
+static const struct ref_scale_ops rcu_tasks_ops = {
 	.init		= rcu_sync_scale_init,
 	.readsection	= rcu_tasks_ref_scale_read_section,
 	.delaysection	= rcu_tasks_ref_scale_delay_section,
@@ -272,7 +272,7 @@ static void rcu_trace_ref_scale_delay_section(const int nloops, const int udl, c
 	}
 }
 
-static struct ref_scale_ops rcu_trace_ops = {
+static const struct ref_scale_ops rcu_trace_ops = {
 	.init		= rcu_sync_scale_init,
 	.readsection	= rcu_trace_ref_scale_read_section,
 	.delaysection	= rcu_trace_ref_scale_delay_section,
@@ -311,7 +311,7 @@ static void ref_refcnt_delay_section(const int nloops, const int udl, const int 
 	}
 }
 
-static struct ref_scale_ops refcnt_ops = {
+static const struct ref_scale_ops refcnt_ops = {
 	.init		= rcu_sync_scale_init,
 	.readsection	= ref_refcnt_section,
 	.delaysection	= ref_refcnt_delay_section,
@@ -348,7 +348,7 @@ static void ref_rwlock_delay_section(const int nloops, const int udl, const int 
 	}
 }
 
-static struct ref_scale_ops rwlock_ops = {
+static const struct ref_scale_ops rwlock_ops = {
 	.init		= ref_rwlock_init,
 	.readsection	= ref_rwlock_section,
 	.delaysection	= ref_rwlock_delay_section,
@@ -385,7 +385,7 @@ static void ref_rwsem_delay_section(const int nloops, const int udl, const int n
 	}
 }
 
-static struct ref_scale_ops rwsem_ops = {
+static const struct ref_scale_ops rwsem_ops = {
 	.init		= ref_rwsem_init,
 	.readsection	= ref_rwsem_section,
 	.delaysection	= ref_rwsem_delay_section,
@@ -420,7 +420,7 @@ static void ref_lock_delay_section(const int nloops, const int udl, const int nd
 	preempt_enable();
 }
 
-static struct ref_scale_ops lock_ops = {
+static const struct ref_scale_ops lock_ops = {
 	.readsection	= ref_lock_section,
 	.delaysection	= ref_lock_delay_section,
 	.name		= "lock"
@@ -455,7 +455,7 @@ static void ref_lock_irq_delay_section(const int nloops, const int udl, const in
 	preempt_enable();
 }
 
-static struct ref_scale_ops lock_irq_ops = {
+static const struct ref_scale_ops lock_irq_ops = {
 	.readsection	= ref_lock_irq_section,
 	.delaysection	= ref_lock_irq_delay_section,
 	.name		= "lock-irq"
@@ -491,7 +491,7 @@ static void ref_acqrel_delay_section(const int nloops, const int udl, const int 
 	preempt_enable();
 }
 
-static struct ref_scale_ops acqrel_ops = {
+static const struct ref_scale_ops acqrel_ops = {
 	.readsection	= ref_acqrel_section,
 	.delaysection	= ref_acqrel_delay_section,
 	.name		= "acqrel"
@@ -525,7 +525,7 @@ static void ref_sched_clock_delay_section(const int nloops, const int udl, const
 	stopopts = x;
 }
 
-static struct ref_scale_ops sched_clock_ops = {
+static const struct ref_scale_ops sched_clock_ops = {
 	.readsection	= ref_sched_clock_section,
 	.delaysection	= ref_sched_clock_delay_section,
 	.name		= "sched-clock"
@@ -558,7 +558,7 @@ static void ref_clock_delay_section(const int nloops, const int udl, const int n
 	stopopts = x;
 }
 
-static struct ref_scale_ops clock_ops = {
+static const struct ref_scale_ops clock_ops = {
 	.readsection	= ref_clock_section,
 	.delaysection	= ref_clock_delay_section,
 	.name		= "clock"
@@ -590,7 +590,7 @@ static void ref_jiffies_delay_section(const int nloops, const int udl, const int
 	stopopts = x;
 }
 
-static struct ref_scale_ops jiffies_ops = {
+static const struct ref_scale_ops jiffies_ops = {
 	.readsection	= ref_jiffies_section,
 	.delaysection	= ref_jiffies_delay_section,
 	.name		= "jiffies"
@@ -740,9 +740,9 @@ static void refscale_typesafe_ctor(void *rtsp_in)
 	preempt_enable();
 }
 
-static struct ref_scale_ops typesafe_ref_ops;
-static struct ref_scale_ops typesafe_lock_ops;
-static struct ref_scale_ops typesafe_seqlock_ops;
+static const struct ref_scale_ops typesafe_ref_ops;
+static const struct ref_scale_ops typesafe_lock_ops;
+static const struct ref_scale_ops typesafe_seqlock_ops;
 
 // Initialize for a typesafe test.
 static bool typesafe_init(void)
@@ -803,7 +803,7 @@ static void typesafe_cleanup(void)
 }
 
 // The typesafe_init() function distinguishes these structures by address.
-static struct ref_scale_ops typesafe_ref_ops = {
+static const struct ref_scale_ops typesafe_ref_ops = {
 	.init		= typesafe_init,
 	.cleanup	= typesafe_cleanup,
 	.readsection	= typesafe_read_section,
@@ -811,7 +811,7 @@ static struct ref_scale_ops typesafe_ref_ops = {
 	.name		= "typesafe_ref"
 };
 
-static struct ref_scale_ops typesafe_lock_ops = {
+static const struct ref_scale_ops typesafe_lock_ops = {
 	.init		= typesafe_init,
 	.cleanup	= typesafe_cleanup,
 	.readsection	= typesafe_read_section,
@@ -819,7 +819,7 @@ static struct ref_scale_ops typesafe_lock_ops = {
 	.name		= "typesafe_lock"
 };
 
-static struct ref_scale_ops typesafe_seqlock_ops = {
+static const struct ref_scale_ops typesafe_seqlock_ops = {
 	.init		= typesafe_init,
 	.cleanup	= typesafe_cleanup,
 	.readsection	= typesafe_read_section,
@@ -1060,7 +1060,7 @@ end:
 }
 
 static void
-ref_scale_print_module_parms(struct ref_scale_ops *cur_ops, const char *tag)
+ref_scale_print_module_parms(const struct ref_scale_ops *cur_ops, const char *tag)
 {
 	pr_alert("%s" SCALE_FLAG
 		 "--- %s:  verbose=%d verbose_batched=%d shutdown=%d holdoff=%d lookup_instances=%ld loops=%ld nreaders=%d nruns=%d readdelay=%d\n", scale_type, tag,
@@ -1115,7 +1115,7 @@ ref_scale_init(void)
 {
 	long i;
 	int firsterr = 0;
-	static struct ref_scale_ops *scale_ops[] = {
+	static const struct ref_scale_ops *scale_ops[] = {
 		&rcu_ops, &srcu_ops, RCU_TRACE_OPS RCU_TASKS_OPS &refcnt_ops, &rwlock_ops,
 		&rwsem_ops, &lock_ops, &lock_irq_ops, &acqrel_ops, &sched_clock_ops, &clock_ops,
 		&jiffies_ops, &typesafe_ref_ops, &typesafe_lock_ops, &typesafe_seqlock_ops,
