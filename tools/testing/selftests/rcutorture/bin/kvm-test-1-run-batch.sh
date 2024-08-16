@@ -58,7 +58,7 @@ do
 	kvm-get-cpus-script.sh $T/cpuarray.awk $T/cpubatches.awk $T/cpustate
 	if test -z "${TORTURE_NO_AFFINITY}"
 	then
-		cat << '	___EOF___' >> $T/cpubatches.awk
+		cat << '		___EOF___' >> $T/cpubatches.awk
 		END {
 			affinitylist = "";
 			if (!gotcpus()) {
