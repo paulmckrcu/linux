@@ -1986,6 +1986,7 @@ static inline struct folio *find_get_entry(struct xa_state *xas, pgoff_t max,
 	struct folio *folio;
 
 retry:
+	cond_resched();
 	if (mark == XA_PRESENT)
 		folio = xas_find(xas, max);
 	else
