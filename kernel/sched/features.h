@@ -29,6 +29,11 @@ SCHED_FEAT(NEXT_BUDDY, false)
 SCHED_FEAT(CACHE_HOT_BUDDY, true)
 
 /*
+ * DELAY_ZERO clips the lag on dequeue (or wakeup) to 0.
+ */
+SCHED_FEAT(DELAY_ZERO, true)
+
+/*
  * Allow wakeup-time preemption of the current task:
  */
 SCHED_FEAT(WAKEUP_PREEMPTION, true)
