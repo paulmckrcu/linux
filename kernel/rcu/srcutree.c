@@ -1239,7 +1239,7 @@ static bool srcu_should_expedite(struct srcu_struct *ssp)
 
 	check_init_srcu_struct(ssp);
 	/* If _lite() readers, don't do unsolicited expediting. */
-	if (__this_cpu_read(ssp->sda->srcu_reader_flavor) & SRCU_READ_FLAVOR_LITE)
+	if (this_cpu_read(ssp->sda->srcu_reader_flavor) & SRCU_READ_FLAVOR_LITE)
 		return false;
 	/* If the local srcu_data structure has callbacks, not idle.  */
 	sdp = raw_cpu_ptr(ssp->sda);
