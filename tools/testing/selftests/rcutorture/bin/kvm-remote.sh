@@ -277,7 +277,7 @@ do
 	while :
 	do
 		checkremotefile "$i" "$resdir/$ds/remote.run"
-		ret = $?
+		ret=$?
 		if test "$ret" -eq 0
 		then
 			echo " ---" Collecting results from $i `date` | tee -a "$oldrun/remote-log"
