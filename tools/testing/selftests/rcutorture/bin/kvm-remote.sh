@@ -278,7 +278,7 @@ do
 	do
 		checkremotefile "$i" "$resdir/$ds/remote.run"
 		ret=$?
-		if test "$ret" -eq 0
+		if test "$ret" -eq 1
 		then
 			echo " ---" Collecting results from $i `date` | tee -a "$oldrun/remote-log"
 			( cd "$oldrun"; ssh -o BatchMode=yes $i "cd $rundir; tar -czf - kvm-remote-*.sh.out */console.log */kvm-test-1-run*.sh.out */qemu[_-]pid */qemu-retval */qemu-affinity; rm -rf $T > /dev/null 2>&1" | tar -xzf - )
