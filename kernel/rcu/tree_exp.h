@@ -746,7 +746,15 @@ static void rcu_exp_handler(void *unused)
 	struct task_struct *t = current;
 
 	/*
-	 * First, the common case of not being in an RCU read-side
+	 * First, is there no need for a quiescent state from this CPU,
+	 * or is this CPU already looking for a quiescent state for the
+	 * current grace period?  If either is the case, just leave.
+	 */
+	if (!(READ_ONCE(rnp->expmask) & rdp->grpmask) || READ_ONCE(rdp->cpu_no_qs.b.exp))
+		return;
+
+	/*
+	 * Second, the common case of not being in an RCU read-side
 	 * critical section.  If also enabled or idle, immediately
 	 * report the quiescent state, otherwise defer.
 	 */
@@ -760,7 +768,7 @@ static void rcu_exp_handler(void *unused)
 	}
 
 	/*
-	 * Second, the less-common case of being in an RCU read-side
+	 * Third, the less-common case of being in an RCU read-side
 	 * critical section.  In this case we can count on a future
 	 * rcu_read_unlock().  However, this rcu_read_unlock() might
 	 * execute on some other CPU, but in that case there will be
@@ -781,7 +789,7 @@ static void rcu_exp_handler(void *unused)
 		return;
 	}
 
-	// Finally, negative nesting depth should not happen.
+	// Fourth and finally, negative nesting depth should not happen.
 	WARN_ON_ONCE(1);
 }
 
