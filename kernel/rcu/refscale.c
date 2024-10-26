@@ -1182,7 +1182,9 @@ ref_scale_init(void)
 		scale_type); pr_alert("rcu-scale types:"); for (i = 0;
 		i < ARRAY_SIZE(scale_ops); i++)
 			pr_cont(" %s", scale_ops[i]->name);
-		pr_cont("\n"); firsterr = -EINVAL; cur_ops = NULL;
+		pr_cont("\n");
+		firsterr = -EINVAL;
+		cur_ops = NULL;
 		goto unwind;
 	}
 	if (cur_ops->init)
