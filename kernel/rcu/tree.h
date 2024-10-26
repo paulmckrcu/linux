@@ -24,6 +24,7 @@
 /* Communicate arguments to a kthread worker handler. */
 struct rcu_exp_work {
 	unsigned long rew_s;
+	unsigned long rew_s_start;
 	struct kthread_work rew_work;
 };
 
