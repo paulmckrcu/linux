@@ -360,7 +360,7 @@ static void __sync_rcu_exp_select_node_cpus(struct rcu_exp_work *rewp)
 	raw_spin_lock_irqsave_rcu_node(rnp, flags);
 	if (s_start != READ_ONCE(rcu_state.expedited_sequence)) {
 		raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
-		return;
+		goto notify_done;
 	}
 
 	/* Each pass checks a CPU for identity, offline, and idle. */
@@ -431,7 +431,7 @@ retry_ipi:
 		raw_spin_lock_irqsave_rcu_node(rnp, flags);
 		if (s_start != READ_ONCE(rcu_state.expedited_sequence)) {
 			raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
-			return;
+			goto notify_done;
 		}
 		if ((rnp->qsmaskinitnext & mask) &&
 		    (rnp->expmask & mask)) {
@@ -454,6 +454,11 @@ retry_ipi:
 		else
 			raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
 	}
+
+notify_done:
+	// Let synchronize_rcu_expedited know that we are done.
+	if (atomic_dec_and_test(&rcu_state.exp_leaves_init_left))
+		complete(&rcu_state.exp_leaves_init);
 }
 
 static void rcu_exp_sel_wait_wake(unsigned long s, unsigned long s_start);
@@ -524,8 +529,11 @@ static void sync_rcu_exp_select_cpus(unsigned long s_start)
 	/* Schedule work for each leaf rcu_node structure. */
 	rcu_for_each_leaf_node(rnp) {
 		rnp->exp_need_flush = false;
-		if (!READ_ONCE(rnp->expmask))
+		if (!READ_ONCE(rnp->expmask)) {
+			if (atomic_dec_and_test(&rcu_state.exp_leaves_init_left))
+				complete(&rcu_state.exp_leaves_init);
 			continue; /* Avoid early boot non-existent wq. */
+		}
 		rnp->rew.rew_s_start = s_start;
 		if (!rcu_exp_par_worker_started(rnp) ||
 		    rcu_scheduler_active != RCU_SCHEDULER_RUNNING ||
@@ -728,6 +736,11 @@ static void rcu_exp_sel_wait_wake(unsigned long s, unsigned long s_start)
 {
 	/* Initialize the rcu_node tree in preparation for the wait. */
 	sync_rcu_exp_select_cpus(s_start);
+
+	// Wait for per-leaf rcu_node initialization to complete.
+	if (atomic_dec_and_test(&rcu_state.exp_leaves_init_left))
+		complete(&rcu_state.exp_leaves_init);
+	wait_for_completion(&rcu_state.exp_leaves_init);
 
 	/* Wait and clean up, including waking everyone. */
 	rcu_exp_wait_wake(s);
@@ -1006,6 +1019,11 @@ void synchronize_rcu_expedited(void)
 	s = rcu_exp_gp_seq_snap();
 	if (exp_funnel_lock(s, &s_start))
 		return;  /* Someone else did our work for us. */
+
+	// Number of leaf rcu_node structures plus one for quick completions.
+	atomic_set(&rcu_state.exp_leaves_init_left,
+		   &rcu_state.node[rcu_num_nodes] - rcu_first_leaf_node() + 1);
+	init_completion(&rcu_state.exp_leaves_init);
 
 	/* Ensure that load happens before action based on it. */
 	if (unlikely((rcu_scheduler_active == RCU_SCHEDULER_INIT) || !rcu_exp_worker_started())) {
