@@ -379,6 +379,8 @@ struct rcu_state {
 	atomic_t expedited_need_qs;		/* # CPUs left to check in. */
 	struct swait_queue_head expedited_wq;	/* Wait for check-ins. */
 	int ncpus_snap;				/* # CPUs seen last time. */
+	atomic_t exp_leaves_init_left;		/* # leaf rcu_nodes still to initialize. */
+	struct completion exp_leaves_init;	/* Wake at rcu_node initialization end. */
 	u8 cbovld;				/* Callback overload now? */
 	u8 cbovldnext;				/* ^        ^  next time? */
 
