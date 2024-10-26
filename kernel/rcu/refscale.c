@@ -1173,16 +1173,18 @@ ref_scale_init(void)
 		return -EBUSY;
 
 	for (i = 0; i < ARRAY_SIZE(scale_ops); i++) {
-		cur_ops = scale_ops[i]; if (strcmp(scale_type,
-		cur_ops->name) == 0)
+		cur_ops = scale_ops[i];
+		if (strcmp(scale_type, cur_ops->name) == 0)
 			break;
 	}
 	if (i == ARRAY_SIZE(scale_ops)) {
-		pr_alert("rcu-scale: invalid scale type: \"%s\"\n",
-		scale_type); pr_alert("rcu-scale types:"); for (i = 0;
-		i < ARRAY_SIZE(scale_ops); i++)
+		pr_alert("rcu-scale: invalid scale type: \"%s\"\n", scale_type);
+		pr_alert("rcu-scale types:");
+		for (i = 0; i < ARRAY_SIZE(scale_ops); i++)
 			pr_cont(" %s", scale_ops[i]->name);
-		pr_cont("\n"); firsterr = -EINVAL; cur_ops = NULL;
+		pr_cont("\n");
+		firsterr = -EINVAL;
+		cur_ops = NULL;
 		goto unwind;
 	}
 	if (cur_ops->init)
