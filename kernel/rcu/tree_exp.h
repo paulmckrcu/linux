@@ -529,8 +529,11 @@ static void sync_rcu_exp_select_cpus(unsigned long s_start)
 	/* Schedule work for each leaf rcu_node structure. */
 	rcu_for_each_leaf_node(rnp) {
 		rnp->exp_need_flush = false;
-		if (!READ_ONCE(rnp->expmask))
+		if (!READ_ONCE(rnp->expmask)) {
+			if (atomic_dec_and_test(&rcu_state.exp_leaves_init_left))
+				complete(&rcu_state.exp_leaves_init);
 			continue; /* Avoid early boot non-existent wq. */
+		}
 		rnp->rew.rew_s_start = s_start;
 		if (!rcu_exp_par_worker_started(rnp) ||
 		    rcu_scheduler_active != RCU_SCHEDULER_RUNNING ||
