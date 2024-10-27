@@ -1014,7 +1014,7 @@ void synchronize_rcu_expedited(void)
 
 	// Number of leaf rcu_node structures plus one for quick completions.
 	atomic_set(&rcu_state.exp_leaves_init_left,
-		   &rcu_state.node[rcu_num_nodes] - rcu_first_leaf_node());
+		   &rcu_state.node[rcu_num_nodes] - rcu_first_leaf_node() + 1);
 	init_completion(&rcu_state.exp_leaves_init);
 
 	/* Ensure that load happens before action based on it. */
