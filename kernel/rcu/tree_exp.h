@@ -737,6 +737,11 @@ static void rcu_exp_sel_wait_wake(unsigned long s, unsigned long s_start)
 	/* Initialize the rcu_node tree in preparation for the wait. */
 	sync_rcu_exp_select_cpus(s_start);
 
+	// Wait for per-leaf rcu_node initialization to complete.
+	if (atomic_dec_and_test(&rcu_state.exp_leaves_init_left))
+		complete(&rcu_state.exp_leaves_init);
+	wait_for_completion(&rcu_state.exp_leaves_init);
+
 	/* Wait and clean up, including waking everyone. */
 	rcu_exp_wait_wake(s);
 }
@@ -1030,11 +1035,6 @@ void synchronize_rcu_expedited(void)
 		rew.rew_s_start = s_start;
 		synchronize_rcu_expedited_queue_work(&rew);
 	}
-
-	// Wait for per-leaf rcu_node initialization to complete.
-	if (atomic_dec_and_test(&rcu_state.exp_leaves_init_left))
-		complete(&rcu_state.exp_leaves_init);
-	wait_for_completion(&rcu_state.exp_leaves_init);
 
 	/* Wait for expedited grace period to complete. */
 	rnp = rcu_get_root();
