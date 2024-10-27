@@ -764,9 +764,13 @@ static void rcu_exp_handler(void *unused)
 	 * First, is there no need for a quiescent state from this CPU,
 	 * or is this CPU already looking for a quiescent state for the
 	 * current grace period?  If either is the case, just leave.
+	 * However, this should not happen due to the preemptible
+	 * sync_sched_exp_online_cleanup() implementation being a no-op,
+	 * so warn if this does happen.
 	 */
 	ASSERT_EXCLUSIVE_WRITER_SCOPED(rdp->cpu_no_qs.b.exp);
-	if (!(READ_ONCE(rnp->expmask) & rdp->grpmask) || READ_ONCE(rdp->cpu_no_qs.b.exp))
+	if (WARN_ON_ONCE(!(READ_ONCE(rnp->expmask) & rdp->grpmask) ||
+			 READ_ONCE(rdp->cpu_no_qs.b.exp)))
 		return;
 
 	/*
