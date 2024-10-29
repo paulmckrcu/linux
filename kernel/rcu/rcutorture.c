@@ -1457,8 +1457,19 @@ rcu_torture_writer(void *arg)
 	}
 
 	do {
+		int testcpu;
+
 		rcu_torture_writer_state = RTWS_FIXED_DELAY;
 		torture_hrtimeout_us(500, 1000, &rand);
+		local_bh_disable();
+		testcpu = smp_processor_id();
+		mdelay(10);
+		local_bh_disable();
+		mdelay(10);
+		local_bh_enable();
+		mdelay(10);
+		WARN_ON_ONCE(testcpu != smp_processor_id());
+		local_bh_enable();
 		rp = rcu_torture_alloc();
 		if (rp == NULL)
 			continue;
