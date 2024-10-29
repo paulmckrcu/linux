@@ -69,10 +69,11 @@ static inline void cond_resched_rcu(void)
 // critical section?
 static inline bool has_rcu_reader_blocked(void)
 {
-	if (IS_ENABLED(CONFIG_PREEMPT_RCU))
-		return list_empty(&current->rcu_node_entry);
-	else
-		return false;
+#ifdef CONFIG_PREEMPT_RCU
+	return list_empty(&current->rcu_node_entry);
+#else
+	return false;
+#endif
 }
 
 #endif /* _LINUX_SCHED_RCUPDATE_WAIT_H */
