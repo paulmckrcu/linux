@@ -3570,7 +3570,7 @@ rcu_torture_cleanup(void)
 					err_segs[i].rt_delay_us);
 				firsttime = 0;
 			}
-			pr_cont("%s", err_segs[i].rt_preempted ? "preempted" : "");
+			pr_cont("%s", err_segs[i].rt_preempted ? " preempted" : "");
 			if (err_segs[i].rt_readstate & RCUTORTURE_RDR_BH)
 				pr_cont(" BH");
 			if (err_segs[i].rt_readstate & RCUTORTURE_RDR_IRQ)
