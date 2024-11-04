@@ -127,7 +127,6 @@ static unsigned long scf_sel_totweight;
 
 // Communicate between caller and handler.
 struct scf_check {
-	struct work_struct work;
 	bool scfc_in;
 	bool scfc_out;
 	int scfc_cpu; // -1 for not _single().
@@ -253,13 +252,6 @@ static struct scf_selector *scf_sel_rand(struct torture_random_state *trsp)
 	return &scf_sel_array[0];
 }
 
-static void kfree_scf_check_work(struct work_struct *w)
-{
-	struct scf_check *scfcp = container_of(w, struct scf_check, work);
-
-	kfree(scfcp);
-}
-
 // Update statistics and occasionally burn up mass quantities of CPU time,
 // if told to do so via scftorture.longwait.  Otherwise, occasionally burn
 // a little bit.
@@ -304,10 +296,7 @@ out:
 		if (scfcp->scfc_rpc)
 			complete(&scfcp->scfc_completion);
 	} else {
-		// Cannot call kfree() directly, pass it to workqueue. It's OK
-		// only because this is test code, avoid this in real world
-		// usage.
-		queue_work(system_wq, &scfcp->work);
+		kfree(scfcp);
 	}
 }
 
@@ -346,7 +335,6 @@ static void scftorture_invoke_one(struct scf_statistics *scfp, struct torture_ra
 			scfcp->scfc_wait = scfsp->scfs_wait;
 			scfcp->scfc_out = false;
 			scfcp->scfc_rpc = false;
-			INIT_WORK(&scfcp->work, kfree_scf_check_work);
 		}
 	}
 	switch (scfsp->scfs_prim) {
