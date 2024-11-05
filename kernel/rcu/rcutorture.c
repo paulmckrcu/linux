@@ -1951,6 +1951,10 @@ static void rcutorture_one_extend(int *readstate, int newstate, bool insoftirq,
 	if (statesnew & RCUTORTURE_RDR_RCU_2)
 		idxnew2 = (cur_ops->readlock() << RCUTORTURE_RDR_SHIFT_2) & RCUTORTURE_RDR_MASK_2;
 
+	// Complain unless both the old and the new protection is in place.
+	rcutorture_one_extend_check("during change",
+				    idxold1 | statesnew, statesnew, statesold, insoftirq);
+
 	/*
 	 * Next, remove old protection, in decreasing order of strength
 	 * to avoid unlock paths that aren't safe in the stronger
@@ -2001,7 +2005,7 @@ static void rcutorture_one_extend(int *readstate, int newstate, bool insoftirq,
 	WARN_ON_ONCE(*readstate < 0);
 	if (WARN_ON_ONCE(*readstate & ~RCUTORTURE_RDR_ALLBITS))
 		pr_info("Unexpected readstate value of %#x\n", *readstate);
-	rcutorture_one_extend_check("before change", newstate, statesnew, statesold, insoftirq);
+	rcutorture_one_extend_check("after change", newstate, statesnew, statesold, insoftirq);
 }
 
 /* Return the biggest extendables mask given current RCU and boot parameters. */
