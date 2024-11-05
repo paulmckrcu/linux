@@ -359,7 +359,8 @@ struct rcu_torture_ops {
 	void (*read_delay)(struct torture_random_state *rrsp,
 			   struct rt_read_seg *rtrsp);
 	void (*readunlock)(int idx);
-	int (*readlock_held)(void);
+	int (*readlock_held)(void);   // lockdep.
+	int (*readlock_nesting)(void); // actual nesting, if available, -1 if not.
 	unsigned long (*get_gp_seq)(void);
 	unsigned long (*gp_diff)(unsigned long new, unsigned long old);
 	void (*deferred_free)(struct rcu_torture *p);
@@ -466,6 +467,15 @@ static void rcu_torture_read_unlock(int idx)
 	rcu_read_unlock();
 }
 
+static int rcu_torture_readlock_nesting(void)
+{
+	if (IS_ENABLED(CONFIG_PREEMPT_RCU))
+		return rcu_preempt_depth();
+	if (IS_ENABLED(CONFIG_PREEMPT_COUNT))
+		return (preempt_count() & PREEMPT_MASK);
+	return -1;
+}
+
 /*
  * Update callback in the pipe.  This should be invoked after a grace period.
  */
@@ -555,6 +565,7 @@ static struct rcu_torture_ops rcu_ops = {
 	.read_delay		= rcu_read_delay,
 	.readunlock		= rcu_torture_read_unlock,
 	.readlock_held		= torture_readlock_not_held,
+	.readlock_nesting	= rcu_torture_readlock_nesting,
 	.get_gp_seq		= rcu_get_gp_seq,
 	.gp_diff		= rcu_seq_diff,
 	.deferred_free		= rcu_torture_deferred_free,
@@ -1873,25 +1884,27 @@ static void rcutorture_one_extend_check(char *s, int curstate, int new, int old,
 		return;
 
 	WARN_ONCE((curstate & (RCUTORTURE_RDR_BH | RCUTORTURE_RDR_RBH)) &&
-			 !(preempt_count() & SOFTIRQ_MASK), ROEC_ARGS);
+		  !(preempt_count() & SOFTIRQ_MASK), ROEC_ARGS);
 	WARN_ONCE((curstate & (RCUTORTURE_RDR_PREEMPT | RCUTORTURE_RDR_SCHED)) &&
-			 !(preempt_count() & PREEMPT_MASK), ROEC_ARGS);
+		  !(preempt_count() & PREEMPT_MASK), ROEC_ARGS);
 	WARN_ONCE(IS_ENABLED(CONFIG_PREEMPT_RCU) &&
-			 (curstate & (RCUTORTURE_RDR_RCU_1 | RCUTORTURE_RDR_RCU_2)) &&
-			 !rcu_preempt_depth(), ROEC_ARGS);
+		  (curstate & (RCUTORTURE_RDR_RCU_1 | RCUTORTURE_RDR_RCU_2)) &&
+		  !rcu_preempt_depth(), ROEC_ARGS);
 
 	// Timer handlers have all sorts of stuff disabled, so ignore
 	// unintended disabling.
 	if (insoftirq)
 		return;
 
-	WARN_ONCE(!(curstate & (RCUTORTURE_RDR_BH | RCUTORTURE_RDR_RBH)) &&
-			 (preempt_count() & SOFTIRQ_MASK), ROEC_ARGS);
-	WARN_ONCE(!(curstate & (RCUTORTURE_RDR_PREEMPT | RCUTORTURE_RDR_SCHED)) &&
-			 (preempt_count() & PREEMPT_MASK), ROEC_ARGS);
-	WARN_ONCE(IS_ENABLED(CONFIG_PREEMPT_RCU) &&
-			 !(curstate & (RCUTORTURE_RDR_RCU_1 | RCUTORTURE_RDR_RCU_2)) &&
-			 rcu_preempt_depth(), ROEC_ARGS);
+	WARN_ONCE(cur_ops->extendables &&
+		  !(curstate & (RCUTORTURE_RDR_BH | RCUTORTURE_RDR_RBH)) &&
+		  (preempt_count() & SOFTIRQ_MASK), ROEC_ARGS);
+	WARN_ONCE(cur_ops->extendables &&
+		  !(curstate & (RCUTORTURE_RDR_PREEMPT | RCUTORTURE_RDR_SCHED)) &&
+		  (preempt_count() & PREEMPT_MASK), ROEC_ARGS);
+	WARN_ONCE(cur_ops->readlock_nesting &&
+		  !(curstate & (RCUTORTURE_RDR_RCU_1 | RCUTORTURE_RDR_RCU_2)) &&
+		  cur_ops->readlock_nesting() > 0, ROEC_ARGS);
 }
 
 /*
