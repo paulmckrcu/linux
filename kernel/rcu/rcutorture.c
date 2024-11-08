@@ -2017,7 +2017,7 @@ static void rcutorture_one_extend(int *readstate, int newstate, bool insoftirq,
 	WARN_ON_ONCE(*readstate < 0);
 	if (WARN_ON_ONCE(*readstate & ~RCUTORTURE_RDR_ALLBITS))
 		pr_info("Unexpected readstate value of %#x\n", *readstate);
-	rcutorture_one_extend_check("after change", newstate, statesnew, statesold, insoftirq);
+	rcutorture_one_extend_check("after change", *readstate, statesnew, statesold, insoftirq);
 }
 
 /* Return the biggest extendables mask given current RCU and boot parameters. */
