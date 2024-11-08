@@ -1944,8 +1944,6 @@ static void rcutorture_one_extend(int *readstate, int newstate, bool insoftirq,
 	WARN_ON_ONCE(idxold2 & ~RCUTORTURE_RDR_ALLBITS);
 	rcutorture_one_extend_check("before change", idxold1, statesnew, statesold, insoftirq);
 	rtrsp->rt_readstate = newstate;
-	if (IS_ENABLED(CONFIG_RCU_TORTURE_TEST_LOG_CPU))
-		rtrsp->rt_cpu = raw_smp_processor_id();
 
 	/* First, put new protection in place to avoid critical-section gap. */
 	if (statesnew & RCUTORTURE_RDR_BH)
@@ -2018,6 +2016,8 @@ static void rcutorture_one_extend(int *readstate, int newstate, bool insoftirq,
 	if (WARN_ON_ONCE(*readstate & ~RCUTORTURE_RDR_ALLBITS))
 		pr_info("Unexpected readstate value of %#x\n", *readstate);
 	rcutorture_one_extend_check("after change", *readstate, statesnew, statesold, insoftirq);
+	if (IS_ENABLED(CONFIG_RCU_TORTURE_TEST_LOG_CPU))
+		rtrsp->rt_cpu = raw_smp_processor_id();
 }
 
 /* Return the biggest extendables mask given current RCU and boot parameters. */
