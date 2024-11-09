@@ -1378,6 +1378,7 @@ static void rcu_torture_write_types(void)
 		pr_alert("%s: gp_sync without primitives.\n", __func__);
 	}
 	pr_alert("%s: Testing %d update types.\n", __func__, nsynctypes);
+	pr_info("%s: gp_cond_wi %d gp_cond_wi_exp %d gp_poll_wi %d gp_poll_wi_exp %d\n", __func__, gp_cond_wi, gp_cond_wi_exp, gp_poll_wi, gp_poll_wi_exp);
 }
 
 /*
