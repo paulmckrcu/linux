@@ -1933,6 +1933,7 @@ static void rcutorture_one_extend(int *readstate, int newstate, bool insoftirq,
 				  struct torture_random_state *trsp,
 				  struct rt_read_seg *rtrsp)
 {
+	bool first;
 	unsigned long flags;
 	int idxnew1 = -1;
 	int idxnew2 = -1;
@@ -1941,6 +1942,7 @@ static void rcutorture_one_extend(int *readstate, int newstate, bool insoftirq,
 	int statesnew = ~*readstate & newstate;
 	int statesold = *readstate & ~newstate;
 
+	first = idxold1 == 0;
 	WARN_ON_ONCE(idxold2 < 0);
 	WARN_ON_ONCE(idxold2 & ~RCUTORTURE_RDR_ALLBITS);
 	rcutorture_one_extend_check("before change", idxold1, statesnew, statesold, insoftirq);
@@ -1970,7 +1972,7 @@ static void rcutorture_one_extend(int *readstate, int newstate, bool insoftirq,
 	if (IS_ENABLED(CONFIG_RCU_TORTURE_TEST_LOG_CPU)) {
 		int cpu = raw_smp_processor_id();
 		rtrsp->rt_cpu = cpu;
-		if (rtrsp != err_segs)
+		if (!first)
 			rtrsp[-1].rt_end_cpu = cpu;
 	}
 
