@@ -70,7 +70,7 @@ static inline void cond_resched_rcu(void)
 static inline bool has_rcu_reader_blocked(void)
 {
 #ifdef CONFIG_PREEMPT_RCU
-	return list_empty(&current->rcu_node_entry);
+	return !list_empty(&current->rcu_node_entry);
 #else
 	return false;
 #endif
