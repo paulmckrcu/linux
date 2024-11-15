@@ -1919,9 +1919,9 @@ static void rcutorture_one_extend_check(char *s, int curstate, int new, int old,
 		  !(preempt_count() & SOFTIRQ_MASK), ROEC_ARGS);
 	WARN_ONCE((curstate & (RCUTORTURE_RDR_PREEMPT | RCUTORTURE_RDR_SCHED)) &&
 		  !(preempt_count() & PREEMPT_MASK), ROEC_ARGS);
-	WARN_ONCE(IS_ENABLED(CONFIG_PREEMPT_RCU) &&
+	WARN_ONCE(cur_ops->readlock_nesting &&
 		  (curstate & (RCUTORTURE_RDR_RCU_1 | RCUTORTURE_RDR_RCU_2)) &&
-		  !rcu_preempt_depth(), ROEC_ARGS);
+		  cur_ops->readlock_nesting() == 0, ROEC_ARGS);
 
 	// Timer handlers have all sorts of stuff disabled, so ignore
 	// unintended disabling.
