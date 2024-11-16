@@ -3583,6 +3583,7 @@ rcu_torture_cleanup(void)
 	int flags = 0;
 	unsigned long gp_seq = 0;
 	int i;
+	int j;
 
 	if (torture_cleanup_begin()) {
 		if (cur_ops->cb_barrier != NULL) {
@@ -3681,10 +3682,20 @@ rcu_torture_cleanup(void)
 			if (cur_ops->gather_gp_seqs && cur_ops->format_gp_seqs) {
 				char buf1[16+1];
 				char buf2[16+1];
+				char sepchar = '-';
 
 				cur_ops->format_gp_seqs(err_segs[i].rt_gp_seq, buf1);
 				cur_ops->format_gp_seqs(err_segs[i].rt_gp_seq_end, buf2);
-				pr_cont(" %s-%s", buf1, buf2);
+				if (err_segs[i].rt_gp_seq == err_segs[i].rt_gp_seq_end) {
+					if (buf2[0]) {
+						for (j = 0; buf2[j]; j++)
+							buf2[j] = '.';
+						if (j)
+							buf2[j - 1] = ' ';
+					}
+					sepchar = ' ';
+				}
+				pr_cont(" %s%c%s", buf1, sepchar, buf2);
 			}
 			if (err_segs[i].rt_delay_ms != 0) {
 				pr_cont(" %s%ldms", firsttime ? "" : "+",
