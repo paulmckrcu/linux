@@ -266,7 +266,7 @@ EXPORT_SYMBOL_GPL(rcutorture_gather_gp_seqs);
 
 void rcutorture_format_gp_seqs(unsigned long long seqs, char *cp)
 {
-	snprintf(cp, 8, "g%04lx", seqs & 0xffffULL);
+	snprintf(cp, 8, "g%04llx", seqs & 0xffffULL);
 }
 EXPORT_SYMBOL_GPL(rcutorture_format_gp_seqs);
 #endif
