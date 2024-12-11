@@ -257,7 +257,7 @@ void kvfree_call_rcu(struct rcu_head *head, void *ptr)
 EXPORT_SYMBOL_GPL(kvfree_call_rcu);
 #endif
 
-#ifdef CONFIG_RCU_TORTURE_TEST
+#if IS_ENABLED(CONFIG_RCU_TORTURE_TEST)
 unsigned long long rcutorture_gather_gp_seqs(void)
 {
 	return READ_ONCE(rcu_ctrlblk.gp_seq) & 0xffffULL;
