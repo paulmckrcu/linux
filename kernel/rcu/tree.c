@@ -562,8 +562,8 @@ EXPORT_SYMBOL_GPL(rcutorture_get_gp_data);
 /* Gather grace-period sequence numbers for rcutorture diagnostics. */
 unsigned long long rcutorture_gather_gp_seqs(void)
 {
-	return ((READ_ONCE(rcu_state.gp_seq) & 0xffffULL) << 24) |
-	       ((READ_ONCE(rcu_state.expedited_sequence) & 0xffffULL) << 16) |
+	return ((READ_ONCE(rcu_state.gp_seq) & 0xffffULL) << 40) |
+	       ((READ_ONCE(rcu_state.expedited_sequence) & 0xffffffULL) << 16) |
 	       (READ_ONCE(rcu_state.gp_seq_polled) & 0xffffULL);
 }
 EXPORT_SYMBOL_GPL(rcutorture_gather_gp_seqs);
@@ -571,11 +571,11 @@ EXPORT_SYMBOL_GPL(rcutorture_gather_gp_seqs);
 /* Format grace-period sequence numbers for rcutorture diagnostics. */
 void rcutorture_format_gp_seqs(unsigned long long seqs, char *cp)
 {
-	unsigned int egp = (seqs >> 16) & 0xffffULL;
-	unsigned int ggp = (seqs >> 24) & 0xffffULL;
+	unsigned int egp = (seqs >> 16) & 0xffffffULL;
+	unsigned int ggp = (seqs >> 40) & 0xffffULL;
 	unsigned int pgp = seqs & 0xffffULL;
 
-	snprintf(cp, 20, "g%04x:e%04x:p%04x", ggp, egp, pgp);
+	snprintf(cp, 20, "g%04x:e%06x:p%04x", ggp, egp, pgp);
 }
 EXPORT_SYMBOL_GPL(rcutorture_format_gp_seqs);
 
