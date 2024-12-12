@@ -271,22 +271,37 @@ static void wake_nocb_gp_defer(struct rcu_data *rdp, int waketype,
 
 	raw_spin_lock_irqsave(&rdp_gp->nocb_gp_lock, flags);
 
-	/*
-	 * Bypass wakeup overrides previous deferments. In case of
-	 * callback storms, no need to wake up too early.
-	 */
-	if (waketype == RCU_NOCB_WAKE_LAZY &&
-	    rdp->nocb_defer_wakeup == RCU_NOCB_WAKE_NOT) {
-		mod_timer(&rdp_gp->nocb_timer, jiffies + rcu_get_jiffies_lazy_flush());
-		WRITE_ONCE(rdp_gp->nocb_defer_wakeup, waketype);
-	} else if (waketype == RCU_NOCB_WAKE_BYPASS) {
+	switch (waketype) {
+	case RCU_NOCB_WAKE_BYPASS:
+		/*
+		 * Bypass wakeup overrides previous deferments. In case of
+		 * callback storms, no need to wake up too early.
+		 */
 		mod_timer(&rdp_gp->nocb_timer, jiffies + 2);
 		WRITE_ONCE(rdp_gp->nocb_defer_wakeup, waketype);
-	} else {
+		break;
+	case RCU_NOCB_WAKE_LAZY:
+		if (rdp->nocb_defer_wakeup == RCU_NOCB_WAKE_NOT) {
+			mod_timer(&rdp_gp->nocb_timer, jiffies + rcu_get_jiffies_lazy_flush());
+			WRITE_ONCE(rdp_gp->nocb_defer_wakeup, waketype);
+		}
+		/*
+		 * If the timer is already armed, a non-lazy enqueue may have happened
+		 * in-between. Don't delay it and fall-through.
+		 */
+		break;
+	case RCU_NOCB_WAKE:
+		fallthrough;
+	case RCU_NOCB_WAKE_FORCE:
 		if (rdp_gp->nocb_defer_wakeup < RCU_NOCB_WAKE)
 			mod_timer(&rdp_gp->nocb_timer, jiffies + 1);
+		fallthrough;
+	case RCU_NOCB_WAKE_OFFLINE:
 		if (rdp_gp->nocb_defer_wakeup < waketype)
 			WRITE_ONCE(rdp_gp->nocb_defer_wakeup, waketype);
+		break;
+	default:
+		WARN_ON_ONCE(1);
 	}
 
 	raw_spin_unlock_irqrestore(&rdp_gp->nocb_gp_lock, flags);
@@ -549,8 +564,16 @@ static void __call_rcu_nocb_wake(struct rcu_data *rdp, bool was_alldone,
 	lazy_len = READ_ONCE(rdp->lazy_len);
 	if (was_alldone) {
 		rdp->qlen_last_fqs_check = len;
-		// Only lazy CBs in bypass list
-		if (lazy_len && bypass_len == lazy_len) {
+		if (cpu_is_offline(rdp->cpu)) {
+			/*
+			 * Offline CPUs can't call swake_up_one_online() from IRQs. Rely
+			 * on the final deferred wake-up rcutree_report_cpu_dead()
+			 */
+			rcu_nocb_unlock(rdp);
+			wake_nocb_gp_defer(rdp, RCU_NOCB_WAKE_OFFLINE,
+					   TPS("WakeEmptyIsDeferredOffline"));
+		} else if (lazy_len && bypass_len == lazy_len) {
+			// Only lazy CBs in bypass list
 			rcu_nocb_unlock(rdp);
 			wake_nocb_gp_defer(rdp, RCU_NOCB_WAKE_LAZY,
 					   TPS("WakeLazy"));
