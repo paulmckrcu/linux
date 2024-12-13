@@ -727,6 +727,8 @@ static void rcu_exp_sel_wait_wake(unsigned long s)
 	// Wait for per-leaf rcu_node initialization to complete.
 	if (atomic_dec_and_test(&rcu_state.exp_leaves_init_left))
 		complete(&rcu_state.exp_leaves_init);
+	else
+		WARN_ON_ONCE(1);
 	wait_for_completion(&rcu_state.exp_leaves_init);
 
 	/* Wait and clean up, including waking everyone. */
