@@ -1213,6 +1213,7 @@ static void enqueue_hrtimer_offline(struct hrtimer *timer,
 				    struct hrtimer_clock_base *base,
 				    const enum hrtimer_mode mode)
 {
+#ifdef CONFIG_HOTPLUG_CPU
 	struct hrtimer_cpu_base *new_cpu_base, *old_cpu_base, *this_cpu_base;
 	struct hrtimer_clock_base *new_base;
 	int cpu;
@@ -1238,6 +1239,7 @@ static void enqueue_hrtimer_offline(struct hrtimer *timer,
 
 	if (enqueue_hrtimer(timer, new_base, mode))
 		smp_call_function_single_async(cpu, &new_cpu_base->csd);
+#endif
 }
 
 
