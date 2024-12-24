@@ -85,7 +85,7 @@ config RCU_TORTURE_TEST_LOG_CPU
 	  Say N if you are unsure.
 
 config RCU_TORTURE_TEST_LOG_GP
-	tristate "Log grace-period numbers for rcutorture failures"
+	bool "Log grace-period numbers for rcutorture failures"
 	depends on RCU_TORTURE_TEST
 	default n
 	help
