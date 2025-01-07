@@ -2009,9 +2009,9 @@ static int srcu_module_coming(struct module *mod)
 	for (i = 0; i < mod->num_srcu_structs; i++) {
 		ssp = *(sspp++);
 		ssp->sda = alloc_percpu(struct srcu_data);
-		ssp->srcu_ctrp = &ssp->sda->srcu_ctrs[0];
 		if (WARN_ON_ONCE(!ssp->sda))
 			return -ENOMEM;
+		ssp->srcu_ctrp = &ssp->sda->srcu_ctrs[0];
 	}
 	return 0;
 }
