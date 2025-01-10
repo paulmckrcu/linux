@@ -783,7 +783,7 @@ int __srcu_read_lock_nmisafe(struct srcu_struct *ssp)
 
 	atomic_long_inc(&scp->srcu_locks);
 	smp_mb__after_atomic(); /* B */  /* Avoid leaking the critical section. */
-	return __srcu_ptr_to_ctr(ssp, scp);
+	return __srcu_ptr_to_ctr(ssp, scpp);
 }
 EXPORT_SYMBOL_GPL(__srcu_read_lock_nmisafe);
 
