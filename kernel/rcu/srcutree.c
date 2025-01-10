@@ -794,10 +794,8 @@ EXPORT_SYMBOL_GPL(__srcu_read_lock_nmisafe);
  */
 void __srcu_read_unlock_nmisafe(struct srcu_struct *ssp, int idx)
 {
-	struct srcu_data *sdp = raw_cpu_ptr(ssp->sda);
-
 	smp_mb__before_atomic(); /* C */  /* Avoid leaking the critical section. */
-	atomic_long_inc(__srcu_ctr_to_ptr(ssp, idx)->srcu_unlocks);
+	atomic_long_inc(&__srcu_ctr_to_ptr(ssp, idx)->srcu_unlocks);
 }
 EXPORT_SYMBOL_GPL(__srcu_read_unlock_nmisafe);
 
