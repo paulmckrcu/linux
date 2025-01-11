@@ -221,7 +221,7 @@ static inline bool __srcu_ptr_to_ctr(struct srcu_struct *ssp, struct srcu_ctr __
 
 // Converts an integer to a per-CPU pointer to the corresponding
 // ->srcu_ctrs[] array element.
-static inline struct srcu_ctr *__srcu_ctr_to_ptr(struct srcu_struct *ssp, int idx)
+static inline struct srcu_ctr __percpu *__srcu_ctr_to_ptr(struct srcu_struct *ssp, int idx)
 {
 	return &ssp->sda->srcu_ctrs[idx];
 }
