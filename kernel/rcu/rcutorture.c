@@ -687,7 +687,7 @@ static void srcu_get_gp_data(int *flags, unsigned long *gp_seq)
 static int srcu_torture_read_lock(void)
 {
 	int idx;
-	struct srcu_ctr *scp;
+	struct srcu_ctr __percpu *scp;
 	int ret = 0;
 
 	WARN_ON_ONCE(reader_flavor & ~SRCU_READ_FLAVOR_ALL);
