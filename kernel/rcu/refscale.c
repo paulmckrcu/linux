@@ -219,7 +219,7 @@ static const struct ref_scale_ops srcu_ops = {
 static void srcu_fast_ref_scale_read_section(const int nloops)
 {
 	int i;
-	struct srcu_ctr *scp;
+	struct srcu_ctr __percpu *scp;
 
 	for (i = nloops; i >= 0; i--) {
 		scp = srcu_read_lock_fast(srcu_ctlp);
@@ -230,7 +230,7 @@ static void srcu_fast_ref_scale_read_section(const int nloops)
 static void srcu_fast_ref_scale_delay_section(const int nloops, const int udl, const int ndl)
 {
 	int i;
-	struct srcu_ctr *scp;
+	struct srcu_ctr __percpu *scp;
 
 	for (i = nloops; i >= 0; i--) {
 		scp = srcu_read_lock_fast(srcu_ctlp);
