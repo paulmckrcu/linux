@@ -387,7 +387,7 @@ static inline void srcu_read_unlock(struct srcu_struct *ssp, int idx)
 /**
  * srcu_read_unlock_fast - unregister a old reader from an SRCU-protected structure.
  * @ssp: srcu_struct in which to unregister the old reader.
- * @idx: return value from corresponding srcu_read_lock().
+ * @scp: return value from corresponding srcu_read_lock_fast().
  *
  * Exit a light-weight SRCU read-side critical section.
  */
