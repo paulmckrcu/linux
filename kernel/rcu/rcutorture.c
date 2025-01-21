@@ -687,10 +687,24 @@ static void srcu_get_gp_data(int *flags, unsigned long *gp_seq)
 static int srcu_torture_read_lock(void)
 {
 	int idx;
+	unsigned long my_reader_flavor;
+	int n_reader_flavors;
+	int reader_flavor_bit;
 	struct srcu_ctr __percpu *scp;
 	int ret = 0;
 
 	WARN_ON_ONCE(reader_flavor & ~SRCU_READ_FLAVOR_ALL);
+
+	my_reader_flavor = reader_flavor;
+	if (reader_flavor & (reader_flavor - 1)) {
+		n_reader_flavors = hweight_long(my_reader_flavor);
+		reader_flavor_bit = find_nth_bit(&my_reader_flavor, sizeof(my_reader_flavor),
+						 jiffies % n_reader_flavors);
+		WARN_ON_ONCE(reader_flavor_bit > sizeof(reader_flavor) * __CHAR_BIT__);
+		WARN_ON_ONCE(reader_flavor_bit & (reader_flavor_bit - 1));
+		WARN_ON_ONCE(reader_flavor_bit & ~reader_flavor);
+		my_reader_flavor = 1 << reader_flavor_bit;
+	}
 
 	if ((reader_flavor & SRCU_READ_FLAVOR_NORMAL) || !(reader_flavor & SRCU_READ_FLAVOR_ALL)) {
 		idx = srcu_read_lock(srcu_ctlp);
