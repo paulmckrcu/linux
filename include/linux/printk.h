@@ -207,6 +207,7 @@ void printk_legacy_allow_panic_sync(void);
 extern bool nbcon_device_try_acquire(struct console *con);
 extern void nbcon_device_release(struct console *con);
 void nbcon_atomic_flush_unsafe(void);
+bool pr_flush(int timeout_ms, bool reset_on_progress);
 #else
 static inline __printf(1, 0)
 int vprintk(const char *s, va_list args)
@@ -313,6 +314,11 @@ static inline void nbcon_device_release(struct console *con)
 
 static inline void nbcon_atomic_flush_unsafe(void)
 {
+}
+
+static bool pr_flush(int timeout_ms, bool reset_on_progress)
+{
+	return true;
 }
 
 #endif
@@ -806,6 +812,4 @@ static inline void print_hex_dump_debug(const char *prefix_str, int prefix_type,
 #define print_hex_dump_bytes(prefix_str, prefix_type, buf, len)	\
 	print_hex_dump_debug(prefix_str, prefix_type, 16, 1, buf, len, true)
 
-
-bool pr_flush(int timeout_ms, bool reset_on_progress);
 #endif
