@@ -2181,16 +2181,12 @@ static void init_rcu_torture_one_read_state(struct rcu_torture_one_read_state *r
 
 /*
  * Set up the first segment of a series of overlapping read-side
- * critical sections.
+ * critical sections.  The caller must have actually initiated the
+ * outermost read-side critical section.
  */
 static bool rcu_torture_one_read_start(struct rcu_torture_one_read_state *rtorsp,
 				       struct torture_random_state *trsp, long myid)
 {
-	int newstate;
-
-	WARN_ON_ONCE(!rcu_is_watching());
-	newstate = rcutorture_extend_mask(rtorsp->readstate, trsp);
-	rcutorture_one_extend(&rtorsp->readstate, newstate, myid < 0, trsp, rtorsp->rtrsp++);
 	if (rtorsp->checkpolling) {
 		if (cur_ops->get_gp_state && cur_ops->poll_gp_state)
 			rtorsp->cookie = cur_ops->get_gp_state();
@@ -2287,9 +2283,13 @@ static void rcu_torture_one_read_end(struct rcu_torture_one_read_state *rtorsp,
  */
 static bool rcu_torture_one_read(struct torture_random_state *trsp, long myid)
 {
+	int newstate;
 	struct rcu_torture_one_read_state rtors;
 
+	WARN_ON_ONCE(!rcu_is_watching());
 	init_rcu_torture_one_read_state(&rtors, trsp);
+	newstate = rcutorture_extend_mask(rtors.readstate, trsp);
+	rcutorture_one_extend(&rtors.readstate, newstate, myid < 0, trsp, rtors.rtrsp++);
 	if (!rcu_torture_one_read_start(&rtors, trsp, myid))
 		return false;
 	rtors.rtrsp = rcutorture_loop_extend(&rtors.readstate, myid < 0, trsp, rtors.rtrsp);
