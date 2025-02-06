@@ -316,7 +316,7 @@ static inline void nbcon_atomic_flush_unsafe(void)
 {
 }
 
-static bool pr_flush(int timeout_ms, bool reset_on_progress)
+static inline bool pr_flush(int timeout_ms, bool reset_on_progress)
 {
 	return true;
 }
