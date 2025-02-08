@@ -2355,8 +2355,10 @@ static bool rcu_torture_one_read(struct torture_random_state *trsp, long myid)
 	init_rcu_torture_one_read_state(&rtors, trsp);
 	newstate = rcutorture_extend_mask(rtors.readstate, trsp);
 	rcutorture_one_extend(&rtors.readstate, newstate, myid < 0, trsp, rtors.rtrsp++);
-	if (!rcu_torture_one_read_start(&rtors, trsp, myid))
+	if (!rcu_torture_one_read_start(&rtors, trsp, myid)) {
+		rcutorture_one_extend(&rtors.readstate, 0, myid < 0, trsp, rtors.rtrsp);
 		return false;
+	}
 	rtors.rtrsp = rcutorture_loop_extend(&rtors.readstate, myid < 0, trsp, rtors.rtrsp);
 	rcu_torture_one_read_end(&rtors, trsp, myid);
 	return true;
