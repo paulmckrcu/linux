@@ -2477,7 +2477,8 @@ static int rcu_torture_updown_init(void)
 		updownreaders[i].rtorsu_hrt.function = rcu_torture_updown_hrt;
 		torture_random_init(&updownreaders[i].rtorsu_trs);
 		updownreaders[i].rtorsu_myid = -1;
-		init_rcu_torture_one_read_state(&updownreaders[i].rtorsu_rtors, rand);
+		init_rcu_torture_one_read_state(&updownreaders[i].rtorsu_rtors,
+						&updownreaders[i].rtorsu_trs);
 	}
 	ret = torture_create_kthread(rcu_torture_updown, rand, updown_task);
 	if (ret) {
