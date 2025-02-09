@@ -2539,7 +2539,6 @@ rcu_torture_updown(void *arg)
 	struct rcu_torture_one_read_state_updown *rtorsup;
 
 	VERBOSE_TOROUT_STRING("rcu_torture_updown task started");
-	// @@@ ??? tick_dep_set_task(current, TICK_DEP_BIT_RCU);
 	do {
 		for (rtorsup = updownreaders; rtorsup < &updownreaders[n_up_down]; rtorsup++) {
 			if (torture_must_stop())
@@ -2551,7 +2550,6 @@ rcu_torture_updown(void *arg)
 		torture_hrtimeout_ms(1, 1000, &rcu_torture_updown_rand);
 		stutter_wait("rcu_torture_updown");
 	} while (!torture_must_stop());
-	//  @@@ needed?  @@@ tick_dep_clear_task(current, TICK_DEP_BIT_RCU);
 	rcu_torture_updown_cleanup();
 	torture_kthread_stopping("rcu_torture_updown");
 	return 0;
