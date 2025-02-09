@@ -2434,7 +2434,6 @@ struct rcu_torture_one_read_state_updown {
 	struct hrtimer rtorsu_hrt;
 	bool rtorsu_inuse;
 	struct torture_random_state rtorsu_trs;
-	bool rtorsu_myid;
 	struct rcu_torture_one_read_state rtorsu_rtors;
 };
 
@@ -2447,8 +2446,7 @@ static enum hrtimer_restart rcu_torture_updown_hrt(struct hrtimer *hrtp)
 	struct rcu_torture_one_read_state_updown *rtorsup;
 
 	rtorsup = container_of(hrtp, struct rcu_torture_one_read_state_updown, rtorsu_hrt);
-	rcu_torture_one_read_end(&rtorsup->rtorsu_rtors, &rtorsup->rtorsu_trs,
-				 rtorsup->rtorsu_myid);
+	rcu_torture_one_read_end(&rtorsup->rtorsu_rtors, &rtorsup->rtorsu_trs, -1);
 	smp_store_release(&rtorsup->rtorsu_inuse, false);
 	return HRTIMER_NORESTART;
 }
@@ -2476,7 +2474,6 @@ static int rcu_torture_updown_init(void)
 			     HRTIMER_MODE_REL | HRTIMER_MODE_SOFT);
 		updownreaders[i].rtorsu_hrt.function = rcu_torture_updown_hrt;
 		torture_random_init(&updownreaders[i].rtorsu_trs);
-		updownreaders[i].rtorsu_myid = -1;
 		init_rcu_torture_one_read_state(&updownreaders[i].rtorsu_rtors,
 						&updownreaders[i].rtorsu_trs);
 	}
@@ -2515,8 +2512,7 @@ static void rcu_torture_updown_one(struct rcu_torture_one_read_state_updown *rto
 	idx = (rawidx << RCUTORTURE_RDR_SHIFT_1) & RCUTORTURE_RDR_MASK_1;
 	rtorsup->rtorsu_rtors.readstate = idx | RCUTORTURE_RDR_UPDOWN;
 	rtorsup->rtorsu_rtors.rtrsp++;
-	if (!rcu_torture_one_read_start(&rtorsup->rtorsu_rtors,
-					&rtorsup->rtorsu_trs, rtorsup->rtorsu_myid)) {
+	if (!rcu_torture_one_read_start(&rtorsup->rtorsu_rtors, &rtorsup->rtorsu_trs, -1)) {
 		cur_ops->up_read(rawidx);
 		schedule_timeout_idle(HZ);
 		return;
