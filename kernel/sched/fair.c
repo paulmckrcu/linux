@@ -1256,7 +1256,7 @@ static void update_curr(struct cfs_rq *cfs_rq)
 		 *    against fair_server such that it can account for this time
 		 *    and possibly avoid running this period.
 		 */
-		if (dl_server_active(&rq->fair_server))
+		if (dl_server_active(&rq->fair_server) && rt_bandwidth_enabled())
 			dl_server_update(&rq->fair_server, delta_exec);
 	}
 
@@ -5970,7 +5970,7 @@ static bool throttle_cfs_rq(struct cfs_rq *cfs_rq)
 	sub_nr_running(rq, queued_delta);
 
 	/* Stop the fair server if throttling resulted in no runnable tasks */
-	if (rq_h_nr_queued && !rq->cfs.h_nr_queued)
+	if (rq_h_nr_queued && !rq->cfs.h_nr_queued && dl_server_active(&rq->fair_server))
 		dl_server_stop(&rq->fair_server);
 done:
 	/*
@@ -6069,7 +6069,7 @@ void unthrottle_cfs_rq(struct cfs_rq *cfs_rq)
 	}
 
 	/* Start the fair server if un-throttling resulted in new runnable tasks */
-	if (!rq_h_nr_queued && rq->cfs.h_nr_queued)
+	if (!rq_h_nr_queued && rq->cfs.h_nr_queued && rt_bandwidth_enabled())
 		dl_server_start(&rq->fair_server);
 
 	/* At this point se is NULL and we are at root level*/
@@ -7020,9 +7020,11 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 
 	if (!rq_h_nr_queued && rq->cfs.h_nr_queued) {
 		/* Account for idle runtime */
-		if (!rq->nr_running)
+		if (!rq->nr_running && rt_bandwidth_enabled())
 			dl_server_update_idle_time(rq, rq->curr);
-		dl_server_start(&rq->fair_server);
+
+		if (rt_bandwidth_enabled())
+			dl_server_start(&rq->fair_server);
 	}
 
 	/* At this point se is NULL and we are at root level*/
@@ -7151,7 +7153,7 @@ static int dequeue_entities(struct rq *rq, struct sched_entity *se, int flags)
 
 	sub_nr_running(rq, h_nr_queued);
 
-	if (rq_h_nr_queued && !rq->cfs.h_nr_queued)
+	if (rq_h_nr_queued && !rq->cfs.h_nr_queued && dl_server_active(&rq->fair_server))
 		dl_server_stop(&rq->fair_server);
 
 	/* balance early to pull high priority tasks */
