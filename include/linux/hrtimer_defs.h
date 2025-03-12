@@ -85,7 +85,7 @@ enum  hrtimer_base_type {
  * @max_hang_time:	Maximum time spent in hrtimer_interrupt
  * @softirq_expiry_lock: Lock which is taken while softirq based hrtimer are
  *			 expired
- * @online:		CPU is online from an hrtimers point of view
+ * @hrt_online:		CPU is online from an hrtimers point of view
  * @timer_waiters:	A hrtimer_cancel() invocation waits for the timer
  *			callback to finish.
  * @expires_next:	absolute time of the next event, is required for remote
@@ -109,7 +109,7 @@ struct hrtimer_cpu_base {
 					in_hrtirq		: 1,
 					hang_detected		: 1,
 					softirq_activated       : 1,
-					online			: 1;
+					hrt_online		: 1;
 #ifdef CONFIG_HIGH_RES_TIMERS
 	unsigned int			nr_events;
 	unsigned short			nr_retries;
