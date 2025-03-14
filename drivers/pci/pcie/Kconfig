@@ -58,6 +58,15 @@ config PCIEAER_CXL
 
 	  If unsure, say Y.
 
+config PCIEAER_RATELIMIT
+	bool "PCI Express Advanced Error Reporting rate limiting"
+	depends on PCIEAER
+	help
+	  This enables rate limiting for PCI Express Root Port Advanced
+	  Error Reporting (AER).  This error limiting is on a per-category
+	  basis, with correctable, uncorrectable, and inaccessible errors
+	  being rate-limited separately on a per-device basis.
+
 #
 # PCI Express ECRC
 #
