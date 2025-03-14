@@ -347,6 +347,11 @@ struct pci_dev {
 #ifdef CONFIG_PCIEAER
 	u16		aer_cap;	/* AER capability offset */
 	struct aer_stats *aer_stats;	/* AER stats for this device */
+# ifdef CONFIG_PCIEAER_RATELIMIT
+	struct ratelimit_state aer_rl_nostatus;	/* Per-device/category rate limiting. */
+	struct ratelimit_state aer_rl_correctable;
+	struct ratelimit_state aer_rl_uncorrectable;
+# endif
 #endif
 #ifdef CONFIG_PCIEPORTBUS
 	struct rcec_ea	*rcec_ea;	/* RCEC cached endpoint association */
