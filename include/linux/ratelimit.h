@@ -22,6 +22,11 @@ static inline void ratelimit_default_init(struct ratelimit_state *rs)
 					DEFAULT_RATELIMIT_BURST);
 }
 
+static inline void ratelimit_state_inc_miss(struct ratelimit_state *rs)
+{
+	rs->missed++;
+}
+
 static inline int ratelimit_state_get_miss(struct ratelimit_state *rs)
 {
 	return rs->missed;
