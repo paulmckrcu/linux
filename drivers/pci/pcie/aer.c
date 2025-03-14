@@ -31,6 +31,7 @@
 #include <acpi/apei.h>
 #include <acpi/ghes.h>
 #include <ras/ras_event.h>
+#include <linux/ratelimit.h>
 
 #include "../pci.h"
 #include "portdrv.h"
@@ -365,10 +366,20 @@ void pci_restore_aer_state(struct pci_dev *dev)
 		pci_write_config_dword(dev, aer + PCI_ERR_ROOT_COMMAND, *cap++);
 }
 
+static void pci_aer_ratelimit_init(struct pci_dev *dev)
+{
+#ifdef CONFIG_PCIEAER_RATELIMIT
+	ratelimit_state_init(&dev->aer_rl_nostatus, 10 * HZ, 1);
+	ratelimit_state_init(&dev->aer_rl_correctable, 10 * HZ, 1);
+	ratelimit_state_init(&dev->aer_rl_uncorrectable, 10 * HZ, 1);
+#endif
+}
+
 void pci_aer_init(struct pci_dev *dev)
 {
 	int n;
 
+	pci_aer_ratelimit_init(dev);
 	dev->aer_cap = pci_find_ext_capability(dev, PCI_EXT_CAP_ID_ERR);
 	if (!dev->aer_cap)
 		return;
@@ -665,31 +676,45 @@ static void pci_rootport_aer_stats_incr(struct pci_dev *pdev,
 	}
 }
 
-static void __aer_print_error(struct pci_dev *dev,
-			      struct aer_err_info *info)
+static void __aer_print_error(struct pci_dev *dev, struct aer_err_info *info, bool doprint)
 {
 	const char **strings;
 	unsigned long status = info->status & ~info->mask;
 	const char *level, *errmsg;
 	int i;
 
-	if (info->severity == AER_CORRECTABLE) {
-		strings = aer_correctable_error_string;
-		level = KERN_WARNING;
-	} else {
-		strings = aer_uncorrectable_error_string;
-		level = KERN_ERR;
-	}
+	if (doprint) {
+		if (info->severity == AER_CORRECTABLE) {
+			strings = aer_correctable_error_string;
+			level = KERN_WARNING;
+		} else {
+			strings = aer_uncorrectable_error_string;
+			level = KERN_ERR;
+		}
 
-	for_each_set_bit(i, &status, 32) {
-		errmsg = strings[i];
-		if (!errmsg)
-			errmsg = "Unknown Error Bit";
+		for_each_set_bit(i, &status, 32) {
+			errmsg = strings[i];
+			if (!errmsg)
+				errmsg = "Unknown Error Bit";
 
-		pci_printk(level, dev, "   [%2d] %-22s%s\n", i, errmsg,
-				info->first_error == i ? " (First)" : "");
+			pci_printk(level, dev, "   [%2d] %-22s%s\n", i, errmsg,
+					info->first_error == i ? " (First)" : "");
+		}
 	}
 	pci_dev_aer_stats_incr(dev, info);
+}
+
+static bool aer_print_error_dontlimit(struct pci_dev *dev, struct aer_err_info *info)
+{
+#ifdef CONFIG_PCIEAER_RATELIMIT
+	if (!info->status)
+		return ___ratelimit(&dev->aer_rl_nostatus, "aer_rl_nostatus");
+	if (info->severity == AER_CORRECTABLE)
+		return ___ratelimit(&dev->aer_rl_correctable, "aer_rl_correctable");
+	return ___ratelimit(&dev->aer_rl_uncorrectable, "aer_rl_uncorrectable");
+#else
+	return true;
+#endif
 }
 
 void aer_print_error(struct pci_dev *dev, struct aer_err_info *info)
@@ -697,10 +722,14 @@ void aer_print_error(struct pci_dev *dev, struct aer_err_info *info)
 	int layer, agent;
 	int id = pci_dev_id(dev);
 	const char *level;
+	bool doprint = aer_print_error_dontlimit(dev, info);
 
 	if (!info->status) {
-		pci_err(dev, "PCIe Bus Error: severity=%s, type=Inaccessible, (Unregistered Agent ID)\n",
-			aer_error_severity_string[info->severity]);
+		if (doprint) {
+			pci_err(dev, "PCIe Bus Error: severity=%s, type=Inaccessible, (Unregistered Agent ID)\n",
+				aer_error_severity_string[info->severity]);
+			return;
+		}
 		goto out;
 	}
 
@@ -709,20 +738,22 @@ void aer_print_error(struct pci_dev *dev, struct aer_err_info *info)
 
 	level = (info->severity == AER_CORRECTABLE) ? KERN_WARNING : KERN_ERR;
 
-	pci_printk(level, dev, "PCIe Bus Error: severity=%s, type=%s, (%s)\n",
-		   aer_error_severity_string[info->severity],
-		   aer_error_layer[layer], aer_agent_string[agent]);
+	if (doprint) {
+		pci_printk(level, dev, "PCIe Bus Error: severity=%s, type=%s, (%s)\n",
+			   aer_error_severity_string[info->severity],
+			   aer_error_layer[layer], aer_agent_string[agent]);
 
-	pci_printk(level, dev, "  device [%04x:%04x] error status/mask=%08x/%08x\n",
-		   dev->vendor, dev->device, info->status, info->mask);
+		pci_printk(level, dev, "  device [%04x:%04x] error status/mask=%08x/%08x\n",
+			   dev->vendor, dev->device, info->status, info->mask);
+	}
 
-	__aer_print_error(dev, info);
+	__aer_print_error(dev, info, doprint);
 
-	if (info->tlp_header_valid)
+	if (info->tlp_header_valid && doprint)
 		pcie_print_tlp_log(dev, &info->tlp, dev_fmt("  "));
 
 out:
-	if (info->id && info->error_dev_num > 1 && info->id == id)
+	if (info->id && info->error_dev_num > 1 && info->id == id && doprint)
 		pci_err(dev, "  Error of this Agent is reported first\n");
 
 	trace_aer_event(dev_name(&dev->dev), (info->status & ~info->mask),
@@ -782,7 +813,7 @@ void pci_print_aer(struct pci_dev *dev, int aer_severity,
 	info.first_error = PCI_ERR_CAP_FEP(aer->cap_control);
 
 	pci_err(dev, "aer_status: 0x%08x, aer_mask: 0x%08x\n", status, mask);
-	__aer_print_error(dev, &info);
+	__aer_print_error(dev, &info, true);
 	pci_err(dev, "aer_layer=%s, aer_agent=%s\n",
 		aer_error_layer[layer], aer_agent_string[agent]);
 
