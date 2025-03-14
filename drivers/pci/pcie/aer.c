@@ -31,6 +31,7 @@
 #include <acpi/apei.h>
 #include <acpi/ghes.h>
 #include <ras/ras_event.h>
+#include <linux/ratelimit.h>
 
 #include "../pci.h"
 #include "portdrv.h"
@@ -692,6 +693,10 @@ static void __aer_print_error(struct pci_dev *dev,
 	pci_dev_aer_stats_incr(dev, info);
 }
 
+static DEFINE_RATELIMIT_STATE(ape_nostatus, 10 * HZ, 3);
+static DEFINE_RATELIMIT_STATE(ape_correctable, 10 * HZ, 3);
+static DEFINE_RATELIMIT_STATE(ape_uncorrectable, 10 * HZ, 3);
+
 void aer_print_error(struct pci_dev *dev, struct aer_err_info *info)
 {
 	int layer, agent;
@@ -699,9 +704,23 @@ void aer_print_error(struct pci_dev *dev, struct aer_err_info *info)
 	const char *level;
 
 	if (!info->status) {
-		pci_err(dev, "PCIe Bus Error: severity=%s, type=Inaccessible, (Unregistered Agent ID)\n",
-			aer_error_severity_string[info->severity]);
+		if (!IS_ENABLED(CONFIG_PCIEAER_RATELIMIT) ||
+		    ___ratelimit(&ape_nostatus, "ape_nostatus")) {
+			pci_err(dev, "PCIe Bus Error: severity=%s, type=Inaccessible, (Unregistered Agent ID)\n",
+				aer_error_severity_string[info->severity]);
+			return;
+		}
 		goto out;
+	}
+
+	if (info->severity == AER_CORRECTABLE) {
+		if (IS_ENABLED(CONFIG_PCIEAER_RATELIMIT) &&
+		    !___ratelimit(&ape_correctable, "ape_correctable"))
+			return;
+	} else {
+		if (IS_ENABLED(CONFIG_PCIEAER_RATELIMIT) &&
+		    !___ratelimit(&ape_uncorrectable, "ape_uncorrectable"))
+			return;
 	}
 
 	layer = AER_GET_LAYER_ERROR(info->severity, info->status);
