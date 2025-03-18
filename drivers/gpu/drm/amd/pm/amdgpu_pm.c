@@ -1683,7 +1683,7 @@ static ssize_t amdgpu_set_thermal_throttling_logging(struct device *dev,
 			(throttling_logging_interval - 1) * HZ;
 		adev->throttling_logging_rs.begin = 0;
 		adev->throttling_logging_rs.printed = 0;
-		adev->throttling_logging_rs.missed = 0;
+		ratelimit_state_reset_miss(&adev->throttling_logging_rs);
 		raw_spin_unlock_irqrestore(&adev->throttling_logging_rs.lock, flags);
 
 		atomic_set(&adev->throttling_logging_enabled, 1);
