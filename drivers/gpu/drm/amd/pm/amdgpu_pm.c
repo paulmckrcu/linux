@@ -1655,45 +1655,6 @@ static ssize_t amdgpu_get_thermal_throttling_logging(struct device *dev,
 			  adev->throttling_logging_rs.interval / HZ + 1);
 }
 
-static ssize_t amdgpu_set_thermal_throttling_logging(struct device *dev,
-						     struct device_attribute *attr,
-						     const char *buf,
-						     size_t count)
-{
-	struct drm_device *ddev = dev_get_drvdata(dev);
-	struct amdgpu_device *adev = drm_to_adev(ddev);
-	long throttling_logging_interval;
-	unsigned long flags;
-	int ret = 0;
-
-	ret = kstrtol(buf, 0, &throttling_logging_interval);
-	if (ret)
-		return ret;
-
-	if (throttling_logging_interval > 3600)
-		return -EINVAL;
-
-	if (throttling_logging_interval > 0) {
-		raw_spin_lock_irqsave(&adev->throttling_logging_rs.lock, flags);
-		/*
-		 * Reset the ratelimit timer internals.
-		 * This can effectively restart the timer.
-		 */
-		adev->throttling_logging_rs.interval =
-			(throttling_logging_interval - 1) * HZ;
-		adev->throttling_logging_rs.begin = 0;
-		adev->throttling_logging_rs.printed = 0;
-		ratelimit_state_reset_miss(&adev->throttling_logging_rs);
-		raw_spin_unlock_irqrestore(&adev->throttling_logging_rs.lock, flags);
-
-		atomic_set(&adev->throttling_logging_enabled, 1);
-	} else {
-		atomic_set(&adev->throttling_logging_enabled, 0);
-	}
-
-	return count;
-}
-
 /**
  * DOC: apu_thermal_cap
  *
