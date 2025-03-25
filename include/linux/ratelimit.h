@@ -37,18 +37,6 @@ static inline int ratelimit_state_reset_miss(struct ratelimit_state *rs)
 	return atomic_xchg_relaxed(&rs->missed, 0);
 }
 
-static inline void ratelimit_state_reset_interval(struct ratelimit_state *rs, int interval_init)
-{
-	unsigned long flags;
-
-	raw_spin_lock_irqsave(rs->lock, flags);
-	rs->interval = interval_init;
-	rs->begin = 0;
-	rs->printed = 0;
-	ratelimit_state_reset_miss(rs);
-	raw_spin_unlock_irqrestore(&rs->lock, flags);
-}
-
 static inline void ratelimit_state_exit(struct ratelimit_state *rs)
 {
 	int m;
