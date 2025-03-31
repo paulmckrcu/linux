@@ -18,7 +18,7 @@ struct ratelimit_state {
 
 	int		interval;
 	int		burst;
-	int		printed;
+	atomic_t	rs_n_left;
 	atomic_t	missed;
 	unsigned int	flags;
 	unsigned long	begin;
@@ -28,6 +28,7 @@ struct ratelimit_state {
 		.lock		= __RAW_SPIN_LOCK_UNLOCKED(name.lock),		  \
 		.interval	= interval_init,				  \
 		.burst		= burst_init,					  \
+		.rs_n_left	= ATOMIC_INIT(burst_init),			  \
 		.flags		= flags_init,					  \
 	}
 
