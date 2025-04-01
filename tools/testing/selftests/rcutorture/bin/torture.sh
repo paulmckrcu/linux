@@ -505,7 +505,7 @@ then
 	then
 		echo " --- Running 'make mrproper' in order to run kunit." | tee -a $rrdir/log > $rrdir/mrproper.out
 		make mrproper > $rrdir/mrproper.out 2>&1
-		retcode = $?
+		retcode=$?
 		echo $retcode > $rrdir/mrproper.exitcode
 		buildphase=mrproper
 	fi
