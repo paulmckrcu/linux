@@ -27,12 +27,12 @@
 int ___ratelimit(struct ratelimit_state *rs, const char *func)
 {
 	unsigned long begin;
-	unsigned long burst = READ_ONCE(rs->burst);
+	int burst = READ_ONCE(rs->burst);
 	int delta = 0;
 	unsigned long flags;
 	bool gotlock = false;
 	bool initialized;
-	unsigned long interval = READ_ONCE(rs->interval);
+	int interval = READ_ONCE(rs->interval);
 	unsigned long j;
 	int n_left;
 
