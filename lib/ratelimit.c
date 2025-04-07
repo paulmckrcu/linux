@@ -24,7 +24,7 @@
  * 0 means callbacks will be suppressed.
  * 1 means go ahead and do it.
  */
-int ___ratelimit(struct ratelimit_state *rs, const char *func)
+bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 {
 	unsigned long begin;
 	int burst = READ_ONCE(rs->burst);
