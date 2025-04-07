@@ -63,7 +63,7 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 	/*
 	 * If this structure is marked as initialized and has been
 	 * recently used, pick up its ->begin field.  Otherwise, pick up
-	 * the current time and attempt to re-initialized the structure.
+	 * the current time and attempt to re-initialize the structure.
 	 */
 	j = jiffies;
 	initialized = smp_load_acquire(&rs->flags) & RATELIMIT_INITIALIZED; /* Pair with release. */
