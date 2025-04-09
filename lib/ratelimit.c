@@ -35,6 +35,7 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 	int interval = READ_ONCE(rs->interval);
 	unsigned long j;
 	int n_left;
+	bool ret = true;
 
 	/*
 	 * If the burst or interval settings mark this ratelimit_state
@@ -54,11 +55,13 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 
 	/*
 	 * If this structure has just now been ratelimited, but not yet
-	 * reset for the next rate-limiting interval, take an early and
-	 * low-cost exit.
+	 * reset for the next rate-limiting interval, take an early exit,
+	 * but try to do a reset.
 	 */
-	if (atomic_read_acquire(&rs->rs_n_left) <= 0) /* Pair with release. */
-		goto limited;
+	if (atomic_read_acquire(&rs->rs_n_left) <= 0) { /* Pair with release. */
+		ret = false;  // Rate limiting, but not yet reset.
+		goto tryreset;
+	}
 
 	/*
 	 * If this structure is marked as initialized and has been
@@ -98,11 +101,13 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 
 	/*
 	 * Register another request, and take an early (but not low-cost)
-	 * exit if rate-limiting just nowcame into effect.
+	 * exit if rate-limiting just now came into effect.
 	 */
 	n_left = atomic_dec_return(&rs->rs_n_left);
-	if (n_left < 0)
-		goto limited; /* Just now started ratelimiting. */
+	if (n_left < 0) {
+		ret = false;
+		goto tryreset; /* Just now started ratelimiting. */
+	}
 	if (n_left > 0) {
 		/*
 		 * Otherwise, there is not yet any rate limiting for the
@@ -135,15 +140,20 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 		gotlock = true;
 		delta = -1;
 	}
+tryreset:
 	if (!gotlock) {
 		/*
-		 * We get here if we got the last count (n_left == 0),
-		 * so that rate limiting is in effect for the next caller.
-		 * We will return @true to tell our caller to go ahead,
-		 * but first we acquire the lock and set things up for
-		 * the next rate-limiting interval.
+		 * We get here two ways.  If we got the last count
+		 * (->rs_n_left == 0), so that rate limiting is in effect
+		 * for the next caller, then we will return @true to
+		 * tell our caller to go ahead.  Alternatively, if we saw
+		 * ->rs_n_left less than zero, we will return @false to
+		 * tell our caller to rate-limit.  Either way, we first
+		 * try to acquire the lock and, if successful, set things
+		 * up for the next rate-limiting interval.
 		 */
-		raw_spin_lock_irqsave(&rs->lock, flags);
+		if (!raw_spin_trylock_irqsave(&rs->lock, flags))
+			return ret;
 		interval = READ_ONCE(rs->interval);
 		j = jiffies;
 		begin = rs->begin;
@@ -173,7 +183,7 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 			printk_deferred(KERN_WARNING "%s: %d callbacks suppressed\n", func, delta);
 	}
 	raw_spin_unlock_irqrestore(&rs->lock, flags);
-	return true;
+	return ret;
 
 limited:
 	/*
