@@ -35,6 +35,7 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 	int interval = READ_ONCE(rs->interval);
 	unsigned long j;
 	int n_left;
+	bool ret = true;
 
 	/*
 	 * If the burst or interval settings mark this ratelimit_state
@@ -57,8 +58,10 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 	 * reset for the next rate-limiting interval, take an early and
 	 * low-cost exit.
 	 */
-	if (atomic_read_acquire(&rs->rs_n_left) <= 0) /* Pair with release. */
-		goto limited;
+	if (atomic_read_acquire(&rs->rs_n_left) <= 0) { /* Pair with release. */
+		ret = false;  // Rate limiting, but not yet reset.
+		goto tryreset;
+	}
 
 	/*
 	 * If this structure is marked as initialized and has been
@@ -101,8 +104,10 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 	 * exit if rate-limiting just nowcame into effect.
 	 */
 	n_left = atomic_dec_return(&rs->rs_n_left);
-	if (n_left < 0)
-		goto limited; /* Just now started ratelimiting. */
+	if (n_left < 0) {
+		ret = false;
+		goto tryreset; /* Just now started ratelimiting. */
+	}
 	if (n_left > 0) {
 		/*
 		 * Otherwise, there is not yet any rate limiting for the
@@ -135,6 +140,7 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 		gotlock = true;
 		delta = -1;
 	}
+tryreset:
 	if (!gotlock) {
 		/*
 		 * We get here if we got the last count (n_left == 0),
@@ -143,7 +149,8 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 		 * but first we acquire the lock and set things up for
 		 * the next rate-limiting interval.
 		 */
-		raw_spin_lock_irqsave(&rs->lock, flags);
+		if (!raw_spin_trylock_irqsave(&rs->lock, flags))
+			return ret;
 		interval = READ_ONCE(rs->interval);
 		j = jiffies;
 		begin = rs->begin;
@@ -173,7 +180,7 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 			printk_deferred(KERN_WARNING "%s: %d callbacks suppressed\n", func, delta);
 	}
 	raw_spin_unlock_irqrestore(&rs->lock, flags);
-	return true;
+	return ret;
 
 limited:
 	/*
