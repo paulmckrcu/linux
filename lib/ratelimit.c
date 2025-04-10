@@ -50,7 +50,7 @@ bool ___ratelimit(struct ratelimit_state *rs, const char *func)
 				smp_store_release(&rs->flags, rs->flags & ~RATELIMIT_INITIALIZED);
 			raw_spin_unlock_irqrestore(&rs->lock, flags);
 		}
-		return true;
+		return burst > 0;
 	}
 
 	/*
