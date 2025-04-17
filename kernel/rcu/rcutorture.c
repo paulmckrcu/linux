@@ -2536,9 +2536,8 @@ static void rcu_torture_updown_one(struct rcu_torture_one_read_state_updown *rto
 	rtorsup->rtorsu_rtors.rtrsp++;
 	rtorsup->rtorsu_cpu = raw_smp_processor_id();
 	if (!rcu_torture_one_read_start(&rtorsup->rtorsu_rtors, &rtorsup->rtorsu_trs, -1)) {
-		cur_ops->up_read(rawidx);
-		WRITE_ONCE(rtorsup->rtorsu_nups, rtorsup->rtorsu_nups + 1);
 		WARN_ONCE(rtorsup->rtorsu_nups >= rtorsup->rtorsu_ndowns, "%s: Up without matching down #%zu.\n", __func__, rtorsup - updownreaders);
+		WRITE_ONCE(rtorsup->rtorsu_nups, rtorsup->rtorsu_nups + 1);
 		schedule_timeout_idle(HZ);
 		return;
 	}
