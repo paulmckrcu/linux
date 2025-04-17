@@ -2121,6 +2121,7 @@ static void rcutorture_one_extend(int *readstate, int newstate, bool insoftirq,
 			raw_spin_unlock_irqrestore(&current->pi_lock, flags);
 	}
 	if (statesold & RCUTORTURE_RDR_UPDOWN) {
+		WARN_ON_ONCE(!~in_serving_softirq() && !in_hardirq());
 		cur_ops->up_read((idxold1 & RCUTORTURE_RDR_MASK_1) >> RCUTORTURE_RDR_SHIFT_1);
 		WARN_ON_ONCE(idxnew1 != -1);
 		idxold1 = 0;
