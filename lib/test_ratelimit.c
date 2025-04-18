@@ -11,7 +11,7 @@
 static DEFINE_RATELIMIT_STATE(testrl, TESTRL_INTERVAL, 3);
 
 #define test_ratelimited(test, expected) \
-	KUNIT_ASSERT_EQ(test, ___ratelimit(&testrl, "test_ratelimit_smoke"), (expected));
+	KUNIT_ASSERT_EQ(test, ___ratelimit(&testrl, "test_ratelimit_smoke"), (expected))
 
 static void test_ratelimit_smoke(struct kunit *test)
 {
