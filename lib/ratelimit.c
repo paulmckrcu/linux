@@ -44,7 +44,7 @@ int ___ratelimit(struct ratelimit_state *rs, const char *func)
 		if (!(READ_ONCE(rs->flags) & RATELIMIT_INITIALIZED) ||
 		    !raw_spin_trylock_irqsave(&rs->lock, flags))
 			return ret;
-		
+
 		/* Force re-initialization once re-enabled. */
 		rs->flags &= ~RATELIMIT_INITIALIZED;
 		goto unlock_ret;
