@@ -2555,6 +2555,7 @@ static void rcu_torture_updown_one(struct rcu_torture_one_read_state_updown *rto
 static int
 rcu_torture_updown(void *arg)
 {
+	unsigned long j;
 	struct rcu_torture_one_read_state_updown *rtorsup;
 
 	VERBOSE_TOROUT_STRING("rcu_torture_updown task started");
@@ -2562,8 +2563,9 @@ rcu_torture_updown(void *arg)
 		for (rtorsup = updownreaders; rtorsup < &updownreaders[n_up_down]; rtorsup++) {
 			if (torture_must_stop())
 				break;
+			j = smp_load_acquire(&jiffies); // Time before ->rtorsu_inuse.
 			if (smp_load_acquire(&rtorsup->rtorsu_inuse)) {
-				WARN_ON_ONCE(time_after(jiffies, rtorsup->rtorsu_j + 10 * HZ));
+				WARN_ON_ONCE(time_after(j, rtorsup->rtorsu_j + 10 * HZ));
 				continue;
 			}
 			rcu_torture_updown_one(rtorsup);
