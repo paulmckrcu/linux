@@ -36,7 +36,7 @@ int ___ratelimit(struct ratelimit_state *rs, const char *func)
 	int ret;
 
 	if (interval <= 0 || burst <= 0)
-		return 1;
+		return interval == 0 || burst > 0;
 
 	/*
 	 * If we contend on this state's lock then just check if
