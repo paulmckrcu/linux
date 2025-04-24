@@ -2490,7 +2490,7 @@ static int rcu_torture_updown_init(void)
 	for (i = 0; i < n_up_down; i++) {
 		init_rcu_torture_one_read_state(&updownreaders[i].rtorsu_rtors, rand);
 		hrtimer_setup(&updownreaders[i].rtorsu_hrt, rcu_torture_updown_hrt, CLOCK_MONOTONIC,
-			      HRTIMER_MODE_REL | HRTIMER_MODE_SOFT);
+			      HRTIMER_MODE_REL | HRTIMER_MODE_HARD);
 		torture_random_init(&updownreaders[i].rtorsu_trs);
 		init_rcu_torture_one_read_state(&updownreaders[i].rtorsu_rtors,
 						&updownreaders[i].rtorsu_trs);
@@ -2545,7 +2545,7 @@ static void rcu_torture_updown_one(struct rcu_torture_one_read_state_updown *rto
 	t = torture_random(&rtorsup->rtorsu_trs) & 0xfffff; // One per million.
 	if (t < 10 * 1000)
 		t = 200 * 1000 * 1000;
-	hrtimer_start(&rtorsup->rtorsu_hrt, t, HRTIMER_MODE_REL | HRTIMER_MODE_SOFT);
+	hrtimer_start(&rtorsup->rtorsu_hrt, t, HRTIMER_MODE_REL | HRTIMER_MODE_HARD);
 	smp_mb(); // Sample jiffies after posting hrtimer.
 	rtorsup->rtorsu_j = jiffies;  // Not used by hrtimer handler.
 	rtorsup->rtorsu_kt = t;
