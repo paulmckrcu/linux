@@ -383,6 +383,9 @@ static int rcu_preempt_blocked_readers_cgp(struct rcu_node *rnp)
 	return READ_ONCE(rnp->gp_tasks) != NULL;
 }
 
+/* Bias and limit values for ->rcu_read_lock_nesting. */
+#define RCU_NEST_BIAS INT_MAX
+#define RCU_NEST_NMAX (-INT_MAX / 2)
 /* limit value for ->rcu_read_lock_nesting. */
 #define RCU_NEST_PMAX (INT_MAX / 2)
 
@@ -391,12 +394,10 @@ static void rcu_preempt_read_enter(void)
 	WRITE_ONCE(current->rcu_read_lock_nesting, READ_ONCE(current->rcu_read_lock_nesting) + 1);
 }
 
-static int rcu_preempt_read_exit(void)
+static void rcu_preempt_read_exit(void)
 {
-	int ret = READ_ONCE(current->rcu_read_lock_nesting) - 1;
 
-	WRITE_ONCE(current->rcu_read_lock_nesting, ret);
-	return ret;
+	WRITE_ONCE(current->rcu_read_lock_nesting, READ_ONCE(current->rcu_read_lock_nesting) - 1);
 }
 
 static void rcu_preempt_depth_set(int val)
@@ -431,16 +432,22 @@ void __rcu_read_unlock(void)
 {
 	struct task_struct *t = current;
 
-	barrier();  // critical section before exit code.
-	if (rcu_preempt_read_exit() == 0) {
-		barrier();  // critical-section exit before .s check.
+	if (rcu_preempt_depth() != 1) {
+		rcu_preempt_read_exit();
+	} else {
+		barrier();  // critical section before exit code.
+		rcu_preempt_depth_set(-RCU_NEST_BIAS);
+		barrier();  // critical section before ->rcu_read_unlock_special load
 		if (unlikely(READ_ONCE(t->rcu_read_unlock_special.s)))
 			rcu_read_unlock_special(t);
+		barrier();  // ->rcu_read_unlock_special load before assignment
+		rcu_preempt_depth_set(0);
 	}
 	if (IS_ENABLED(CONFIG_PROVE_LOCKING)) {
 		int rrln = rcu_preempt_depth();
 
-		WARN_ON_ONCE(rrln < 0 || rrln > RCU_NEST_PMAX);
+		WARN_ON_ONCE(rrln < 0 && rrln > RCU_NEST_NMAX);
+		WARN_ON_ONCE(rrln > RCU_NEST_PMAX);
 	}
 }
 EXPORT_SYMBOL_GPL(__rcu_read_unlock);
@@ -601,7 +608,7 @@ static notrace bool rcu_preempt_need_deferred_qs(struct task_struct *t)
 {
 	return (__this_cpu_read(rcu_data.cpu_no_qs.b.exp) ||
 		READ_ONCE(t->rcu_read_unlock_special.s)) &&
-	       rcu_preempt_depth() == 0;
+	       rcu_preempt_depth() <= 0;
 }
 
 /*
@@ -755,8 +762,8 @@ static void rcu_flavor_sched_clock_irq(int user)
 	} else if (rcu_preempt_need_deferred_qs(t)) {
 		rcu_preempt_deferred_qs(t); /* Report deferred QS. */
 		return;
-	} else if (!WARN_ON_ONCE(rcu_preempt_depth())) {
-		rcu_qs(); /* Report immediate QS. */
+	} else if (!rcu_preempt_depth()) {
+		rcu_qs(); /* On our way out anyway, so report immediate QS. */
 		return;
 	}
 

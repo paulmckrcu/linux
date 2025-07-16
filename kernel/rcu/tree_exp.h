@@ -805,8 +805,32 @@ static void rcu_exp_handler(void *unused)
 		return;
 	}
 
-	// Fourth and finally, negative nesting depth should not happen.
-	WARN_ON_ONCE(1);
+	/*
+	 * The final and least likely case is where the interrupted
+	 * code was just about to or just finished exiting the
+	 * RCU-preempt read-side critical section when using
+	 * rcu_read_unlock_notrace(), and no, we can't tell which.
+	 * So either way, set ->cpu_no_qs.b.exp to flag later code that
+	 * a quiescent state is required.
+	 *
+	 * If the CPU has preemption and softirq enabled (or if some
+	 * buggy no-trace RCU-preempt read-side critical section is
+	 * being used from idle), just invoke rcu_preempt_deferred_qs()
+	 * to immediately report the quiescent state.  We cannot use
+	 * rcu_read_unlock_special() because we are in an interrupt handler,
+	 * which will cause that function to take an early exit without
+	 * doing anything.
+	 *
+	 * Otherwise, force a context switch after the CPU enables everything.
+	 */
+	rdp->cpu_no_qs.b.exp = true;
+	if (!(preempt_count() & (PREEMPT_MASK | SOFTIRQ_MASK)) ||
+	    WARN_ON_ONCE(!rcu_is_watching_curr_cpu())) {
+		rcu_preempt_deferred_qs(t);
+	} else {
+		set_tsk_need_resched(t);
+		set_preempt_need_resched();
+	}
 }
 
 /*
