@@ -85,9 +85,6 @@ static LIST_HEAD(tracepoint_module_list);
  */
 static DEFINE_MUTEX(tracepoints_mutex);
 
-static struct rcu_head *early_probes;
-static bool ok_to_free_tracepoints;
-
 /*
  * Note about RCU :
  * It is used to delay the free of multiple probes array until a quiescent
@@ -116,40 +113,10 @@ static void srcu_free_old_probes(struct rcu_head *head)
 	kfree(container_of(head, struct tp_probes, rcu));
 }
 
-static __init int release_early_probes(void)
-{
-	struct rcu_head *tmp;
-
-	ok_to_free_tracepoints = true;
-
-	while (early_probes) {
-		tmp = early_probes;
-		early_probes = tmp->next;
-		call_srcu(&tracepoint_srcu, tmp, srcu_free_old_probes);
-	}
-
-	return 0;
-}
-
 static void rcu_free_old_probes(struct rcu_head *head)
 {
-	/*
-	 * We can't free probes if SRCU is not initialized yet.
-	 * Postpone the wait for SRCU until after it has initialized.
-	 */
-	if (unlikely(!ok_to_free_tracepoints)) {
-		struct tp_probes *tp_probes = container_of(head, struct tp_probes, rcu);
-
-		tp_probes->rcu.next = early_probes;
-		early_probes = &tp_probes->rcu;
-		return;
-	}
-
 	call_srcu(&tracepoint_srcu, head, srcu_free_old_probes);
 }
-
-/* SRCU is initialized at core_initcall */
-postcore_initcall(release_early_probes);
 
 static inline void release_probes(struct tracepoint *tp, struct tracepoint_func *old)
 {
