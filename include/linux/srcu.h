@@ -271,7 +271,7 @@ static inline int srcu_read_lock(struct srcu_struct *ssp) __acquires(ssp)
  * where RCU is watching, that is, from contexts where it would be legal
  * to invoke rcu_read_lock().  Otherwise, lockdep will complain.
  */
-static inline struct srcu_ctr __percpu *srcu_read_lock_fast(struct srcu_struct *ssp) __acquires(ssp)
+static inline struct srcu_ctr __percpu notrace *srcu_read_lock_fast(struct srcu_struct *ssp) __acquires(ssp)
 {
 	struct srcu_ctr __percpu *retval;
 
@@ -399,7 +399,8 @@ static inline void srcu_read_unlock(struct srcu_struct *ssp, int idx)
  *
  * Exit a light-weight SRCU read-side critical section.
  */
-static inline void srcu_read_unlock_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+static inline void notrace
+srcu_read_unlock_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 	__releases(ssp)
 {
 	srcu_check_read_flavor(ssp, SRCU_READ_FLAVOR_FAST);
