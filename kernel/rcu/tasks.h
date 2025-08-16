@@ -1480,11 +1480,6 @@ struct task_struct *get_rcu_tasks_trace_gp_kthread(void)
 }
 EXPORT_SYMBOL_GPL(get_rcu_tasks_trace_gp_kthread);
 
-void rcu_tasks_trace_get_gp_data(int *flags, unsigned long *gp_seq)
-{
-}
-EXPORT_SYMBOL_GPL(rcu_tasks_trace_get_gp_data);
-
 #endif /* #else #ifdef CONFIG_TASKS_TRACE_RCU */
 
 #ifndef CONFIG_TINY_RCU
