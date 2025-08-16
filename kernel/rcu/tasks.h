@@ -1471,18 +1471,6 @@ void __init rcu_tasks_trace_suppress_unused(void)
 	rcu_tasks_torture_stats_print_generic(NULL, NULL, NULL, NULL);
 }
 
-/*
- * Do a cmpxchg() on ->trc_reader_special.b.need_qs, allowing for
- * the four-byte operand-size restriction of some platforms.
- *
- * Returns the old value, which is often ignored.
- */
-u8 rcu_trc_cmpxchg_need_qs(struct task_struct *t, u8 old, u8 new)
-{
-	return cmpxchg(&t->trc_reader_special.b.need_qs, old, new);
-}
-EXPORT_SYMBOL_GPL(rcu_trc_cmpxchg_need_qs);
-
 /* Add a newly blocked reader task to its CPU's list. */
 void rcu_tasks_trace_qs_blkd(struct task_struct *t)
 {
