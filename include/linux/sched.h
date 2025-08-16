@@ -941,7 +941,6 @@ struct task_struct {
 	int				trc_reader_nesting;
 	struct srcu_ctr __percpu	*trc_reader_scp;
 	union rcu_special		trc_reader_special;
-	struct list_head		trc_holdout_list;
 #endif /* #ifdef CONFIG_TASKS_TRACE_RCU */
 
 	struct sched_info		sched_info;
