@@ -51,6 +51,7 @@ static inline void rcu_read_lock_trace(void)
 	struct task_struct *t = current;
 
 	if (t->trc_reader_nesting++) {
+		// In case we interrupted a Tasks Trace RCU reader.
 		rcu_try_lock_acquire(&rcu_tasks_trace_srcu_struct.dep_map);
 		return;
 	}
