@@ -1468,11 +1468,6 @@ void __init rcu_tasks_trace_suppress_unused(void)
 }
 
 #if !defined(CONFIG_TINY_RCU)
-void show_rcu_tasks_trace_gp_kthread(void)
-{
-}
-EXPORT_SYMBOL_GPL(show_rcu_tasks_trace_gp_kthread);
-
 void rcu_tasks_trace_torture_stats_print(char *tt, char *tf)
 {
 }
@@ -1491,7 +1486,6 @@ void show_rcu_tasks_gp_kthreads(void)
 {
 	show_rcu_tasks_classic_gp_kthread();
 	show_rcu_tasks_rude_gp_kthread();
-	show_rcu_tasks_trace_gp_kthread();
 }
 #endif /* #ifndef CONFIG_TINY_RCU */
 
