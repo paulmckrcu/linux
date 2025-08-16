@@ -673,11 +673,6 @@ void show_rcu_tasks_rude_gp_kthread(void);
 #else
 static inline void show_rcu_tasks_rude_gp_kthread(void) {}
 #endif
-#if !defined(CONFIG_TINY_RCU) && defined(CONFIG_TASKS_TRACE_RCU)
-void show_rcu_tasks_trace_gp_kthread(void);
-#else
-static inline void show_rcu_tasks_trace_gp_kthread(void) {}
-#endif
 
 #ifdef CONFIG_TINY_RCU
 static inline bool rcu_cpu_beenfullyonline(int cpu) { return true; }
