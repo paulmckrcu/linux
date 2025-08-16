@@ -544,10 +544,6 @@ struct task_struct *get_rcu_tasks_rude_gp_kthread(void);
 void rcu_tasks_rude_get_gp_data(int *flags, unsigned long *gp_seq);
 #endif // # ifdef CONFIG_TASKS_RUDE_RCU
 
-#ifdef CONFIG_TASKS_TRACE_RCU
-void rcu_tasks_trace_get_gp_data(int *flags, unsigned long *gp_seq);
-#endif
-
 #ifdef CONFIG_TASKS_RCU_GENERIC
 void tasks_cblist_init_generic(void);
 #else /* #ifdef CONFIG_TASKS_RCU_GENERIC */
