@@ -1467,16 +1467,6 @@ void __init rcu_tasks_trace_suppress_unused(void)
 	rcu_tasks_torture_stats_print_generic(NULL, NULL, NULL, NULL);
 }
 
-/* Communicate task state back to the RCU tasks trace stall warning request. */
-struct trc_stall_chk_rdr {
-	int nesting;
-	int ipi_to_cpu;
-	u8 needqs;
-};
-
-int rcu_tasks_trace_lazy_ms = -1;
-module_param(rcu_tasks_trace_lazy_ms, int, 0444);
-
 #if !defined(CONFIG_TINY_RCU)
 void show_rcu_tasks_trace_gp_kthread(void)
 {
