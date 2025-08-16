@@ -800,8 +800,6 @@ static void rcu_tasks_torture_stats_print_generic(struct rcu_tasks *rtp, char *t
 
 #endif // #ifndef CONFIG_TINY_RCU
 
-static void exit_tasks_rcu_finish_trace(struct task_struct *t);
-
 #if defined(CONFIG_TASKS_RCU)
 
 ////////////////////////////////////////////////////////////////////////
@@ -1321,13 +1319,11 @@ void exit_tasks_rcu_finish(void)
 	raw_spin_lock_irqsave_rcu_node(rtpcp, flags);
 	list_del_init(&t->rcu_tasks_exit_list);
 	raw_spin_unlock_irqrestore_rcu_node(rtpcp, flags);
-
-	exit_tasks_rcu_finish_trace(t);
 }
 
 #else /* #ifdef CONFIG_TASKS_RCU */
 void exit_tasks_rcu_start(void) { }
-void exit_tasks_rcu_finish(void) { exit_tasks_rcu_finish_trace(current); }
+void exit_tasks_rcu_finish(void) { }
 #endif /* #else #ifdef CONFIG_TASKS_RCU */
 
 #ifdef CONFIG_TASKS_RUDE_RCU
@@ -1471,12 +1467,6 @@ void __init rcu_tasks_trace_suppress_unused(void)
 	rcu_tasks_torture_stats_print_generic(NULL, NULL, NULL, NULL);
 }
 
-/* Add a newly blocked reader task to its CPU's list. */
-void rcu_tasks_trace_qs_blkd(struct task_struct *t)
-{
-}
-EXPORT_SYMBOL_GPL(rcu_tasks_trace_qs_blkd);
-
 /* Communicate task state back to the RCU tasks trace stall warning request. */
 struct trc_stall_chk_rdr {
 	int nesting;
@@ -1484,18 +1474,8 @@ struct trc_stall_chk_rdr {
 	u8 needqs;
 };
 
-/* Report any needed quiescent state for this exiting task. */
-static void exit_tasks_rcu_finish_trace(struct task_struct *t)
-{
-}
-
 int rcu_tasks_trace_lazy_ms = -1;
 module_param(rcu_tasks_trace_lazy_ms, int, 0444);
-
-static int __init rcu_spawn_tasks_trace_kthread(void)
-{
-	return 0;
-}
 
 #if !defined(CONFIG_TINY_RCU)
 void show_rcu_tasks_trace_gp_kthread(void)
@@ -1514,8 +1494,6 @@ void rcu_tasks_trace_get_gp_data(int *flags, unsigned long *gp_seq)
 }
 EXPORT_SYMBOL_GPL(rcu_tasks_trace_get_gp_data);
 
-#else /* #ifdef CONFIG_TASKS_TRACE_RCU */
-static void exit_tasks_rcu_finish_trace(struct task_struct *t) { }
 #endif /* #else #ifdef CONFIG_TASKS_TRACE_RCU */
 
 #ifndef CONFIG_TINY_RCU
@@ -1660,10 +1638,6 @@ static int __init rcu_init_tasks_generic(void)
 
 #ifdef CONFIG_TASKS_RUDE_RCU
 	rcu_spawn_tasks_rude_kthread();
-#endif
-
-#ifdef CONFIG_TASKS_TRACE_RCU
-	rcu_spawn_tasks_trace_kthread();
 #endif
 
 	// Run the self-tests.

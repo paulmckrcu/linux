@@ -176,7 +176,6 @@ void rcu_tasks_torture_stats_print(char *tt, char *tf);
 # endif
 
 # ifdef CONFIG_TASKS_TRACE_RCU
-void rcu_tasks_trace_qs_blkd(struct task_struct *t);
 void rcu_tasks_trace_torture_stats_print(char *tt, char *tf);
 # endif
 
