@@ -175,10 +175,6 @@ void rcu_tasks_torture_stats_print(char *tt, char *tf);
 # define synchronize_rcu_tasks synchronize_rcu
 # endif
 
-# ifdef CONFIG_TASKS_TRACE_RCU
-void rcu_tasks_trace_torture_stats_print(char *tt, char *tf);
-# endif
-
 #define rcu_tasks_qs(t, preempt) do { rcu_tasks_classic_qs((t), (preempt)); } while (0)
 
 # ifdef CONFIG_TASKS_RUDE_RCU
