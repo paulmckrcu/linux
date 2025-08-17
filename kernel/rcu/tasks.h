@@ -1467,13 +1467,6 @@ void __init rcu_tasks_trace_suppress_unused(void)
 	rcu_tasks_torture_stats_print_generic(NULL, NULL, NULL, NULL);
 }
 
-#if !defined(CONFIG_TINY_RCU)
-void rcu_tasks_trace_torture_stats_print(char *tt, char *tf)
-{
-}
-EXPORT_SYMBOL_GPL(rcu_tasks_trace_torture_stats_print);
-#endif // !defined(CONFIG_TINY_RCU)
-
 #endif /* #else #ifdef CONFIG_TASKS_TRACE_RCU */
 
 #ifndef CONFIG_TINY_RCU
