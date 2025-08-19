@@ -35,6 +35,43 @@ static inline int rcu_read_lock_trace_held(void)
 #ifdef CONFIG_TASKS_TRACE_RCU
 
 /**
+ * rcu_read_lock_tasks_trace - mark beginning of RCU-trace read-side critical section
+ *
+ * When synchronize_rcu_tasks_trace() is invoked by one task, then that
+ * task is guaranteed to block until all other tasks exit their read-side
+ * critical sections.  Similarly, if call_rcu_trace() is invoked on one
+ * task while other tasks are within RCU read-side critical sections,
+ * invocation of the corresponding RCU callback is deferred until after
+ * the all the other tasks exit their critical sections.
+ *
+ * For more details, please see the documentation for srcu_read_lock_fast().
+ */
+static inline struct srcu_ctr __percpu *rcu_read_lock_tasks_trace(void)
+{
+	struct srcu_ctr __percpu *ret = srcu_read_lock_fast(&rcu_tasks_trace_srcu_struct);
+
+	if (IS_ENABLED(CONFIG_HAVE_NOINSTR_HACK))
+		smp_mb();
+	return ret;
+}
+
+/**
+ * rcu_read_unlock_tasks_trace - mark end of RCU-trace read-side critical section
+ * @scp: return value from corresponding rcu_read_lock_tasks_trace().
+ *
+ * Pairs with the preceding call to rcu_read_lock_tasks_trace() that
+ * returned the value passed in via scp.
+ *
+ * For more details, please see the documentation for rcu_read_unlock().
+ */
+static inline void rcu_read_unlock_tasks_trace(struct srcu_ctr __percpu *scp)
+{
+	if (!IS_ENABLED(CONFIG_HAVE_NOINSTR_HACK))
+		smp_mb();
+	srcu_read_unlock_fast(&rcu_tasks_trace_srcu_struct, scp);
+}
+
+/**
  * rcu_read_lock_trace - mark beginning of RCU-trace read-side critical section
  *
  * When synchronize_rcu_tasks_trace() is invoked by one task, then that
