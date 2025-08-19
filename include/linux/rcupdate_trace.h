@@ -50,8 +50,7 @@ static inline struct srcu_ctr __percpu *rcu_read_lock_tasks_trace(void)
 {
 	struct srcu_ctr __percpu *ret = srcu_read_lock_fast(&rcu_tasks_trace_srcu_struct);
 
-	if (IS_ENABLED(CONFIG_HAVE_NOINSTR_HACK))
-		smp_mb();
+	smp_mb(); // Placeholder for more selective ordering
 	return ret;
 }
 
@@ -66,8 +65,7 @@ static inline struct srcu_ctr __percpu *rcu_read_lock_tasks_trace(void)
  */
 static inline void rcu_read_unlock_tasks_trace(struct srcu_ctr __percpu *scp)
 {
-	if (!IS_ENABLED(CONFIG_HAVE_NOINSTR_HACK))
-		smp_mb();
+	smp_mb(); // Placeholder for more selective ordering
 	srcu_read_unlock_fast(&rcu_tasks_trace_srcu_struct, scp);
 }
 
