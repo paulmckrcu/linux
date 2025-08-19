@@ -1600,8 +1600,13 @@ static inline void rcu_tasks_bootup_oddness(void) {}
 // Tracing variant of Tasks RCU.  This variant is designed to be used
 // to protect tracing hooks, including those of BPF.  This variant
 // is implemented via a straightforward mapping onto SRCU-fast.
+// DEFINE_SRCU_FAST() is required because rcu_read_lock_trace() must
+// use __srcu_read_lock_fast() in order to bypass the rcu_is_watching()
+// checks in kernels built with CONFIG_TASKS_TRACE_RCU_NO_MB=n, which also
+// bypasses the srcu_check_read_flavor_force() that would otherwise mark
+// rcu_tasks_trace_srcu_struct as needing SRCU-fast readers.
 
-DEFINE_SRCU(rcu_tasks_trace_srcu_struct);
+DEFINE_SRCU_FAST(rcu_tasks_trace_srcu_struct);
 EXPORT_SYMBOL_GPL(rcu_tasks_trace_srcu_struct);
 
 #endif /* #else #ifdef CONFIG_TASKS_TRACE_RCU */

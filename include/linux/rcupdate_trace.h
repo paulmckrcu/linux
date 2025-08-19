@@ -48,10 +48,11 @@ static inline int rcu_read_lock_trace_held(void)
  */
 static inline struct srcu_ctr __percpu *rcu_read_lock_tasks_trace(void)
 {
-	struct srcu_ctr __percpu *ret = srcu_read_lock_fast(&rcu_tasks_trace_srcu_struct);
+	struct srcu_ctr __percpu *ret = __srcu_read_lock_fast(&rcu_tasks_trace_srcu_struct);
 
-	if (IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR))
-		smp_mb();
+	rcu_try_lock_acquire(&rcu_tasks_trace_srcu_struct.dep_map);
+	if (!IS_ENABLED(CONFIG_TASKS_TRACE_RCU_NO_MB))
+		smp_mb(); // Provide ordering on noinstr-incomplete architectures.
 	return ret;
 }
 
@@ -66,9 +67,10 @@ static inline struct srcu_ctr __percpu *rcu_read_lock_tasks_trace(void)
  */
 static inline void rcu_read_unlock_tasks_trace(struct srcu_ctr __percpu *scp)
 {
-	if (!IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR))
-		smp_mb();
-	srcu_read_unlock_fast(&rcu_tasks_trace_srcu_struct, scp);
+	if (!IS_ENABLED(CONFIG_TASKS_TRACE_RCU_NO_MB))
+		smp_mb(); // Provide ordering on noinstr-incomplete architectures.
+	__srcu_read_unlock_fast(&rcu_tasks_trace_srcu_struct, scp);
+	srcu_lock_release(&rcu_tasks_trace_srcu_struct.dep_map);
 }
 
 /**
@@ -87,14 +89,15 @@ static inline void rcu_read_lock_trace(void)
 {
 	struct task_struct *t = current;
 
+	rcu_try_lock_acquire(&rcu_tasks_trace_srcu_struct.dep_map);
 	if (t->trc_reader_nesting++) {
 		// In case we interrupted a Tasks Trace RCU reader.
-		rcu_try_lock_acquire(&rcu_tasks_trace_srcu_struct.dep_map);
 		return;
 	}
 	barrier();  // nesting before scp to protect against interrupt handler.
-	t->trc_reader_scp = srcu_read_lock_fast(&rcu_tasks_trace_srcu_struct);
-	smp_mb(); // Placeholder for more selective ordering
+	t->trc_reader_scp = __srcu_read_lock_fast(&rcu_tasks_trace_srcu_struct);
+	if (!IS_ENABLED(CONFIG_TASKS_TRACE_RCU_NO_MB))
+		smp_mb(); // Placeholder for more selective ordering
 }
 
 /**
@@ -111,13 +114,14 @@ static inline void rcu_read_unlock_trace(void)
 	struct srcu_ctr __percpu *scp;
 	struct task_struct *t = current;
 
-	smp_mb(); // Placeholder for more selective ordering
 	scp = t->trc_reader_scp;
 	barrier();  // scp before nesting to protect against interrupt handler.
-	if (!--t->trc_reader_nesting)
-		srcu_read_unlock_fast(&rcu_tasks_trace_srcu_struct, scp);
-	else
-		srcu_lock_release(&rcu_tasks_trace_srcu_struct.dep_map);
+	if (!--t->trc_reader_nesting) {
+		if (!IS_ENABLED(CONFIG_TASKS_TRACE_RCU_NO_MB))
+			smp_mb(); // Placeholder for more selective ordering
+		__srcu_read_unlock_fast(&rcu_tasks_trace_srcu_struct, scp);
+	}
+	srcu_lock_release(&rcu_tasks_trace_srcu_struct.dep_map);
 }
 
 /**
