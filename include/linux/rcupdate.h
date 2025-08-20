@@ -205,7 +205,7 @@ static inline void exit_tasks_rcu_finish(void) { }
  *
  * You have been warned!
  */
-static inline bool rcu_trace_implies_rcu_gp(void) { return false; }
+static inline bool rcu_trace_implies_rcu_gp(void) { return true; }
 
 /**
  * cond_resched_tasks_rcu_qs - Report potential quiescent states to RCU
