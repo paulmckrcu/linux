@@ -25,7 +25,7 @@ enum tp_func_state {
 extern tracepoint_ptr_t __start___tracepoints_ptrs[];
 extern tracepoint_ptr_t __stop___tracepoints_ptrs[];
 
-DEFINE_SRCU(tracepoint_srcu);
+DEFINE_SRCU_FAST(tracepoint_srcu);
 EXPORT_SYMBOL_GPL(tracepoint_srcu);
 
 enum tp_transition_sync {
