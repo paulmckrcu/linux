@@ -52,6 +52,7 @@ void srcu_drive_gp(struct work_struct *wp);
 // Dummy structure for srcu_notifier_head.
 struct srcu_usage { };
 #define __SRCU_USAGE_INIT(name) { }
+#define __init_srcu_struct_fast __init_srcu_struct
 
 void synchronize_srcu(struct srcu_struct *ssp);
 
