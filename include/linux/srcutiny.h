@@ -55,6 +55,9 @@ void srcu_drive_gp(struct work_struct *wp);
 struct srcu_usage { };
 #define __SRCU_USAGE_INIT(name) { }
 #define __init_srcu_struct_fast __init_srcu_struct
+#ifndef CONFIG_DEBUG_LOCK_ALLOC
+#define init_srcu_struct_fast init_srcu_struct
+#endif // #ifndef CONFIG_DEBUG_LOCK_ALLOC
 
 void synchronize_srcu(struct srcu_struct *ssp);
 
