@@ -1760,7 +1760,7 @@ void srcu_expedite_current(struct srcu_struct *ssp)
 	bool needcb = false;
 	struct srcu_data *sdp;
 
-	preempt_disable();
+	migrate_disable();
 	sdp = this_cpu_ptr(ssp->sda);
 	spin_lock_irqsave_sdp_contention(sdp, &flags);
 	if (sdp->srcu_ec_state == SRCU_EC_IDLE) {
@@ -1775,7 +1775,7 @@ void srcu_expedite_current(struct srcu_struct *ssp)
 	// If needed, queue an expedited SRCU callback.
 	if (needcb)
 		__call_srcu(ssp, &sdp->srcu_ec_head, srcu_expedite_current_cb, false);
-	preempt_enable();
+	migrate_enable();
 }
 EXPORT_SYMBOL_GPL(srcu_expedite_current);
 
