@@ -6,8 +6,13 @@
 # "CFLIST" or "3*TRACE01") and an indication of a set of commits to test,
 # then runs each commit through the specified list of commits using kvm.sh.
 # The runs are grouped into a -series/config/commit directory tree.
+# Each run defaults to a duration of one minute.
 # 
-# Run in top-level Linux source directory.
+# Run in top-level Linux source directory.  Please note that this is in
+# no way a replacement for "git bisect"!!!
+#
+# This script is intended to replace kvm-check-branches.sh by providing
+# ease of use and faster execution.
 
 T="`mktemp -d ${TMPDIR-/tmp}/kvm-series.sh.XXXXXX`"
 trap 'rm -rf $T' 0
@@ -64,11 +69,13 @@ echo " --- Results directory: " $ds | tee -a $T/log
 
 for config in ${config_list}
 do
-	for sha1 in ${sha1_list}
+	sha_n=0
+	for sha in ${sha1_list}
 	do
+		sha1=${sha_n}.${sha} # Enable "sort -k1nr" to list commits in order.
 		echo Starting ${config}/${sha1} at `date` | tee -a $T/log
-		git checkout "${sha1}"
-		time tools/testing/selftests/rcutorture/bin/kvm.sh --configs "$config" --datestamp "$ds/${config}/${sha1}" "$@"
+		git checkout "${sha}"
+		time tools/testing/selftests/rcutorture/bin/kvm.sh --configs "$config" --datestamp "$ds/${config}/${sha1}" --duration 1 "$@"
 		curret=$?
 		if test "${curret}" -ne 0
 		then
@@ -77,11 +84,14 @@ do
 		else
 			nsuccess=$((nsuccess+1))
 			successlist="$successlist ${config}/${sha1}"
+			# Successful run, so remove large files.
+			rm -f ${RCUTORTURE}/$ds/${config}/${sha1}/{vmlinux,bzImage,System.map,Module.symvers}
 		fi
 		if test "${ret}" -eq 0
 		then
 			ret=${curret}
 		fi
+		sha_n=$((sha_n+1))
 	done
 done
 git checkout "${cursha1}"
@@ -93,6 +103,6 @@ echo ${nfail} FAILURES: | tee -a $T/log
 echo ${faillist} | fmt | tee -a $T/log
 echo Started at $startdate, ended at `date`, duration `get_starttime_duration $starttime`. | tee -a $T/log
 echo Summary: Successes: ${nsuccess} Failures: ${nfail} | tee -a $T/log
-cat $T/log tools/testing/selftests/rcutorture/res/${ds}/log
+cp $T/log tools/testing/selftests/rcutorture/res/${ds}
 
 exit "${ret}"
