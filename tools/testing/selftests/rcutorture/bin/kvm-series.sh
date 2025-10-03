@@ -101,6 +101,13 @@ echo ${successlist} | fmt | tee -a $T/log
 echo | tee -a $T/log
 echo ${nfail} FAILURES: | tee -a $T/log
 echo ${faillist} | fmt | tee -a $T/log
+if test -n "${faillist}"
+then
+	echo | tee -a $T/log
+	echo Failures across commits: | tee -a $T/log
+	echo ${faillist} | tr ' ' '\012' | sed -e 's,^[^/]*/,,' -e 's/([0-9]*)//' |
+		sort | uniq -c | sort -k2n | tee -a $T/log
+fi
 echo Started at $startdate, ended at `date`, duration `get_starttime_duration $starttime`. | tee -a $T/log
 echo Summary: Successes: ${nsuccess} Failures: ${nfail} | tee -a $T/log
 cp $T/log tools/testing/selftests/rcutorture/res/${ds}
