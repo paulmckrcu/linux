@@ -200,11 +200,7 @@ struct srcu_struct {
  * See include/linux/percpu-defs.h for the rules on per-CPU variables.
  *
  * DEFINE_SRCU_FAST() creates an srcu_struct and associated structures
- * whose readers must be of the SRCU-fast variety.  DEFINE_SRCU_FAST()
- * cannot be used within modules due to there being no place to
- * put the desired ->srcu_reader_flavor value.  If in-module use of
- * DEFINE_SRCU_FAST() becomes necessary, the srcu_struct structure will
- * need to grow in order to store this value.
+ * whose readers must be of the SRCU-fast variety.
  */
 #ifdef MODULE
 # define __DEFINE_SRCU(name, fast, is_static)							\
