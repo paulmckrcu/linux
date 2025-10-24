@@ -199,8 +199,15 @@ struct srcu_struct {
  *
  * See include/linux/percpu-defs.h for the rules on per-CPU variables.
  *
- * DEFINE_SRCU_FAST() creates an srcu_struct and associated structures
- * whose readers must be of the SRCU-fast variety.
+ * DEFINE_SRCU_FAST() and DEFINE_STATIC_SRCU_FAST create an srcu_struct
+ * and associated structures whose readers must be of the SRCU-fast variety.
+ * DEFINE_SRCU_FAST_UPDOWN() and DEFINE_STATIC_SRCU_FAST_UPDOWN() create
+ * an srcu_struct and associated structures whose readers must be of the
+ * SRCU-fast-updown variety.  The key point (aside from error checking) with
+ * both varieties is that the grace periods must use synchronize_rcu()
+ * instead of smp_mb(), and given that the first (for example)
+ * srcu_read_lock_fast() might race with the first synchronize_srcu(),
+ * this different must be specified at initialization time.
  */
 #ifdef MODULE
 # define __DEFINE_SRCU(name, fast, is_static)							\
@@ -221,6 +228,10 @@ struct srcu_struct {
 #define DEFINE_STATIC_SRCU(name)	__DEFINE_SRCU(name, 0, static)
 #define DEFINE_SRCU_FAST(name)		__DEFINE_SRCU(name, SRCU_READ_FLAVOR_FAST, /* not static */)
 #define DEFINE_STATIC_SRCU_FAST(name)	__DEFINE_SRCU(name, SRCU_READ_FLAVOR_FAST, static)
+#define DEFINE_SRCU_FAST_UPDOWN(name)	__DEFINE_SRCU(name, SRCU_READ_FLAVOR_FAST_UPDOWN, \
+						      /* not static */)
+#define DEFINE_STATIC_SRCU_FAST_UPDOWN(name) \
+					__DEFINE_SRCU(name, SRCU_READ_FLAVOR_FAST_UPDOWN, static)
 
 int __srcu_read_lock(struct srcu_struct *ssp) __acquires(ssp);
 void synchronize_srcu_expedited(struct srcu_struct *ssp);
