@@ -265,6 +265,40 @@ __srcu_read_lock_fast_arm(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp
 	local_irq_restore(flags);
 }
 
+static inline void notrace
+__srcu_read_unlock_fast_arm(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+{
+	unsigned long flags;
+	atomic_long_t *scnp;
+
+	local_irq_save(flags);
+	scnp = raw_cpu_ptr(&scp->srcu_unlocks);
+	atomic_long_set(scnp, atomic_long_read(scnp) - 1);
+	local_irq_restore(flags);
+}
+
+static inline void notrace
+__srcu_read_unlock_fast_arm_nmisafe(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+{
+	// Verify that in_hardirq() and in_nmi() are accurate
+	// from the viewpoint of any traceable code.
+	WARN_ON_ONCE(!IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR));
+
+	if (in_hardirq() || in_nmi()) {
+		atomic_long_t *scnp = raw_cpu_ptr(&scp->srcu_locks);
+
+		// Interrupts were disabled, so there has been no
+		// migration since the matching __srcu_read_lock_fast().
+		// We therefore decrement exactly the counter that was
+		// incremented.  Also, interrupts are already disabled.
+		atomic_long_set(scnp, atomic_long_read(scnp) - 1);
+	} else {
+		// We might have migrated to another CPU, so follow the
+		// normal SRCU counter protocol.
+		__srcu_read_unlock_fast_arm(ssp, scp);
+	}
+}
+
 /*
  * Counts the new reader in the appropriate per-CPU element of the
  * srcu_struct.  Returns a pointer that must be passed to the matching
@@ -340,7 +374,10 @@ static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct src
 static inline void notrace
 __srcu_read_unlock_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 {
-	__srcu_read_unlock_fast_pcp(ssp, scp);
+	if (IS_ENABLED(CONFIG_ARM64))
+		__srcu_read_unlock_fast_arm_nmisafe(ssp, scp);
+	else
+		__srcu_read_unlock_fast_pcp(ssp, scp);
 }
 
 /*
