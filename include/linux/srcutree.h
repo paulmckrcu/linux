@@ -285,16 +285,14 @@ static inline struct srcu_ctr __percpu *__srcu_ctr_to_ptr(struct srcu_struct *ss
  * on architectures that support NMIs but do not supply NMI-safe
  * implementations of this_cpu_inc().
  */
-static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct srcu_struct *ssp)
+static inline void notrace
+__srcu_read_lock_fast_pcp(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 {
-	struct srcu_ctr __percpu *scp = READ_ONCE(ssp->srcu_ctrp);
-
 	if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE))
 		this_cpu_inc(scp->srcu_locks.counter); // Y, and implicit RCU reader.
 	else
 		atomic_long_inc(raw_cpu_ptr(&scp->srcu_locks));  // Y, and implicit RCU reader.
 	barrier(); /* Avoid leaking the critical section. */
-	return scp;
 }
 
 /*
@@ -307,13 +305,78 @@ static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct src
  * information on implicit RCU readers and NMI safety.
  */
 static inline void notrace
-__srcu_read_unlock_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+__srcu_read_unlock_fast_pcp(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 {
 	barrier();  /* Avoid leaking the critical section. */
 	if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE))
 		this_cpu_inc(scp->srcu_unlocks.counter);  // Z, and implicit RCU reader.
 	else
 		atomic_long_inc(raw_cpu_ptr(&scp->srcu_unlocks));  // Z, and implicit RCU reader.
+}
+
+/*
+ * Enter an SRCU-fast reader.  The special case for arm64 is due to
+ * performance measurements on a Neoerse system that showed well over an
+ * order of magnitude speedup.  It is quite possible that a more targeted
+ * use of this optimization will be appropriate at some point, if it in
+ * fact is not already the case.
+ */
+static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct srcu_struct *ssp)
+{
+	struct srcu_ctr __percpu *scp = READ_ONCE(ssp->srcu_ctrp);
+
+	if (IS_ENABLED(CONFIG_ARM64)) {
+		unsigned long flags;
+		atomic_long_t *scnp;
+
+		local_irq_save(flags);
+		scnp = raw_cpu_ptr(&scp->srcu_locks);
+		atomic_long_set(scnp, atomic_long_read(scnp) + 1);
+		local_irq_restore(flags);
+		return scp;
+	}
+	__srcu_read_lock_fast_pcp(ssp, scp);
+	return scp;
+}
+
+/*
+ * Exit an SRCU-fast reader.  The performance optimization for arm64 is
+ * a bit more involved.
+ */
+static inline void notrace
+__srcu_read_unlock_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+{
+	if (IS_ENABLED(CONFIG_ARM64)) {
+		unsigned long flags;
+		atomic_long_t *scnp;
+
+		// Verify that in_hardirq() and in_nmi() are accurate
+		// from the viewpoint of any traceable code.
+		WARN_ON_ONCE(!IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR));
+
+		if (in_hardirq() || in_nmi()) {
+			// Interrupts were disabled, so there
+			// has been no migration since the matching
+			// __srcu_read_lock_fast().  This means we
+			// can decrement exactly the counter that was
+			// incremented.  Also, interrupts are already
+			// disabled.
+			scnp = raw_cpu_ptr(&scp->srcu_locks);
+			atomic_long_set(scnp, atomic_long_read(scnp) - 1);
+		} else {
+			// We might have migrated to another CPU, so follow
+			// the normal SRCU counter protocol.
+			local_irq_save(flags);
+			scnp = raw_cpu_ptr(&scp->srcu_unlocks);
+			atomic_long_set(scnp, atomic_long_read(scnp) - 1);
+			local_irq_restore(flags);
+		}
+		return;
+	}
+
+	// Otherwise, per-CPU atomics should be faster than interrupt
+	// disabling.
+	__srcu_read_unlock_fast(ssp, scp);
 }
 
 /*
