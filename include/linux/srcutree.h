@@ -284,6 +284,37 @@ __srcu_read_unlock_fast_na(struct srcu_struct *ssp, struct srcu_ctr __percpu *sc
 }
 
 /*
+ * Non-atomic manipulation of SRCU lock or unlock counters.  If we are
+ * in an interrupt, NMI, or softirq handler, we know that we are executing
+ * on the same same CPU as did the matching __srcu_read_lock_fast_na(),
+ * so we can simply decrement the lock counter.  Otherwise, we call
+ * __srcu_read_unlock_fast_na() to increment the lock counter as per usual.
+ */
+static inline void notrace
+__srcu_read_unlock_fast_na_nmisafe(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+{
+	// Verify that in_hardirq() and in_nmi() are accurate
+	// from the viewpoint of any traceable code.
+	WARN_ON_ONCE(!IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR));
+
+	lockdep_assert_preemption_disabled();
+	if (in_hardirq() || in_nmi() || in_serving_softirq()) {
+		atomic_long_t *scnp;
+
+		// Interrupts were disabled, so there has been no
+		// migration since the matching __srcu_read_lock_fast().
+		// We therefore decrement exactly the counter that was
+		// incremented.
+		scnp = raw_cpu_ptr(&scp->srcu_locks);
+		atomic_long_set(scnp, atomic_long_read(scnp) - 1);
+	} else {
+		// We might have migrated to another CPU, so follow the
+		// normal SRCU counter protocol.
+		__srcu_read_unlock_fast_na(ssp, scp);
+	}
+}
+
+/*
  * Counts the new reader in the appropriate per-CPU element of the
  * srcu_struct.  Returns a pointer that must be passed to the matching
  * srcu_read_unlock_fast().
@@ -315,7 +346,7 @@ __srcu_read_unlock_fast_na(struct srcu_struct *ssp, struct srcu_ctr __percpu *sc
  * on architectures that support NMIs but do not supply NMI-safe
  * implementations of this_cpu_inc().
  */
-static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct srcu_struct *ssp)
+static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast_pcp(struct srcu_struct *ssp)
 {
 	struct srcu_ctr __percpu *scp = READ_ONCE(ssp->srcu_ctrp);
 
@@ -337,13 +368,46 @@ static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct src
  * information on implicit RCU readers and NMI safety.
  */
 static inline void notrace
-__srcu_read_unlock_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+__srcu_read_unlock_fast_pcp(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 {
 	barrier();  /* Avoid leaking the critical section. */
 	if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE))
 		this_cpu_inc(scp->srcu_unlocks.counter);  // Z, and implicit RCU reader.
 	else
 		atomic_long_inc(raw_cpu_ptr(&scp->srcu_unlocks));  // Z, and implicit RCU reader.
+}
+
+/*
+ * Architectures with noinstr properly placed can use non-atomic
+ * increments.  Others must use per-CPU atomics.  The trick enabling
+ * non-atomic increments rules out up/down APIs, as these would result
+ * in multiple CPUs concurrently and non-atomically incrementing and/or
+ * decrementing the same counter, which can cause counts to be lost.
+ */
+static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct srcu_struct *ssp)
+{
+	struct srcu_ctr __percpu *scp;
+
+	if (IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR)) {
+		preempt_disable();
+		scp = __srcu_read_lock_fast_na(ssp);
+		preempt_enable();
+	} else {
+		scp = __srcu_read_lock_fast_pcp(ssp);
+	}
+	return scp;
+}
+
+static inline void notrace
+__srcu_read_unlock_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+{
+	if (IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR)) {
+		preempt_disable();
+		__srcu_read_unlock_fast_na_nmisafe(ssp, scp);
+		preempt_enable();
+	} else {
+		__srcu_read_unlock_fast_pcp(ssp, scp);
+	}
 }
 
 /*
