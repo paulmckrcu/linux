@@ -253,49 +253,54 @@ static inline struct srcu_ctr __percpu *__srcu_ctr_to_ptr(struct srcu_struct *ss
 	return &ssp->sda->srcu_ctrs[idx];
 }
 
+/*
+ * Non-atomic.  @@@
+ */
 static inline void notrace
-__srcu_read_lock_fast_arm(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+__srcu_read_lock_fast_na(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 {
-	unsigned long flags;
 	atomic_long_t *scnp;
 
-	local_irq_save(flags);
+	preempt_disable();
 	scnp = raw_cpu_ptr(&scp->srcu_locks);
 	atomic_long_set(scnp, atomic_long_read(scnp) + 1);
-	local_irq_restore(flags);
+	preempt_enable();
 }
 
 static inline void notrace
-__srcu_read_unlock_fast_arm(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+__srcu_read_unlock_fast_na(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 {
-	unsigned long flags;
 	atomic_long_t *scnp;
 
-	local_irq_save(flags);
+	preempt_disable();
 	scnp = raw_cpu_ptr(&scp->srcu_unlocks);
 	atomic_long_set(scnp, atomic_long_read(scnp) - 1);
-	local_irq_restore(flags);
+	preempt_enable();
 }
 
 static inline void notrace
-__srcu_read_unlock_fast_arm_nmisafe(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+__srcu_read_unlock_fast_na_nmisafe(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 {
 	// Verify that in_hardirq() and in_nmi() are accurate
 	// from the viewpoint of any traceable code.
 	WARN_ON_ONCE(!IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR));
 
-	if (in_hardirq() || in_nmi()) {
-		atomic_long_t *scnp = raw_cpu_ptr(&scp->srcu_locks);
+	if (in_hardirq() || in_nmi() || in_serving_softirq()) {
+		atomic_long_t *scnp;
 
 		// Interrupts were disabled, so there has been no
 		// migration since the matching __srcu_read_lock_fast().
 		// We therefore decrement exactly the counter that was
-		// incremented.  Also, interrupts are already disabled.
+		// incremented.  In the case of ksoftirq, preemption is
+		// possible, so disable it.
+		preempt_disable();
+		scnp = raw_cpu_ptr(&scp->srcu_locks);
 		atomic_long_set(scnp, atomic_long_read(scnp) - 1);
+		preempt_enable();
 	} else {
 		// We might have migrated to another CPU, so follow the
 		// normal SRCU counter protocol.
-		__srcu_read_unlock_fast_arm(ssp, scp);
+		__srcu_read_unlock_fast_na(ssp, scp);
 	}
 }
 
@@ -360,12 +365,15 @@ __srcu_read_unlock_fast_pcp(struct srcu_struct *ssp, struct srcu_ctr __percpu *s
 		atomic_long_inc(raw_cpu_ptr(&scp->srcu_unlocks));  // Z, and implicit RCU reader.
 }
 
+/*
+ * 
+ */
 static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct srcu_struct *ssp)
 {
 	struct srcu_ctr __percpu *scp = READ_ONCE(ssp->srcu_ctrp);
 
-	if (IS_ENABLED(CONFIG_ARM64))
-		__srcu_read_lock_fast_arm(ssp, scp);
+	if (IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR))
+		__srcu_read_lock_fast_na(ssp, scp);
 	else
 		__srcu_read_lock_fast_pcp(ssp, scp);
 	return scp;
@@ -374,8 +382,8 @@ static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct src
 static inline void notrace
 __srcu_read_unlock_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 {
-	if (IS_ENABLED(CONFIG_ARM64))
-		__srcu_read_unlock_fast_arm_nmisafe(ssp, scp);
+	if (IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR))
+		__srcu_read_unlock_fast_na_nmisafe(ssp, scp);
 	else
 		__srcu_read_unlock_fast_pcp(ssp, scp);
 }
