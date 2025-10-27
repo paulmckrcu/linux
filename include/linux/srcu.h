@@ -348,7 +348,7 @@ __acquires(ssp)
 {
 	struct srcu_ctr __percpu *retval;
 
-	RCU_LOCKDEP_WARN(!rcu_is_watching(), "RCU must be watching srcu_read_lock_fast().");
+	RCU_LOCKDEP_WARN(!rcu_is_watching(), "RCU must be watching srcu_read_lock_fast_updown().");
 	srcu_check_read_flavor(ssp, SRCU_READ_FLAVOR_FAST_UPDOWN);
 	retval = __srcu_read_lock_fast_updown(ssp);
 	rcu_try_lock_acquire(&ssp->dep_map);
@@ -386,7 +386,7 @@ static inline struct srcu_ctr __percpu *srcu_down_read_fast(struct srcu_struct *
 	WARN_ON_ONCE(IS_ENABLED(CONFIG_PROVE_RCU) && in_nmi());
 	RCU_LOCKDEP_WARN(!rcu_is_watching(), "RCU must be watching srcu_down_read_fast().");
 	srcu_check_read_flavor(ssp, SRCU_READ_FLAVOR_FAST_UPDOWN);
-	return __srcu_read_lock_fast(ssp);
+	return __srcu_read_lock_fast_updown(ssp);
 }
 
 /**
@@ -494,7 +494,7 @@ srcu_read_unlock_fast_updown(struct srcu_struct *ssp, struct srcu_ctr __percpu *
 {
 	srcu_check_read_flavor(ssp, SRCU_READ_FLAVOR_FAST_UPDOWN);
 	srcu_lock_release(&ssp->dep_map);
-	__srcu_read_unlock_fast(ssp, scp);
+	__srcu_read_unlock_fast_updown(ssp, scp);
 	RCU_LOCKDEP_WARN(!rcu_is_watching(),
 			 "RCU must be watching srcu_read_unlock_fast_updown().");
 }
@@ -521,10 +521,11 @@ static inline void srcu_read_unlock_fast_notrace(struct srcu_struct *ssp,
 static inline void srcu_up_read_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 	__releases(ssp)
 {
+	WARN_ON_ONCE(1);
 	WARN_ON_ONCE(IS_ENABLED(CONFIG_PROVE_RCU) && in_nmi());
 	srcu_check_read_flavor(ssp, SRCU_READ_FLAVOR_FAST_UPDOWN);
-	__srcu_read_unlock_fast(ssp, scp);
-	RCU_LOCKDEP_WARN(!rcu_is_watching(), "RCU must be watching srcu_up_read_fast().");
+	__srcu_read_unlock_fast_updown(ssp, scp);
+	RCU_LOCKDEP_WARN(!rcu_is_watching(), "RCU must be watching srcu_up_read_fast_updown().");
 }
 
 /**
