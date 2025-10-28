@@ -274,7 +274,7 @@ __srcu_read_unlock_fast_na(struct srcu_struct *ssp, struct srcu_ctr __percpu *sc
 
 	preempt_disable();
 	scnp = raw_cpu_ptr(&scp->srcu_unlocks);
-	atomic_long_set(scnp, atomic_long_read(scnp) - 1);
+	atomic_long_set(scnp, atomic_long_read(scnp) + 1);
 	preempt_enable();
 }
 
