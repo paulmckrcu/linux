@@ -701,7 +701,7 @@ static struct rcu_torture_ops srcud_ops;
 static void srcu_torture_init(void)
 {
 	rcu_sync_torture_init();
-	if (reader_flavor & SRCU_READ_FLAVOR_NORMAL) {
+	if (!reader_flavor || (reader_flavor & SRCU_READ_FLAVOR_NORMAL)) {
 		VERBOSE_TOROUT_STRING("srcu_torture_init normal SRCU");
 	}
 	if (reader_flavor & SRCU_READ_FLAVOR_NMI) {
@@ -930,7 +930,7 @@ static struct rcu_torture_ops srcu_ops = {
 static void srcud_torture_init(void)
 {
 	rcu_sync_torture_init();
-	if (reader_flavor & SRCU_READ_FLAVOR_NORMAL) {
+	if (!reader_flavor || (reader_flavor & SRCU_READ_FLAVOR_NORMAL)) {
 		VERBOSE_TOROUT_STRING("srcud_torture_init normal SRCU");
 	} else if (reader_flavor & SRCU_READ_FLAVOR_NMI) {
 		VERBOSE_TOROUT_STRING("srcud_torture_init NMI-safe SRCU");
@@ -2456,6 +2456,9 @@ static DEFINE_TORTURE_RANDOM_PERCPU(rcu_torture_timer_rand);
  */
 static void rcu_torture_timer(struct timer_list *unused)
 {
+	WARN_ON_ONCE(!in_serving_softirq());
+	WARN_ON_ONCE(in_hardirq());
+	WARN_ON_ONCE(in_nmi());
 	atomic_long_inc(&n_rcu_torture_timers);
 	(void)rcu_torture_one_read(this_cpu_ptr(&rcu_torture_timer_rand), -1);
 
