@@ -521,7 +521,6 @@ static inline void srcu_read_unlock_fast_notrace(struct srcu_struct *ssp,
 static inline void srcu_up_read_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 	__releases(ssp)
 {
-	WARN_ON_ONCE(1);
 	WARN_ON_ONCE(IS_ENABLED(CONFIG_PROVE_RCU) && in_nmi());
 	srcu_check_read_flavor(ssp, SRCU_READ_FLAVOR_FAST_UPDOWN);
 	__srcu_read_unlock_fast_updown(ssp, scp);
