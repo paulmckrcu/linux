@@ -256,15 +256,18 @@ static inline struct srcu_ctr __percpu *__srcu_ctr_to_ptr(struct srcu_struct *ss
 /*
  * Non-atomic.  @@@
  */
-static inline void notrace
-__srcu_read_lock_fast_na(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast_na(struct srcu_struct *ssp)
 {
 	atomic_long_t *scnp;
+	struct srcu_ctr __percpu *scp;
+
 
 	preempt_disable();
+	scp = READ_ONCE(ssp->srcu_ctrp);
 	scnp = raw_cpu_ptr(&scp->srcu_locks);
 	atomic_long_set(scnp, atomic_long_read(scnp) + 1);
 	preempt_enable();
+	return scp;
 }
 
 static inline void notrace
@@ -336,14 +339,16 @@ __srcu_read_unlock_fast_na_nmisafe(struct srcu_struct *ssp, struct srcu_ctr __pe
  * on architectures that support NMIs but do not supply NMI-safe
  * implementations of this_cpu_inc().
  */
-static inline void notrace
-__srcu_read_lock_fast_pcp(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
+static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast_pcp(struct srcu_struct *ssp)
 {
+	struct srcu_ctr __percpu *scp = READ_ONCE(ssp->srcu_ctrp);
+
 	if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE))
 		this_cpu_inc(scp->srcu_locks.counter); // Y, and implicit RCU reader.
 	else
 		atomic_long_inc(raw_cpu_ptr(&scp->srcu_locks));  // Y, and implicit RCU reader.
 	barrier(); /* Avoid leaking the critical section. */
+	return scp;
 }
 
 /*
@@ -370,12 +375,12 @@ __srcu_read_unlock_fast_pcp(struct srcu_struct *ssp, struct srcu_ctr __percpu *s
  */
 static inline struct srcu_ctr __percpu notrace *__srcu_read_lock_fast(struct srcu_struct *ssp)
 {
-	struct srcu_ctr __percpu *scp = READ_ONCE(ssp->srcu_ctrp);
+	struct srcu_ctr __percpu *scp;
 
 	if (IS_ENABLED(CONFIG_ARCH_WANTS_NO_INSTR))
-		__srcu_read_lock_fast_na(ssp, scp);
+		scp = __srcu_read_lock_fast_na(ssp);
 	else
-		__srcu_read_lock_fast_pcp(ssp, scp);
+		scp = __srcu_read_lock_fast_pcp(ssp);
 	return scp;
 }
 
