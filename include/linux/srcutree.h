@@ -404,12 +404,23 @@ __srcu_read_unlock_fast(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 static inline
 struct srcu_ctr __percpu notrace *__srcu_read_lock_fast_updown(struct srcu_struct *ssp)
 {
-	struct srcu_ctr __percpu *scp = READ_ONCE(ssp->srcu_ctrp);
+	struct srcu_ctr __percpu *scp;
 
-	if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE))
+	if (IS_ENABLED(CONFIG_ARM64)) {
+		unsigned long flags;
+
+		local_irq_save(flags);
+		scp = __srcu_read_lock_fast_na(ssp);
+		local_irq_restore(flags); /* Avoids leaking the critical section. */
+		return scp;
+	}
+
+	scp = READ_ONCE(ssp->srcu_ctrp);
+	if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE)) {
 		this_cpu_inc(scp->srcu_locks.counter); // Y, and implicit RCU reader.
-	else
+	} else {
 		atomic_long_inc(raw_cpu_ptr(&scp->srcu_locks));  // Y, and implicit RCU reader.
+	}
 	barrier(); /* Avoid leaking the critical section. */
 	return scp;
 }
@@ -427,10 +438,17 @@ static inline void notrace
 __srcu_read_unlock_fast_updown(struct srcu_struct *ssp, struct srcu_ctr __percpu *scp)
 {
 	barrier();  /* Avoid leaking the critical section. */
-	if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE))
+	if (IS_ENABLED(CONFIG_ARM64)) {
+		unsigned long flags;
+
+		local_irq_save(flags);
+		 __srcu_read_unlock_fast_na(ssp, scp);
+		local_irq_restore(flags);
+	} else if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE)) {
 		this_cpu_inc(scp->srcu_unlocks.counter);  // Z, and implicit RCU reader.
-	else
+	} else {
 		atomic_long_inc(raw_cpu_ptr(&scp->srcu_unlocks));  // Z, and implicit RCU reader.
+	}
 }
 
 void __srcu_check_read_flavor(struct srcu_struct *ssp, int read_flavor);
