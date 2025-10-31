@@ -70,7 +70,7 @@ __percpu_##name##_case_##sz(void *ptr, unsigned long val)		\
 	unsigned int loop;						\
 	u##sz tmp;							\
 									\
-	asm volatile (ARM64_LSE_ATOMIC_INSN(				\
+	asm volatile (ARM64_LSE_PERCPU_ATOMIC_INSN(			\
 	/* LL/SC */							\
 	"1:	ldxr" #sfx "\t%" #w "[tmp], %[ptr]\n"			\
 		#op_llsc "\t%" #w "[tmp], %" #w "[tmp], %" #w "[val]\n"	\
@@ -91,7 +91,7 @@ __percpu_##name##_return_case_##sz(void *ptr, unsigned long val)	\
 	unsigned int loop;						\
 	u##sz ret;							\
 									\
-	asm volatile (ARM64_LSE_ATOMIC_INSN(				\
+	asm volatile (ARM64_LSE_PERCPU_ATOMIC_INSN(			\
 	/* LL/SC */							\
 	"1:	ldxr" #sfx "\t%" #w "[ret], %[ptr]\n"			\
 		#op_llsc "\t%" #w "[ret], %" #w "[ret], %" #w "[val]\n"	\
