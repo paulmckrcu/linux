@@ -423,7 +423,7 @@ struct srcu_ctr __percpu notrace *__srcu_read_lock_fast_updown(struct srcu_struc
 {
 	struct srcu_ctr __percpu *scp;
 
-	if (IS_ENABLED(CONFIG_ARM64)) {
+	if (IS_ENABLED(CONFIG_ARM64) && IS_ENABLED(CONFIG_ARM64_USE_LSE_PERCPU_ATOMICS)) {
 		unsigned long flags;
 
 		local_irq_save(flags);
