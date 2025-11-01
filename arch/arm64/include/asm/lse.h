@@ -26,19 +26,12 @@
 /* In-line patching at runtime */
 #define ARM64_LSE_ATOMIC_INSN(llsc, lse)				\
 	ALTERNATIVE(llsc, __LSE_PREAMBLE lse, ARM64_HAS_LSE_ATOMICS)
-#if IS_ENABLED(CONFIG_ARM64_USE_LSE_PERCPU_ATOMICS)
-#define ARM64_LSE_PERCPU_ATOMIC_INSN(llsc, lse)				\
-	ALTERNATIVE(llsc, __LSE_PREAMBLE lse, ARM64_HAS_LSE_ATOMICS)
-#else
-#define ARM64_LSE_PERCPU_ATOMIC_INSN(llsc, lse)	llsc
-#endif
 
 #else	/* CONFIG_ARM64_LSE_ATOMICS */
 
 #define __lse_ll_sc_body(op, ...)		__ll_sc_##op(__VA_ARGS__)
 
 #define ARM64_LSE_ATOMIC_INSN(llsc, lse)	llsc
-#define ARM64_LSE_PERCPU_ATOMIC_INSN(llsc, lse)	llsc
 
 #endif	/* CONFIG_ARM64_LSE_ATOMICS */
 #endif	/* __ASM_LSE_H */

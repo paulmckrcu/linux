@@ -1927,21 +1927,6 @@ config ARM64_USE_LSE_ATOMICS
 	  atomic routines. This incurs a small overhead on CPUs that do
 	  not support these instructions.
 
-config ARM64_USE_LSE_PERCPU_ATOMICS
-	bool "LSE for per-CPU atomic instructions"
-	default n
-	help
-	  As part of the Large System Extensions, ARMv8.1 introduces new
-	  atomic instructions that are designed specifically to scale in
-	  very large systems.  However, contention on per-CPU atomics
-	  is usually quite low by design, so these atomics likely benefit
-	  from higher performance, even if this is purchased with reduced
-	  performance under high contention.
-
-	  Say Y here to make use of these instructions for the in-kernel
-	  per-CPU atomic routines. This incurs a small overhead on CPUs
-	  that do not support these instructions.
-
 endmenu # "ARMv8.1 architectural features"
 
 menu "ARMv8.2 architectural features"
