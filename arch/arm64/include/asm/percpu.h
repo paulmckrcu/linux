@@ -70,6 +70,7 @@ __percpu_##name##_case_##sz(void *ptr, unsigned long val)		\
 	unsigned int loop;						\
 	u##sz tmp;							\
 									\
+	asm volatile("prfm pstl1strm, %a0\n" : : "p" (ptr));		\
 	asm volatile (ARM64_LSE_ATOMIC_INSN(				\
 	/* LL/SC */							\
 	"1:	ldxr" #sfx "\t%" #w "[tmp], %[ptr]\n"			\
@@ -91,6 +92,7 @@ __percpu_##name##_return_case_##sz(void *ptr, unsigned long val)	\
 	unsigned int loop;						\
 	u##sz ret;							\
 									\
+	asm volatile("prfm pstl1strm, %a0\n" : : "p" (ptr));		\
 	asm volatile (ARM64_LSE_ATOMIC_INSN(				\
 	/* LL/SC */							\
 	"1:	ldxr" #sfx "\t%" #w "[ret], %[ptr]\n"			\
