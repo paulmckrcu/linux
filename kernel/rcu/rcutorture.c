@@ -931,8 +931,10 @@ static void srcud_torture_init(void)
 {
 	rcu_sync_torture_init();
 	if (!reader_flavor || (reader_flavor & SRCU_READ_FLAVOR_NORMAL)) {
+		WARN_ON(init_srcu_struct(&srcu_ctld));
 		VERBOSE_TOROUT_STRING("srcud_torture_init normal SRCU");
 	} else if (reader_flavor & SRCU_READ_FLAVOR_NMI) {
+		WARN_ON(init_srcu_struct(&srcu_ctld));
 		VERBOSE_TOROUT_STRING("srcud_torture_init NMI-safe SRCU");
 	} else if (reader_flavor & SRCU_READ_FLAVOR_FAST) {
 		WARN_ON(init_srcu_struct_fast(&srcu_ctld));
