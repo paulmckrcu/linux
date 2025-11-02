@@ -701,12 +701,10 @@ static struct rcu_torture_ops srcud_ops;
 static void srcu_torture_init(void)
 {
 	rcu_sync_torture_init();
-	if (!reader_flavor || (reader_flavor & SRCU_READ_FLAVOR_NORMAL)) {
+	if (!reader_flavor || (reader_flavor & SRCU_READ_FLAVOR_NORMAL))
 		VERBOSE_TOROUT_STRING("srcu_torture_init normal SRCU");
-	}
-	if (reader_flavor & SRCU_READ_FLAVOR_NMI) {
+	if (reader_flavor & SRCU_READ_FLAVOR_NMI)
 		VERBOSE_TOROUT_STRING("srcu_torture_init NMI-safe SRCU");
-	}
 	if (reader_flavor & SRCU_READ_FLAVOR_FAST) {
 		srcu_ctlp = &srcu_ctlf;
 		VERBOSE_TOROUT_STRING("srcu_torture_init fast SRCU");
