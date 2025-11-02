@@ -367,11 +367,10 @@ struct srcu_ctr __percpu notrace *__srcu_read_lock_fast_updown(struct srcu_struc
 	}
 
 	scp = READ_ONCE(ssp->srcu_ctrp);
-	if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE)) {
+	if (!IS_ENABLED(CONFIG_NEED_SRCU_NMI_SAFE))
 		this_cpu_inc(scp->srcu_locks.counter); // Y, and implicit RCU reader.
-	} else {
+	else
 		atomic_long_inc(raw_cpu_ptr(&scp->srcu_locks));  // Y, and implicit RCU reader.
-	}
 	barrier(); /* Avoid leaking the critical section. */
 	return scp;
 }
