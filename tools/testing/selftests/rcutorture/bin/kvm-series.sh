@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-2.0+
 #
 # Usage: kvm-series.sh config-list commit-id-list [ kvm.sh parameters ]
 #
@@ -7,7 +8,7 @@
 # then runs each commit through the specified list of commits using kvm.sh.
 # The runs are grouped into a -series/config/commit directory tree.
 # Each run defaults to a duration of one minute.
-# 
+#
 # Run in top-level Linux source directory.  Please note that this is in
 # no way a replacement for "git bisect"!!!
 #
