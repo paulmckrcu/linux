@@ -210,19 +210,19 @@ buildfaillist="`echo ${buildfaillist} | sed -e 's/^ *//' -e 's/ *$//'`"
 runfaillist="`echo ${runfaillist} | sed -e 's/^ *//' -e 's/ *$//'`"
 
 # Print lists of successes, build failures, and run failures, if any.
-if test -n "{successlist}"
+if test "${nsuccess}" -gt 0
 then
 	echo | tee -a $T/log
 	echo ${nsuccess} SUCCESSES: | tee -a $T/log
 	echo ${successlist} | fmt | tee -a $T/log
 fi
-if test -n "{buildfaillist}"
+if test "${nbuildfail}" -gt 0
 then
 	echo | tee -a $T/log
 	echo ${nbuildfail} BUILD FAILURES: | tee -a $T/log
 	echo ${buildfaillist} | fmt | tee -a $T/log
 fi
-if test -n "{runfaillist}"
+if test "${nrunfail}" -gt 0
 then
 	echo | tee -a $T/log
 	echo ${nrunfail} RUN FAILURES: | tee -a $T/log
@@ -230,7 +230,7 @@ then
 fi
 
 # If there were build or runtime failures, map them to commits.
-if test -n "${buildfaillist}" || test -n "${runfaillist}"
+if test "${nbuildfail}" -gt 0 || test "${nrunfail}" -gt 0
 then
 	echo | tee -a $T/log
 	echo Build failures across commits: | tee -a $T/log
