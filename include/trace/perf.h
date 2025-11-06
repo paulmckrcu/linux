@@ -71,7 +71,6 @@ perf_trace_##call(void *__data, proto)					\
 	u64 __count __attribute__((unused));				\
 	struct task_struct *__task __attribute__((unused));		\
 									\
-	guard(preempt_notrace)();					\
 	do_perf_trace_##call(__data, args);				\
 }
 
@@ -86,8 +85,9 @@ perf_trace_##call(void *__data, proto)					\
 	struct task_struct *__task __attribute__((unused));		\
 									\
 	might_fault();							\
-	guard(preempt_notrace)();					\
+	preempt_disable_notrace();					\
 	do_perf_trace_##call(__data, args);				\
+	preempt_enable_notrace();					\
 }
 
 /*

@@ -436,7 +436,6 @@ __DECLARE_EVENT_CLASS(call, PARAMS(proto), PARAMS(args), PARAMS(tstruct), \
 static notrace void							\
 trace_event_raw_event_##call(void *__data, proto)			\
 {									\
-	guard(preempt_notrace)();					\
 	do_trace_event_raw_event_##call(__data, args);			\
 }
 
@@ -448,8 +447,9 @@ static notrace void							\
 trace_event_raw_event_##call(void *__data, proto)			\
 {									\
 	might_fault();							\
-	guard(preempt_notrace)();					\
+	preempt_disable_notrace();					\
 	do_trace_event_raw_event_##call(__data, args);			\
+	preempt_enable_notrace();					\
 }
 
 /*
