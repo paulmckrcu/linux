@@ -96,11 +96,11 @@ do
 			nbuildfail=$((nbuildfail+1))
 			buildfaillist="$buildfaillist ${config}/${sha1}(${curret})"
 		else
-			batchncpus="`grep -v "^# cpus=" "${RCUTORTURE}/res/${ds}/${config}/${sha1}/batches" | awk '{ sum += $3 } END { print sum }'`"
+			batchncpus="`grep -v "^# cpus=" "${DS}/${config}/${sha1}/batches" | awk '{ sum += $3 } END { print sum }'`"
 			echo run_one_qemu ${sha_n} ${config}/${sha1} ${batchncpus} >> $T/torunlist
 			if test "${ncpus}" -eq 0
 			then
-				ncpus="`grep "^# cpus=" "${RCUTORTURE}/res/${ds}/${config}/${sha1}/batches" | sed -e 's/^# cpus=//'`"
+				ncpus="`grep "^# cpus=" "${DS}/${config}/${sha1}/batches" | sed -e 's/^# cpus=//'`"
 				case "${ncpus}" in
 				^[0-9]*$)
 					;;
@@ -137,13 +137,13 @@ do_run_one_qemu () {
 	local resultsdir="$2"
 	local qemu_curout="$3"
 
-	tools/testing/selftests/rcutorture/bin/kvm-again.sh "${RCUTORTURE}/res/${ds}/${resultsdir}" --link inplace-force > ${qemu_curout} 2>&1
+	tools/testing/selftests/rcutorture/bin/kvm-again.sh "${DS}/${resultsdir}" --link inplace-force > ${qemu_curout} 2>&1
 	ret=$?
 	if test "${ret}" -eq 0
 	then
 		echo ${resultsdir} >> $T/successlistfile
 		# Successful run, so remove large files.
-		rm -f ${RCUTORTURE}/res/${ds}/${resultsdir}/{vmlinux,bzImage,System.map,Module.symvers}
+		rm -f ${DS}/${resultsdir}/{vmlinux,bzImage,System.map,Module.symvers}
 	else
 		echo "${resultsdir}(${ret})" >> $T/faillistfile
 	fi
@@ -156,7 +156,7 @@ do_run_one_qemu () {
 cleanup_qemu_batch () {
 	local batchncpus="$1"
 
-	echo Waiting, cpusused=${cpusused}, ncpus=${ncpus} PID=$$ `date` | tee -a $T/log
+	echo Waiting, cpusused=${cpusused}, ncpus=${ncpus} `date` | tee -a $T/log
 	wait
 	cpusused="${batchncpus}"
 	nsuccessbatch="`wc -l $T/successlistfile | awk '{ print $1 }'`"
@@ -184,12 +184,12 @@ run_one_qemu () {
 	local qemu_curout
 
 	cpusused=$((cpusused+batchncpus))
-	echo Checking, cpusused=${cpusused}, batchncpus=${batchncpus}, ncpus=${ncpus}, PID=$$
 	if test "${cpusused}" -gt $ncpus
 	then
 		cleanup_qemu_batch "${batchncpus}"
 	fi
-	qemu_curout="${RCUTORTURE}/res/${ds}/${config_sha1}/qemu-series"
+	echo Starting ${config_sha1} using ${batchncpus} CPUs `date`
+	qemu_curout="${DS}/${config_sha1}/qemu-series"
 	do_run_one_qemu "$ds" "${config_sha1}" ${qemu_curout} &
 }
 
@@ -242,6 +242,6 @@ fi
 echo | tee -a $T/log
 echo Started at $startdate, ended at `date`, duration `get_starttime_duration $starttime`. | tee -a $T/log
 echo Summary: Successes: ${nsuccess} Build Failures: ${nbuildfail} Runtime Failures: ${nrunfail}| tee -a $T/log
-cp $T/log tools/testing/selftests/rcutorture/res/${ds}
+cp $T/log ${DS}
 
 exit "${ret}"
