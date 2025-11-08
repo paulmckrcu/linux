@@ -198,6 +198,7 @@ run_one_qemu () {
 TORTURE_NO_AFFINITY="no-affinity"; export TORTURE_NO_AFFINITY
 
 # Run the kernels (if any) that built correctly.
+echo | tee -a $T/log # Put a blank line between build and run messages.
 . $T/torunlist
 cleanup_qemu_batch "${batchncpus}"
 
@@ -241,7 +242,7 @@ fi
 # Print run summary.
 echo | tee -a $T/log
 echo Started at $startdate, ended at `date`, duration `get_starttime_duration $starttime`. | tee -a $T/log
-echo Summary: Successes: ${nsuccess} Build Failures: ${nbuildfail} Runtime Failures: ${nrunfail}| tee -a $T/log
+echo Summary: Successes: ${nsuccess} " "Build Failures: ${nbuildfail} " "Runtime Failures: ${nrunfail}| tee -a $T/log
 cp $T/log ${DS}
 
 exit "${ret}"
