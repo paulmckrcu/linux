@@ -1087,6 +1087,10 @@ static void synchronize_rcu_trivial_preempt(void)
 static void rcu_sync_torture_init_trivial_preempt(void)
 {
 	rcu_sync_torture_init();
+	if (WARN_ONCE(onoff_interval || shuffle_interval, "%s: Non-zero onoff_interval (%d) or shuffle_interval (%d) breaks trivial RCU, resetting to zero", __func__, onoff_interval, shuffle_interval)) {
+		onoff_interval = 0;
+		shuffle_interval = 0;
+	}
 }
 
 static int rcu_torture_read_lock_trivial_preempt(void)
