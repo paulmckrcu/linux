@@ -1074,8 +1074,10 @@ static void synchronize_rcu_trivial_preempt(void)
 	struct task_struct *g;
 	struct task_struct *t;
 
+	smp_mb(); // Order prior accesses before grace-period start.
 	rcu_read_lock(); // Protect task list.
 	for_each_process_thread(g, t) {
+		// Order later rcu_read_lock() on other tasks after QS.
 		while (smp_load_acquire(&t->rcu_trivial_preempt_nesting))
 			continue;
 	}
@@ -1091,7 +1093,7 @@ static int rcu_torture_read_lock_trivial_preempt(void)
 {
 	struct task_struct *t = current;
 
-	WRITE_ONCE(t->rcu_trivial_preempt_nesting, READ_ONCE(t->rcu_trivial_preempt_nesting) + 1);
+	WRITE_ONCE(t->rcu_trivial_preempt_nesting, t->rcu_trivial_preempt_nesting + 1);
 	smp_mb();
 	return 0;
 }
@@ -1100,21 +1102,20 @@ static void rcu_torture_read_unlock_trivial_preempt(int idx)
 {
 	struct task_struct *t = current;
 
-	smp_mb();
-	WRITE_ONCE(t->rcu_trivial_preempt_nesting, READ_ONCE(t->rcu_trivial_preempt_nesting) - 1);
+	smp_store_release(&t->rcu_trivial_preempt_nesting, t->rcu_trivial_preempt_nesting - 1);
 }
 
 static struct rcu_torture_ops trivial_preempt_ops = {
 	.ttype		= RCU_TRIVIAL_FLAVOR,
 	.init		= rcu_sync_torture_init_trivial_preempt,
 	.readlock	= rcu_torture_read_lock_trivial_preempt,
-	.read_delay	= rcu_read_delay,  /* just reuse rcu's version. */
+	.read_delay	= rcu_read_delay,  // just reuse rcu's version.
 	.readunlock	= rcu_torture_read_unlock_trivial_preempt,
 	.readlock_held	= torture_readlock_not_held,
 	.get_gp_seq	= rcu_no_completed,
 	.sync		= synchronize_rcu_trivial_preempt,
 	.exp_sync	= synchronize_rcu_trivial_preempt,
-	.irq_capable	= 1,
+	.irq_capable	= 0, // In theory it should be, but let's keep it trivial.
 	.name		= "trivial-preempt"
 };
 
