@@ -1061,6 +1061,71 @@ static struct rcu_torture_ops trivial_ops = {
 	.name		= "trivial"
 };
 
+#ifdef CONFIG_TRIVIAL_PREEMPT_RCU
+
+/*
+ * Definitions for trivial CONFIG_PREEMPT=y torture testing.  This
+ * implementation does not work well with large numbers of tasks or with
+ * long-term preemption.  Either or both get you RCU CPU stall warnings.
+ */
+
+static void synchronize_rcu_trivial_preempt(void)
+{
+	struct task_struct *g;
+	struct task_struct *t;
+
+	rcu_read_lock(); // Protect task list.
+	for_each_process_thread(g, t) {
+		while (smp_load_acquire(&t->rcu_trivial_preempt_nesting))
+			continue;
+	}
+	rcu_read_unlock();
+}
+
+static void rcu_sync_torture_init_trivial_preempt(void)
+{
+	rcu_sync_torture_init();
+}
+
+static int rcu_torture_read_lock_trivial_preempt(void)
+{
+	struct task_struct *t = current;
+
+	WRITE_ONCE(t->rcu_trivial_preempt_nesting, READ_ONCE(t->rcu_trivial_preempt_nesting) + 1);
+	smp_mb();
+	return 0;
+}
+
+static void rcu_torture_read_unlock_trivial_preempt(int idx)
+{
+	struct task_struct *t = current;
+
+	smp_mb();
+	WRITE_ONCE(t->rcu_trivial_preempt_nesting, READ_ONCE(t->rcu_trivial_preempt_nesting) - 1);
+}
+
+static struct rcu_torture_ops trivial_preempt_ops = {
+	.ttype		= RCU_TRIVIAL_FLAVOR,
+	.init		= rcu_sync_torture_init_trivial_preempt,
+	.readlock	= rcu_torture_read_lock_trivial_preempt,
+	.read_delay	= rcu_read_delay,  /* just reuse rcu's version. */
+	.readunlock	= rcu_torture_read_unlock_trivial_preempt,
+	.readlock_held	= torture_readlock_not_held,
+	.get_gp_seq	= rcu_no_completed,
+	.sync		= synchronize_rcu_trivial_preempt,
+	.exp_sync	= synchronize_rcu_trivial_preempt,
+	.irq_capable	= 1,
+	.name		= "trivial-preempt"
+};
+
+#define TRIVIAL_PREEMPT_OPS &trivial_preempt_ops,
+
+#else // #ifdef CONFIG_TRIVIAL_PREEMPT_RCU
+
+#define TRIVIAL_PREEMPT_OPS
+
+#endif // #else // #ifdef CONFIG_TRIVIAL_PREEMPT_RCU
+
 #ifdef CONFIG_TASKS_RCU
 
 /*
@@ -4450,7 +4515,7 @@ rcu_torture_init(void)
 	static struct rcu_torture_ops *torture_ops[] = {
 		&rcu_ops, &rcu_busted_ops, &srcu_ops, &srcud_ops, &busted_srcud_ops,
 		TASKS_OPS TASKS_RUDE_OPS TASKS_TRACING_OPS
-		&trivial_ops,
+		&trivial_ops, TRIVIAL_PREEMPT_OPS
 	};
 
 	if (!torture_init_begin(torture_type, verbose))
