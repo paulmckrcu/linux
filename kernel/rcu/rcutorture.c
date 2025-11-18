@@ -1069,21 +1069,6 @@ static struct rcu_torture_ops trivial_ops = {
  * long-term preemption.  Either or both get you RCU CPU stall warnings.
  */
 
-static void synchronize_rcu_trivial_preempt(void)
-{
-	struct task_struct *g;
-	struct task_struct *t;
-
-	smp_mb(); // Order prior accesses before grace-period start.
-	rcu_read_lock(); // Protect task list.
-	for_each_process_thread(g, t) {
-		// Order later rcu_read_lock() on other tasks after QS.
-		while (smp_load_acquire(&t->rcu_trivial_preempt_nesting))
-			continue;
-	}
-	rcu_read_unlock();
-}
-
 static void rcu_sync_torture_init_trivial_preempt(void)
 {
 	rcu_sync_torture_init();
