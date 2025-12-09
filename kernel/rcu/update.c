@@ -557,6 +557,7 @@ void synchronize_rcu_trivial_preempt(void)
 	}
 	rcu_read_unlock();
 }
+EXPORT_SYMBOL_GPL(synchronize_rcu_trivial_preempt);
 #endif // #if IS_ENABLED(CONFIG_TRIVIAL_PREEMPT_RCU)
 
 int rcu_cpu_stall_notifiers __read_mostly; // !0 = provide stall notifiers (rarely useful)
