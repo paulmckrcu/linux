@@ -863,7 +863,7 @@ our %deprecated_apis = (
 	#These should be enough to drive away new IDR users
 	"DEFINE_IDR"				=> "DEFINE_XARRAY",
 	"idr_init"				=> "xa_init",
-	"idr_init_base"				=> "xa_init_flags"
+	"idr_init_base"				=> "xa_init_flags",
 	"rcu_read_lock_trace"			=> "rcu_read_lock_tasks_trace",
 	"rcu_read_unlock_trace"			=> "rcu_read_unlock_tasks_trace",
 );
