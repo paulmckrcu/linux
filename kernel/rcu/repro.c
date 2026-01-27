@@ -34,8 +34,6 @@
 #include <linux/torture.h>
 #include <linux/sched/debug.h>
 
-#include "rcu.h"
-
 MODULE_DESCRIPTION("Experimental bug-reproducr facility");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Paul E. McKenney <paulmckrcu@meta.com>");
@@ -72,11 +70,13 @@ MODULE_AUTHOR("Paul E. McKenney <paulmckrcu@meta.com>");
 #endif
 
 torture_param(int, holdoff, 10, "Holdoff time before test start (s)");
-torture_param(int, nreaders, -1, "Number of RCU reader threads");
-torture_param(int, nwriters, -1, "Number of RCU updater threads");
-torture_param(int, reader_hold, 100, "Time to read-hold lock (us)");
-torture_param(int, reader_wait, 10, "Time to between read acquisitions (us)");
+torture_param(int, nreaders, -1, "Number of repro reader threads");
+torture_param(int, nspinners, -1, "Number of repro spinner threads");
+torture_param(int, nwriters, -1, "Number of repro updater threads");
+torture_param(int, reader_hold, 100, "Time to spin (us)");
+torture_param(int, reader_wait, 10, "Time to wait between spins (us)");
 torture_param(int, shutdown_secs, 0, "Shutdown time (s), <= zero to disable");
+torture_param(int, spinner_hold, 100, "Time to spin on each pass through loop (us)");
 torture_param(int, verbose, 1, "Enable verbose debugging printk()s");
 torture_param(int, writer_hold, 1000, "Time to write-hold lock (us)");
 torture_param(int, writer_wait, 1000, "Time to between write acquisitions (us)");
@@ -86,13 +86,17 @@ module_param(scale_type, charp, 0444);
 MODULE_PARM_DESC(scale_type, "Type of sleeplock to use (rwsem, ...)");
 
 static int nrealreaders;
+static int nrealspinners;
 static int nrealwriters;
-static struct task_struct **writer_tasks;
 static struct task_struct **reader_tasks;
+static struct task_struct **spinner_tasks;
+static struct task_struct **writer_tasks;
 static struct task_struct *shutdown_task;
 
 static atomic_t n_repro_reader_started;
 static atomic_t n_repro_reader_finished;
+static atomic_t n_repro_spinner_started;
+static atomic_t n_repro_spinner_finished;
 static atomic_t n_repro_writer_started;
 static atomic_t n_repro_writer_finished;
 
@@ -153,8 +157,10 @@ static struct repro_ops rwsem_ops = {
 static void repro_wait_shutdown(void)
 {
 	if (atomic_read(&n_repro_writer_finished) < nrealwriters ||
-	    atomic_read(&n_repro_reader_finished) < nrealreaders)
+	    atomic_read(&n_repro_reader_finished) < nrealreaders) {
+		cond_resched();
 		return;
+	}
 	while (!torture_must_stop())
 		schedule_timeout_uninterruptible(1);
 }
@@ -187,6 +193,33 @@ repro_reader(void *arg)
 	} while (!torture_must_stop());
 	atomic_inc(&n_repro_reader_finished);
 	torture_kthread_stopping("repro_reader");
+	return 0;
+}
+
+/*
+ * Reproducer spinner (CPU hog) kthread.  Repeatedly does pretty much
+ * nothing.
+ */
+static int
+repro_spinner(void *arg)
+{
+	long me = (long)arg;
+
+	VERBOSE_REPROOUT_STRING("repro_spinner task started");
+	set_cpus_allowed_ptr(current, cpumask_of(me % nr_cpu_ids));
+	atomic_inc(&n_repro_spinner_started);
+
+	if (holdoff) {
+		schedule_timeout_idle(holdoff * HZ);
+		VERBOSE_REPROOUT_STRING("repro_spinner holdoff complete");
+	}
+
+	do {
+		udelay(spinner_hold);
+		repro_wait_shutdown();
+	} while (!torture_must_stop());
+	atomic_inc(&n_repro_spinner_finished);
+	torture_kthread_stopping("repro_spinner");
 	return 0;
 }
 
@@ -232,8 +265,8 @@ static void
 repro_print_module_parms(struct repro_ops *cur_ops, const char *tag)
 {
 	pr_alert("%s" REPRO_FLAG
-		 "--- %s: nreaders=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d writer_hold=%d writer_wait=%d verbose=%d\n",
-		 scale_type, tag, nrealreaders, nrealwriters, reader_hold, reader_wait, shutdown_secs, writer_hold, writer_wait, verbose);
+		 "--- %s: nreaders=%d nspinners=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d writer_hold=%d writer_wait=%d verbose=%d\n",
+		 scale_type, tag, nrealreaders, nspinners, nrealwriters, reader_hold, reader_wait, shutdown_secs, writer_hold, writer_wait, verbose);
 }
 
 /*
@@ -283,6 +316,13 @@ repro_cleanup(void)
 		writer_tasks = NULL;
 	}
 
+	if (spinner_tasks) {
+		for (i = 0; i < nrealspinners; i++)
+			torture_stop_kthread(repro_spinner, spinner_tasks[i]);
+		kfree(spinner_tasks);
+		spinner_tasks = NULL;
+	}
+
 	/* Do torture-type-specific cleanup operations.  */
 	if (cur_ops->cleanup != NULL)
 		cur_ops->cleanup();
@@ -293,7 +333,7 @@ repro_cleanup(void)
 }
 
 /*
- * RCU scalability shutdown kthread.  Just waits to be awakened, then shuts
+ * Reproducer shutdown kthread.  Just waits to be awakened, then shuts
  * down system.
  */
 static int
@@ -303,6 +343,7 @@ repro_shutdown(void *arg)
 	schedule_timeout_idle(shutdown_secs * HZ);
 	REPROOUT_STRING("Reached shutdown_secs in repro_shutdown.");
 	WARN(atomic_read(&n_repro_writer_started) < nrealwriters ||
+	     atomic_read(&n_repro_spinner_started) < nrealspinners ||
 	     atomic_read(&n_repro_reader_started) < nrealreaders,
 	     "%s: Initialization incomplete, %d of %d readers and %d of %d writers",
 	     atomic_read(&n_repro_writer_started), nrealwriters,
@@ -349,10 +390,13 @@ repro_init(void)
 	} else {
 		nrealwriters = compute_real(nwriters);
 	}
+	nrealspinners = compute_real(nspinners);
 	nrealreaders = compute_real(nreaders);
 	atomic_set(&n_repro_reader_started, 0);
+	atomic_set(&n_repro_spinner_started, 0);
 	atomic_set(&n_repro_writer_started, 0);
 	atomic_set(&n_repro_writer_finished, 0);
+	atomic_set(&n_repro_spinner_finished, 0);
 	atomic_set(&n_repro_reader_finished, 0);
 	repro_print_module_parms(cur_ops, "Start of test");
 
@@ -365,8 +409,7 @@ repro_init(void)
 			goto unwind;
 		schedule_timeout_uninterruptible(1);
 	}
-	reader_tasks = kcalloc(nrealreaders, sizeof(reader_tasks[0]),
-			       GFP_KERNEL);
+	reader_tasks = kcalloc(nrealreaders, sizeof(reader_tasks[0]), GFP_KERNEL);
 	if (!reader_tasks) {
 		REPROOUT_ERRSTRING("out of memory");
 		firsterr = -ENOMEM;
@@ -393,6 +436,21 @@ repro_init(void)
 	while (atomic_read(&n_repro_writer_started) < nrealwriters)
 		schedule_timeout_uninterruptible(1);
 	writer_tasks = kcalloc(nrealwriters, sizeof(writer_tasks[0]), GFP_KERNEL);
+
+	// Spinners last!  They might prevent others from getting started.
+	spinner_tasks = kcalloc(nrealspinners, sizeof(spinner_tasks[0]), GFP_KERNEL);
+	if (!spinner_tasks) {
+		REPROOUT_ERRSTRING("out of memory");
+		firsterr = -ENOMEM;
+		goto unwind;
+	}
+	for (i = 0; i < nrealspinners; i++) {
+		firsterr = torture_create_kthread(repro_spinner, (void *)i, spinner_tasks[i]);
+		if (torture_init_error(firsterr))
+			goto unwind;
+	}
+	while (atomic_read(&n_repro_spinner_started) < nrealspinners)
+		schedule_timeout_uninterruptible(1);
 	torture_init_end();
 	return 0;
 
