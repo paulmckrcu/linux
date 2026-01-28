@@ -87,6 +87,7 @@ static atomic_t n_repro_spinner_started;
 static atomic_t n_repro_spinner_finished;
 static atomic_t n_repro_writer_started;
 static atomic_t n_repro_writer_finished;
+static atomic_long_t n_repro_writer_jmax;
 
 /*
  * Operations vector for selecting different types of tests.
@@ -213,11 +214,13 @@ repro_spinner(void *arg)
 }
 
 /*
- * Reproducer writer kthread.  Repeatedly does a grace period.
+ * Reproducer writer kthread.  Repeatedly write-acquires.
  */
 static int
 repro_writer(void *arg)
 {
+	unsigned long j = 0;
+	unsigned long jmax = 0; // Maximum lock-acquisition delay in jiffies.
 	long me = (long)arg;
 	DEFINE_TORTURE_RANDOM(trs);
 
@@ -239,12 +242,19 @@ repro_writer(void *arg)
 		schedule_timeout_uninterruptible(1);
 
 	do {
+		j = jiffies;
 		cur_ops->writelock();
+		j = jiffies - j;
+		if (j > jmax)
+			jmax = j;
 		udelay(writer_hold);
 		cur_ops->writeunlock();
 		torture_hrtimeout_us(writer_wait, writer_wait, &trs);
 		repro_wait_shutdown();
 	} while (!torture_must_stop());
+	j = atomic_long_read(&n_repro_writer_jmax);
+	while (jmax > j)
+		(void)atomic_long_try_cmpxchg(&n_repro_writer_jmax, &j, jmax);
 	atomic_inc(&n_repro_writer_finished);
 	torture_kthread_stopping("repro_writer");
 	return 0;
@@ -254,8 +264,8 @@ static void
 repro_print_module_parms(struct repro_ops *cur_ops, const char *tag)
 {
 	pr_alert("%s" REPRO_FLAG
-		 "--- %s: nreaders=%d nspinners=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d writer_hold=%d writer_wait=%d verbose=%d\n",
-		 scale_type, tag, nrealreaders, nspinners, nrealwriters, reader_hold, reader_wait, shutdown_secs, writer_hold, writer_wait, verbose);
+		 "--- %s: nreaders=%d nspinners=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d writer_hold=%d writer_wait=%d verbose=%d writer_jmax=%lu\n",
+		 scale_type, tag, nrealreaders, nspinners, nrealwriters, reader_hold, reader_wait, shutdown_secs, writer_hold, writer_wait, verbose, atomic_long_read(&n_repro_writer_jmax));
 }
 
 /*
@@ -391,6 +401,7 @@ repro_init(void)
 	atomic_set(&n_repro_writer_finished, 0);
 	atomic_set(&n_repro_spinner_finished, 0);
 	atomic_set(&n_repro_reader_finished, 0);
+	atomic_long_set(&n_repro_writer_jmax, 0);
 	repro_print_module_parms(cur_ops, "Start of test");
 
 	/* Start up the kthreads. */
