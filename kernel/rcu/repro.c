@@ -64,6 +64,7 @@ torture_param(int, reader_hold, 100, "Time to spin (us)");
 torture_param(int, reader_wait, 10, "Time to wait between spins (us)");
 torture_param(int, shutdown_secs, 0, "Shutdown time (s), <= zero to disable");
 torture_param(int, spinner_hold, 100, "Time to spin on each pass through loop (us)");
+torture_param(int, spinner_nice, -10, "Nice-value for spinner priority");
 torture_param(int, verbose, 1, "Enable verbose debugging printk()s");
 torture_param(int, writer_hold, 1000, "Time to write-hold lock (us)");
 torture_param(int, writer_wait, 1000, "Time to between write acquisitions (us)");
@@ -194,6 +195,7 @@ repro_spinner(void *arg)
 
 	VERBOSE_REPROOUT_STRING("repro_spinner task started");
 	set_cpus_allowed_ptr(current, cpumask_of(me % nr_cpu_ids));
+	sched_set_normal(current, spinner_nice);
 	atomic_inc(&n_repro_spinner_started);
 
 	if (holdoff) {
@@ -304,6 +306,10 @@ repro_cleanup(void)
 	}
 
 	if (spinner_tasks) {
+		if (spinner_nice < -20 || spinner_nice > 19) {
+			WARN_ON(!IS_MODULE(CONFIG_REPRO_TEST));
+			spinner_nice = 0;
+		}
 		for (i = 0; i < nrealspinners; i++)
 			torture_stop_kthread(repro_spinner, spinner_tasks[i]);
 		kfree(spinner_tasks);
