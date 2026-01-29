@@ -264,7 +264,7 @@ static void
 repro_print_module_parms(struct repro_ops *cur_ops, const char *tag)
 {
 	pr_alert("%s" REPRO_FLAG
-		 "--- %s: nreaders=%d nspinners=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d writer_hold=%d writer_wait=%d verbose=%d writer_jmax=%lu\n",
+		 "--- %s: nreaders=%d nspinners=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d writer_hold=%d writer_wait=%d verbose=%d writer_jmax=%lu jiffies\n",
 		 scale_type, tag, nrealreaders, nspinners, nrealwriters, reader_hold, reader_wait, shutdown_secs, writer_hold, writer_wait, verbose, atomic_long_read(&n_repro_writer_jmax));
 }
 
@@ -320,8 +320,10 @@ repro_cleanup(void)
 			WARN_ON(!IS_MODULE(CONFIG_REPRO_TEST));
 			spinner_nice = 0;
 		}
-		for (i = 0; i < nrealspinners; i++)
+		for (i = 0; i < nrealspinners; i++) {
+			WARN_ON_ONCE(task_nice(spinner_tasks[i]) != spinner_nice);
 			torture_stop_kthread(repro_spinner, spinner_tasks[i]);
+		}
 		kfree(spinner_tasks);
 		spinner_tasks = NULL;
 	}
