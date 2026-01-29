@@ -18,6 +18,7 @@
 #include <linux/moduleparam.h>
 #include <linux/reboot.h>
 #include <linux/sched.h>
+#include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/torture.h>
 
@@ -351,6 +352,7 @@ repro_shutdown(void *arg)
 	     atomic_read(&n_repro_spinner_started) < nrealspinners ||
 	     atomic_read(&n_repro_reader_started) < nrealreaders,
 	     "%s: Initialization incomplete, %d of %d readers and %d of %d writers",
+	     __func__,
 	     atomic_read(&n_repro_writer_started), nrealwriters,
 	     atomic_read(&n_repro_reader_started), nrealreaders);
 	repro_cleanup();
