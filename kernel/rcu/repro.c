@@ -66,6 +66,7 @@ torture_param(int, reader_wait, 10, "Time to wait between spins (us)");
 torture_param(int, shutdown_secs, 0, "Shutdown time (s), <= zero to disable");
 torture_param(int, spinner_hold, 100, "Time to spin on each pass through loop (us)");
 torture_param(int, spinner_nice, -10, "Nice-value for spinner priority");
+torture_param(int, stat_interval, 60, "Number of seconds between stats printk()s");
 torture_param(int, verbose, 1, "Enable verbose debugging printk()s");
 torture_param(int, writer_hold, 1000, "Time to write-hold lock (us)");
 torture_param(int, writer_wait, 1000, "Time to between write acquisitions (us)");
@@ -79,6 +80,7 @@ static int nrealspinners;
 static int nrealwriters;
 static struct task_struct **reader_tasks;
 static struct task_struct **spinner_tasks;
+static struct task_struct *stats_task;
 static struct task_struct **writer_tasks;
 static struct task_struct *shutdown_task;
 
@@ -214,6 +216,29 @@ repro_spinner(void *arg)
 	return 0;
 }
 
+static void repro_stats_print(void)
+{
+	pr_alert("%s" REPRO_FLAG "--- repro_stats writer_jmax=%lu jiffies\n",
+		 scale_type, atomic_long_read(&n_repro_writer_jmax));
+}
+
+/*
+ * Periodically prints torture statistics, if periodic statistics printing
+ * was specified via the stat_interval module parameter.
+ */
+static int repro_stats(void *arg)
+{
+	VERBOSE_REPROOUT_STRING("repro_stats task started");
+	sched_set_normal(current, -20);
+	do {
+		schedule_timeout_interruptible(stat_interval * HZ);
+		repro_stats_print();
+		torture_shutdown_absorb("repro_stats");
+	} while (!torture_must_stop());
+	torture_kthread_stopping("repro_stats");
+	return 0;
+}
+
 /*
  * Reproducer writer kthread.  Repeatedly write-acquires.
  */
@@ -248,6 +273,8 @@ repro_writer(void *arg)
 		j = jiffies - j;
 		if (j > jmax)
 			jmax = j;
+		if (jmax > j)
+			(void)atomic_long_try_cmpxchg(&n_repro_writer_jmax, &j, jmax);
 		udelay(writer_hold);
 		cur_ops->writeunlock();
 		torture_hrtimeout_us(writer_wait, writer_wait, &trs);
@@ -265,8 +292,8 @@ static void
 repro_print_module_parms(struct repro_ops *cur_ops, const char *tag)
 {
 	pr_alert("%s" REPRO_FLAG
-		 "--- %s: nreaders=%d nspinners=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d writer_hold=%d writer_wait=%d verbose=%d writer_jmax=%lu jiffies\n",
-		 scale_type, tag, nrealreaders, nspinners, nrealwriters, reader_hold, reader_wait, shutdown_secs, writer_hold, writer_wait, verbose, atomic_long_read(&n_repro_writer_jmax));
+		 "--- %s: nreaders=%d nspinners=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d stat_interval=%d writer_hold=%d writer_wait=%d verbose=%d\n",
+		 scale_type, tag, nrealreaders, nspinners, nrealwriters, reader_hold, reader_wait, shutdown_secs, stat_interval, writer_hold, writer_wait, verbose);
 }
 
 /*
@@ -328,6 +355,7 @@ repro_cleanup(void)
 		kfree(spinner_tasks);
 		spinner_tasks = NULL;
 	}
+	torture_stop_kthread(repro_stats, stats_task);
 
 	/* Do torture-type-specific cleanup operations.  */
 	if (cur_ops->cleanup != NULL)
@@ -444,6 +472,12 @@ repro_init(void)
 	while (atomic_read(&n_repro_writer_started) < nrealwriters)
 		schedule_timeout_uninterruptible(1);
 	writer_tasks = kcalloc(nrealwriters, sizeof(writer_tasks[0]), GFP_KERNEL);
+
+	if (stat_interval > 0) {
+		firsterr = torture_create_kthread(repro_stats, NULL, stats_task);
+		if (torture_init_error(firsterr))
+			goto unwind;
+	}
 
 	// Spinners last!  They might prevent others from getting started.
 	spinner_tasks = kcalloc(nrealspinners, sizeof(spinner_tasks[0]), GFP_KERNEL);
