@@ -374,6 +374,7 @@ static int
 repro_shutdown(void *arg)
 {
 	REPROOUT_STRING("Invoked repro_shutdown.");
+	sched_set_normal(current, -20);
 	schedule_timeout_idle(shutdown_secs * HZ);
 	REPROOUT_STRING("Reached shutdown_secs in repro_shutdown.");
 	WARN(atomic_read(&n_repro_writer_started) < nrealwriters ||
