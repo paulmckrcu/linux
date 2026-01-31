@@ -228,7 +228,11 @@ static void repro_stats_print(void)
  */
 static int repro_stats(void *arg)
 {
+	int cpu = cpumask_first(cpu_online_mask);
+
 	VERBOSE_REPROOUT_STRING("repro_stats task started");
+	if (cpu < nr_cpu_ids)
+		set_cpus_allowed_ptr(current, cpumask_of(cpu));
 	sched_set_normal(current, -20);
 	do {
 		schedule_timeout_interruptible(stat_interval * HZ);
