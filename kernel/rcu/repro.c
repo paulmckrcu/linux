@@ -60,6 +60,7 @@ MODULE_AUTHOR("Paul E. McKenney <paulmckrcu@meta.com>");
 torture_param(int, holdoff, 10, "Holdoff time before test start (s)");
 torture_param(int, nreaders, -1, "Number of repro reader threads");
 torture_param(int, nspinners, -1, "Number of repro spinner threads");
+torture_param(int, ntimers, -1, "Number of repro timer threads");
 torture_param(int, nwriters, -1, "Number of repro updater threads");
 torture_param(int, reader_hold, 100, "Time to spin (us)");
 torture_param(int, reader_wait, 10, "Time to wait between spins (us)");
@@ -77,10 +78,12 @@ MODULE_PARM_DESC(scale_type, "Type of sleeplock to use (rwsem, ...)");
 
 static int nrealreaders;
 static int nrealspinners;
+static int nrealtimers;
 static int nrealwriters;
 static struct task_struct **reader_tasks;
 static struct task_struct **spinner_tasks;
 static struct task_struct *stats_task;
+static struct task_struct **timer_tasks;
 static struct task_struct **writer_tasks;
 static struct task_struct *shutdown_task;
 
@@ -88,6 +91,10 @@ static atomic_t n_repro_reader_started;
 static atomic_t n_repro_reader_finished;
 static atomic_t n_repro_spinner_started;
 static atomic_t n_repro_spinner_finished;
+static atomic_long_t n_repro_stats_jmax;
+static atomic_t n_repro_timer_started;
+static atomic_t n_repro_timer_finished;
+static atomic_long_t n_repro_timer_jmax;
 static atomic_t n_repro_writer_started;
 static atomic_t n_repro_writer_finished;
 static atomic_long_t n_repro_writer_jmax;
@@ -149,6 +156,7 @@ static struct repro_ops rwsem_ops = {
 static void repro_wait_shutdown(void)
 {
 	if (atomic_read(&n_repro_writer_finished) < nrealwriters ||
+	    atomic_read(&n_repro_timer_finished) < nrealwriters ||
 	    atomic_read(&n_repro_reader_finished) < nrealreaders) {
 		cond_resched();
 		return;
@@ -218,8 +226,10 @@ repro_spinner(void *arg)
 
 static void repro_stats_print(void)
 {
-	pr_alert("%s" REPRO_FLAG "--- repro_stats writer_jmax=%lu jiffies\n",
-		 scale_type, atomic_long_read(&n_repro_writer_jmax));
+	pr_alert("%s" REPRO_FLAG
+		 "--- repro_stats n_repro_stats_jmax=%lu n_repro_timer_jmax=%lu writer_jmax=%lu (jiffies)\n",
+		 scale_type, atomic_long_read(&n_repro_stats_jmax),
+		 atomic_long_read(&n_repro_timer_jmax), atomic_long_read(&n_repro_writer_jmax));
 }
 
 /*
@@ -229,17 +239,69 @@ static void repro_stats_print(void)
 static int repro_stats(void *arg)
 {
 	int cpu = cpumask_first(cpu_online_mask);
+	unsigned long j;
+	unsigned long jmax = 0; // Maximum excess hrtimer delay in jiffies.
 
 	VERBOSE_REPROOUT_STRING("repro_stats task started");
 	if (cpu < nr_cpu_ids)
 		set_cpus_allowed_ptr(current, cpumask_of(cpu));
 	sched_set_normal(current, -20);
 	do {
-		schedule_timeout_interruptible(stat_interval * HZ);
+		j = jiffies;
+		torture_hrtimeout_s(stat_interval, 0, NULL);
+		j = jiffies - j - stat_interval * HZ;
+		if (j > (unsigned long)LONG_MAX)
+			j = 0;
+		if (j > jmax)
+			jmax = j;
+		j = atomic_long_read(&n_repro_stats_jmax);
+		if (jmax > j)
+			(void)atomic_long_try_cmpxchg(&n_repro_stats_jmax, &j, jmax);
 		repro_stats_print();
 		torture_shutdown_absorb("repro_stats");
 	} while (!torture_must_stop());
+	j = atomic_long_read(&n_repro_stats_jmax);
+	while (jmax > j)
+		(void)atomic_long_try_cmpxchg(&n_repro_stats_jmax, &j, jmax);
 	torture_kthread_stopping("repro_stats");
+	return 0;
+}
+
+/*
+ * Each pass waits a jiffy, then records delay.  Default priority and
+ * not bound to a CPU.
+ */
+static int repro_timer(void *arg)
+{
+	unsigned long j;
+	unsigned long jmax = 0; // Maximum timer delay in jiffies.
+	const unsigned long jwait = 10;
+
+	VERBOSE_REPROOUT_STRING("repro_timer task started");
+	atomic_inc(&n_repro_timer_started);
+
+	if (holdoff) {
+		schedule_timeout_idle(holdoff * HZ);
+		VERBOSE_REPROOUT_STRING("repro_timer holdoff complete");
+	}
+	do {
+		j = jiffies;
+		torture_hrtimeout_jiffies(jwait, NULL);
+		j = jiffies - j - jwait;
+		if (j > (unsigned long)LONG_MAX)
+			j = 0;
+		if (j > jmax)
+			jmax = j;
+		j = atomic_long_read(&n_repro_timer_jmax);
+		if (jmax > j)
+			(void)atomic_long_try_cmpxchg(&n_repro_timer_jmax, &j, jmax);
+		torture_shutdown_absorb("repro_timer");
+	} while (!torture_must_stop());
+	j = atomic_long_read(&n_repro_timer_jmax);
+	while (jmax > j)
+		(void)atomic_long_try_cmpxchg(&n_repro_timer_jmax, &j, jmax);
+	atomic_inc(&n_repro_timer_finished);
+	torture_kthread_stopping("repro_timer");
 	return 0;
 }
 
@@ -249,7 +311,7 @@ static int repro_stats(void *arg)
 static int
 repro_writer(void *arg)
 {
-	unsigned long j = 0;
+	unsigned long j;
 	unsigned long jmax = 0; // Maximum lock-acquisition delay in jiffies.
 	long me = (long)arg;
 	DEFINE_TORTURE_RANDOM(trs);
@@ -277,6 +339,7 @@ repro_writer(void *arg)
 		j = jiffies - j;
 		if (j > jmax)
 			jmax = j;
+		j = atomic_long_read(&n_repro_writer_jmax);
 		if (jmax > j)
 			(void)atomic_long_try_cmpxchg(&n_repro_writer_jmax, &j, jmax);
 		udelay(writer_hold);
@@ -296,8 +359,8 @@ static void
 repro_print_module_parms(struct repro_ops *cur_ops, const char *tag)
 {
 	pr_alert("%s" REPRO_FLAG
-		 "--- %s: nreaders=%d nspinners=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d stat_interval=%d writer_hold=%d writer_wait=%d verbose=%d\n",
-		 scale_type, tag, nrealreaders, nspinners, nrealwriters, reader_hold, reader_wait, shutdown_secs, stat_interval, writer_hold, writer_wait, verbose);
+		 "--- %s: nreaders=%d nspinners=%d ntimers=%d nwriters=%d reader_hold=%d reader_wait=%d shutdown_secs=%d stat_interval=%d writer_hold=%d writer_wait=%d verbose=%d\n",
+		 scale_type, tag, nrealreaders, nspinners, nrealtimers, nrealwriters, reader_hold, reader_wait, shutdown_secs, stat_interval, writer_hold, writer_wait, verbose);
 }
 
 /*
@@ -333,20 +396,7 @@ repro_cleanup(void)
 		return;
 	}
 
-	if (reader_tasks) {
-		for (i = 0; i < nrealreaders; i++)
-			torture_stop_kthread(repro_reader, reader_tasks[i]);
-		kfree(reader_tasks);
-		reader_tasks = NULL;
-	}
-
-	if (writer_tasks) {
-		for (i = 0; i < nrealwriters; i++)
-			torture_stop_kthread(repro_writer, writer_tasks[i]);
-		kfree(writer_tasks);
-		writer_tasks = NULL;
-	}
-
+	// Stop spinners first because they are usually higher priority.
 	if (spinner_tasks) {
 		if (spinner_nice < -20 || spinner_nice > 19) {
 			WARN_ON(!IS_MODULE(CONFIG_REPRO_TEST));
@@ -360,6 +410,27 @@ repro_cleanup(void)
 		spinner_tasks = NULL;
 	}
 	torture_stop_kthread(repro_stats, stats_task);
+
+	if (reader_tasks) {
+		for (i = 0; i < nrealreaders; i++)
+			torture_stop_kthread(repro_reader, reader_tasks[i]);
+		kfree(reader_tasks);
+		reader_tasks = NULL;
+	}
+
+	if (timer_tasks) {
+		for (i = 0; i < nrealtimers; i++)
+			torture_stop_kthread(repro_timer, timer_tasks[i]);
+		kfree(timer_tasks);
+		timer_tasks = NULL;
+	}
+
+	if (writer_tasks) {
+		for (i = 0; i < nrealwriters; i++)
+			torture_stop_kthread(repro_writer, writer_tasks[i]);
+		kfree(writer_tasks);
+		writer_tasks = NULL;
+	}
 
 	/* Do torture-type-specific cleanup operations.  */
 	if (cur_ops->cleanup != NULL)
@@ -379,15 +450,16 @@ repro_shutdown(void *arg)
 {
 	REPROOUT_STRING("Invoked repro_shutdown.");
 	sched_set_normal(current, -20);
-	schedule_timeout_idle(shutdown_secs * HZ);
+	torture_hrtimeout_s(shutdown_secs, 0, NULL);
 	REPROOUT_STRING("Reached shutdown_secs in repro_shutdown.");
 	WARN(atomic_read(&n_repro_writer_started) < nrealwriters ||
 	     atomic_read(&n_repro_spinner_started) < nrealspinners ||
 	     atomic_read(&n_repro_reader_started) < nrealreaders,
-	     "%s: Initialization incomplete, %d of %d readers and %d of %d writers",
+	     "%s: Initialization incomplete, %d of %d readers, %d of %d timers, and %d of %d writers",
 	     __func__,
-	     atomic_read(&n_repro_writer_started), nrealwriters,
-	     atomic_read(&n_repro_reader_started), nrealreaders);
+	     atomic_read(&n_repro_reader_started), nrealreaders,
+	     atomic_read(&n_repro_timer_started), nrealtimers,
+	     atomic_read(&n_repro_writer_started), nrealwriters);
 	repro_cleanup();
 	kernel_power_off();
 	return -EINVAL;
@@ -431,6 +503,7 @@ repro_init(void)
 		nrealwriters = compute_real(nwriters);
 	}
 	nrealspinners = compute_real(nspinners);
+	nrealtimers = compute_real(ntimers);
 	nrealreaders = compute_real(nreaders);
 	atomic_set(&n_repro_reader_started, 0);
 	atomic_set(&n_repro_spinner_started, 0);
@@ -438,6 +511,7 @@ repro_init(void)
 	atomic_set(&n_repro_writer_finished, 0);
 	atomic_set(&n_repro_spinner_finished, 0);
 	atomic_set(&n_repro_reader_finished, 0);
+	atomic_long_set(&n_repro_timer_jmax, 0);
 	atomic_long_set(&n_repro_writer_jmax, 0);
 	repro_print_module_parms(cur_ops, "Start of test");
 
@@ -463,6 +537,19 @@ repro_init(void)
 	}
 	while (atomic_read(&n_repro_reader_started) < nrealreaders)
 		schedule_timeout_uninterruptible(1);
+	timer_tasks = kcalloc(nrealtimers, sizeof(timer_tasks[0]), GFP_KERNEL);
+	if (!timer_tasks) {
+		REPROOUT_ERRSTRING("out of memory");
+		firsterr = -ENOMEM;
+		goto unwind;
+	}
+	for (i = 0; i < nrealtimers; i++) {
+		firsterr = torture_create_kthread(repro_timer, (void *)i, timer_tasks[i]);
+		if (torture_init_error(firsterr))
+			goto unwind;
+	}
+	while (atomic_read(&n_repro_timer_started) < nrealtimers)
+		schedule_timeout_uninterruptible(1);
 	writer_tasks = kcalloc(nrealwriters, sizeof(writer_tasks[0]), GFP_KERNEL);
 	if (!writer_tasks) {
 		REPROOUT_ERRSTRING("out of memory");
@@ -476,7 +563,6 @@ repro_init(void)
 	}
 	while (atomic_read(&n_repro_writer_started) < nrealwriters)
 		schedule_timeout_uninterruptible(1);
-	writer_tasks = kcalloc(nrealwriters, sizeof(writer_tasks[0]), GFP_KERNEL);
 
 	if (stat_interval > 0) {
 		firsterr = torture_create_kthread(repro_stats, NULL, stats_task);
