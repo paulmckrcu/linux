@@ -39,7 +39,7 @@ do
 		X*)
 			;;
 		*)
-			if test -f kvm-recheck-${TORTURE_SUITE}.sh
+			if test -f tools/testing/selftests/rcutorture/bin/kvm-recheck-${TORTURE_SUITE}.sh
 			then
 				kvm-recheck-${TORTURE_SUITE}.sh $i
 			else
