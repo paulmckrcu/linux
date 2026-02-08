@@ -93,7 +93,7 @@ torture_param(int, nruns, 30, "Number of experiments to run.");
 // Reader delay in nanoseconds, 0 for no delay.
 torture_param(int, readdelay, 0, "Read-side delay in nanoseconds.");
 // Maximum shutdown delay in seconds, or zero for no shutdown.
-torture_param(int, shutdown_secs, !IS_MODULE(CONFIG_REPRO_TEST),
+torture_param(int, shutdown_secs, !IS_MODULE(CONFIG_REPRO_TEST) * 300,
 	      "Shutdown at end of scalability tests or at specified timeout (s).");
 
 struct reader_task {
