@@ -62,14 +62,13 @@ torture_param(int, nreaders, -1, "Number of repro reader threads");
 torture_param(int, nspinners, -1, "Number of repro spinner threads");
 torture_param(int, ntimers, -1, "Number of repro timer threads");
 torture_param(int, nwriters, -1, "Number of repro updater threads");
-torture_param(int, reader_hold, 100, "Time to read-hold lock (us)");
+torture_param(int, reader_hold, 100, "Time to spin (us)");
 torture_param(int, reader_wait, 10, "Time to wait between spins (us)");
 torture_param(int, shutdown_secs, 0, "Shutdown time (s), <= zero to disable");
 torture_param(int, spinner_hold, 100, "Time to spin on each pass through loop (us)");
 torture_param(int, spinner_nice, -10, "Nice-value for spinner priority");
 torture_param(int, stat_interval, 60, "Number of seconds between stats printk()s");
 torture_param(int, verbose, 1, "Enable verbose debugging printk()s");
-torture_param(int, writer_reacquire, 100, "Time to wait for quick reacquisition (us)");
 torture_param(int, writer_hold, 1000, "Time to write-hold lock (us)");
 torture_param(int, writer_wait, 1000, "Time to between write acquisitions (us)");
 
@@ -187,7 +186,7 @@ repro_reader(void *arg)
 
 	do {
 		cur_ops->readlock();
-		torture_hrtimeout_us(reader_hold, reader_hold, &trs);
+		udelay(reader_hold);
 		cur_ops->readunlock();
 		torture_hrtimeout_us(reader_wait, reader_wait, &trs);
 		repro_wait_shutdown();
@@ -345,11 +344,6 @@ repro_writer(void *arg)
 			(void)atomic_long_try_cmpxchg(&n_repro_writer_jmax, &j, jmax);
 		udelay(writer_hold);
 		cur_ops->writeunlock();
-		if (writer_reacquire > 0) {
-			torture_hrtimeout_us(writer_reacquire, 0, NULL);
-			cur_ops->writelock();
-			cur_ops->writeunlock();
-		}
 		torture_hrtimeout_us(writer_wait, writer_wait, &trs);
 		repro_wait_shutdown();
 	} while (!torture_must_stop());
