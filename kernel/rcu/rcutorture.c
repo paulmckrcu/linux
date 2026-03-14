@@ -842,7 +842,13 @@ static unsigned long srcu_torture_completed(void)
 
 static void srcu_torture_deferred_free(struct rcu_torture *rp)
 {
+	bool pd = jiffies & 0x1;
+
+	if (pd)
+		preempt_disable();
 	call_srcu(srcu_ctlp, &rp->rtort_rcu, rcu_torture_cb);
+	if (pd)
+		preempt_enable();
 }
 
 static void srcu_torture_synchronize(void)
