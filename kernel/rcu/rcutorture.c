@@ -843,7 +843,7 @@ static unsigned long srcu_torture_completed(void)
 static void srcu_torture_deferred_free(struct rcu_torture *rp)
 {
 	unsigned long flags;
-	bool lockit = jiffies & 0x1;
+	bool lockit = IS_ENABLED(CONFIG_SMP) && (jiffies & 0x1);
 
 	if (lockit)
 		raw_spin_lock_irqsave(&current->pi_lock, flags);
