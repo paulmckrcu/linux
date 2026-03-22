@@ -2000,9 +2000,9 @@ static void srcu_irq_work(struct irq_work *work)
 	sup = container_of(work, struct srcu_usage, irq_work);
 	ssp = sup->srcu_ssp;
 
-	raw_spin_lock_irq_rcu_node(ssp->srcu_sup);
+	raw_spin_lock_rcu_node(ssp->srcu_sup);
 	delay = srcu_get_delay(ssp);
-	raw_spin_unlock_irq_rcu_node(ssp->srcu_sup);
+	raw_spin_unlock_rcu_node(ssp->srcu_sup);
 
 	queue_delayed_work(rcu_gp_wq, &sup->work, !!delay);
 }
