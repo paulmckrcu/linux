@@ -22,6 +22,7 @@
 #include <linux/spinlock.h>
 #include <linux/torture.h>
 #include <linux/hazptr.h>
+#include <linux/rcupdate.h>
 
 #include "rcu.h"
 
