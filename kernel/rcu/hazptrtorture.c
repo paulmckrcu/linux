@@ -199,10 +199,15 @@ static struct hazptr_torture_ops *cur_ops;
 
 static struct hazptr_torture *hazptr_torture_read_lock(struct hazptr_ctx **hcpp)
 {
-	struct hazptr_ctx *hcp = raw_cpu_ptr(&hazptr_torture_ctx);
+	struct hazptr_ctx *hcp;
+	struct hazptr_torture *htp;
 
+	preempt_disable();
+	hcp = raw_cpu_ptr(&hazptr_torture_ctx);
 	*hcpp = hcp;
-	return (struct hazptr_torture *)hazptr_acquire(hcp, (void *)&hazptr_torture_current);
+	htp = (struct hazptr_torture *)hazptr_acquire(hcp, (void *)&hazptr_torture_current);
+	preempt_disable();
+	return htp;
 }
 
 static void hazptr_read_delay(struct torture_random_state *rrsp)
