@@ -194,7 +194,8 @@ struct hazptr_torture_ops {
 static struct hazptr_torture_ops *cur_ops;
 
 /*
- * Definitions for hazard-pointer torture testing.
+ * Definitions for hazard-pointer torture testing using per-CPU hazptr_ctx
+ * structures.
  */
 
 static struct hazptr_torture *hazptr_torture_read_lock(struct hazptr_ctx **hcpp)
@@ -245,6 +246,29 @@ static struct hazptr_torture_ops hazptr_ops = {
 	.sync			= hazptr_synchronize,
 	.irq_capable		= 1,
 	.name			= "hazptr"
+};
+
+/*
+ * Definitions for hazard-pointer torture testing using on-stack
+ * hazptr_ctx structures.
+ */
+
+static struct hazptr_torture *hazptr_torture_read_lock_stack(struct hazptr_ctx **hcpp)
+{
+	struct hazptr_torture *htp;
+
+	htp = (struct hazptr_torture *)hazptr_acquire(*hcpp, (void *)&hazptr_torture_current);
+	return htp;
+}
+
+static struct hazptr_torture_ops hazptr_stack_ops = {
+	.init			= hazptr_sync_torture_init,
+	.readlock		= hazptr_torture_read_lock_stack,
+	.read_delay		= hazptr_read_delay,
+	.readunlock		= hazptr_torture_read_unlock,
+	.sync			= hazptr_synchronize,
+	.irq_capable		= 1,
+	.name			= "hazptr-stack"
 };
 
 /*
@@ -332,7 +356,8 @@ hazptr_torture_writer(void *arg)
  */
 static int hazptr_torture_reader(void *arg)
 {
-	struct hazptr_ctx *hcp;
+	struct hazptr_ctx hc;
+	struct hazptr_ctx *hcp = &hc;
 	struct hazptr_torture *htp;
 	unsigned long lastsleep = jiffies;
 	long myid = (long)arg;
@@ -565,7 +590,7 @@ static int __init hazptr_torture_init(void)
 	long i;
 	int cpu;
 	int firsterr = 0;
-	static struct hazptr_torture_ops *torture_ops[] = { &hazptr_ops, };
+	static struct hazptr_torture_ops *torture_ops[] = { &hazptr_ops, &hazptr_stack_ops, };
 
 	if (!torture_init_begin(torture_type, verbose))
 		return -EBUSY;
