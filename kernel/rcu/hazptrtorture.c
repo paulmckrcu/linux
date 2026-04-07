@@ -69,7 +69,6 @@ static unsigned long hazptr_torture_current_version;
 static struct hazptr_torture hazptr_tortures[10 * HAZPTR_TORTURE_PIPE_LEN];
 static DEFINE_SPINLOCK(hazptr_torture_lock);
 static DEFINE_PER_CPU(long [HAZPTR_TORTURE_PIPE_LEN + 1], hazptr_torture_count);
-static DEFINE_PER_CPU(struct hazptr_ctx, hazptr_torture_ctx);
 static atomic_t hazptr_torture_wcount[HAZPTR_TORTURE_PIPE_LEN + 1];
 static atomic_t n_hazptr_torture_alloc;
 static atomic_t n_hazptr_torture_alloc_fail;
@@ -188,6 +187,7 @@ struct hazptr_torture_ops {
 	void (*sync)(void *htp);
 	// @@@ void (*stats)(void); If statistics must be extracted from hazptr.c.
 	int irq_capable;
+	int must_free_ctx;
 	const char *name;
 };
 
@@ -200,11 +200,11 @@ static struct hazptr_torture_ops *cur_ops;
 
 static struct hazptr_torture *hazptr_torture_read_lock(struct hazptr_ctx **hcpp)
 {
-	struct hazptr_ctx *hcp;
+	struct hazptr_ctx *hcp = kmalloc(sizeof(*hcp), GFP_KERNEL);
 
-	guard(preempt)();
-	hcp = raw_cpu_ptr(&hazptr_torture_ctx);
 	*hcpp = hcp;
+	if (!hcp)
+		return NULL;
 	return (struct hazptr_torture *)hazptr_acquire(hcp, (void *)&hazptr_torture_current);
 }
 
@@ -230,7 +230,11 @@ static void hazptr_read_delay(struct torture_random_state *rrsp)
 
 static void hazptr_torture_read_unlock(struct hazptr_ctx *hcp, struct hazptr_torture *htp)
 {
-	hazptr_release(hcp, htp);
+	if (hcp) {
+		hazptr_release(hcp, htp);
+		if (cur_ops->must_free_ctx)
+			kfree(hcp);
+	}
 }
 
 static void hazptr_sync_torture_init(void)
@@ -245,6 +249,7 @@ static struct hazptr_torture_ops hazptr_ops = {
 	.readunlock		= hazptr_torture_read_unlock,
 	.sync			= hazptr_synchronize,
 	.irq_capable		= 1,
+	.must_free_ctx		= 1,
 	.name			= "hazptr"
 };
 
