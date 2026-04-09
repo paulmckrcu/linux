@@ -30,9 +30,10 @@ MODULE_DESCRIPTION("Hazard-pointer module-based torture test facility");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Paul E. McKenney <paulmckrcu@meta.com>");
 
-torture_param(int, irqreader, 1, "Allow hazard-pointer readers from irq handlers");
+// @@@ torture_param(int, irqreader, 1, "Allow hazard-pointer readers from irq handlers");
 // @@@ torture_param(int, leakpointer, 0, "Leak pointer dereferences from readers");
 torture_param(int, nreaders, -1, "Number of hazard-pointer reader threads");
+// @@@ Does testing CPU hotplug make sense for hazard pointers?
 torture_param(int, onoff_holdoff, 0, "Time after boot before CPU hotplugs (s)");
 torture_param(int, onoff_interval, 0, "Time between CPU hotplugs (jiffies), 0=disable");
 // @@@ Move the rcu_torture_preempt() function and friends to kernel/torture.c.
@@ -513,13 +514,15 @@ hazptr_torture_print_module_parms(struct hazptr_torture_ops *cur_ops, const char
 {
 	pr_alert("%s" TORTURE_FLAG
 		 "--- %s: nreaders=%d "
-		 "stat_interval=%d verbose=%d "
-		 "shuffle_interval=%d stutter=%d irqreader=%d "
-		 "onoff_interval=%d onoff_holdoff=%d\n",
+		 "onoff_interval=%d onoff_holdoff=%d "
+		 "preempt_duration=%d preempt_interval=%d "
+		 "shuffle_interval=%d shutdown_secs=%d stat_interval=%d stutter=%d "
+		 "verbose=%d\n",
 		 torture_type, tag, nrealreaders,
-		 stat_interval, verbose,
-		 shuffle_interval, stutter, irqreader,
-		 onoff_interval, onoff_holdoff);
+		 onoff_interval, onoff_holdoff,
+		 preempt_duration, preempt_interval,
+		 shuffle_interval, shutdown_secs, stat_interval, stutter,
+		 verbose);
 }
 
 // Randomly preempt online CPUs.
