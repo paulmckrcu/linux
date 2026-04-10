@@ -1431,7 +1431,8 @@ static unsigned long srcu_gp_start_if_needed(struct srcu_struct *ssp,
 static void __call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
 			rcu_callback_t func, bool do_norm)
 {
-	WARN_ON_ONCE(!rcu_cpu_beenfullyonline(raw_smp_processor_id()));
+	WARN_ON_ONCE(rcu_scheduler_active == RCU_SCHEDULER_RUNNING &&
+		     !rcu_cpu_beenfullyonline(raw_smp_processor_id()));
 	if (debug_rcu_head_queue(rhp)) {
 		/* Probable double call_srcu(), so leak the callback. */
 		WRITE_ONCE(rhp->func, srcu_leak_callback);
