@@ -426,6 +426,7 @@ struct rcu_torture_ops {
 	void (*format_gp_seqs)(unsigned long long seqs, char *cp, size_t len);
 	void (*set_gpwrap_lag)(unsigned long lag);
 	int (*get_gpwrap_count)(int cpu);
+	bool (*is_task_rcu_boosted)(void);
 	long cbflood_max;
 	int irq_capable;
 	int can_boost;
@@ -635,6 +636,7 @@ static struct rcu_torture_ops rcu_ops = {
 	.format_gp_seqs		= rcutorture_format_gp_seqs,
 	.set_gpwrap_lag		= rcu_set_gpwrap_lag,
 	.get_gpwrap_count	= rcu_get_gpwrap_count,
+	.is_task_rcu_boosted	= rcu_is_task_rcu_boosted,
 	.irq_capable		= 1,
 	.can_boost		= IS_ENABLED(CONFIG_RCU_BOOST),
 	.extendables		= RCUTORTURE_MAX_EXTEND,
@@ -2518,6 +2520,7 @@ static bool rcu_torture_one_read(struct torture_random_state *trsp, long myid)
 		return false;
 	rtors.rtrsp = rcutorture_loop_extend(&rtors.readstate, trsp, rtors.rtrsp);
 	rcu_torture_one_read_end(&rtors, trsp);
+	WARN_ON_ONCE(cur_ops->is_task_rcu_boosted && cur_ops->is_task_rcu_boosted());
 	return true;
 }
 
