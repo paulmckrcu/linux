@@ -2596,7 +2596,8 @@ static bool rcu_torture_one_read(struct torture_random_state *trsp, long myid)
 		return false;
 	rtors.rtrsp = rcutorture_loop_extend(&rtors.readstate, trsp, rtors.rtrsp);
 	rcu_torture_one_read_end(&rtors, trsp);
-	if (WARN_ON_ONCE(cur_ops->is_task_rcu_boosted && cur_ops->is_task_rcu_boosted()) &&
+	if (WARN_ON_ONCE(cur_ops->is_task_rcu_boosted && cur_ops->is_task_rcu_boosted() &&
+			 !in_serving_softirq()) &&
 	    READ_ONCE(firsttime) && xchg(&firsttime, 0)) {
 		nsegs = rtors.rtrsp - rtors.rtseg;
 		nsegs = clamp_val(nsegs, 0, RCUTORTURE_RDR_MAX_SEGS);
