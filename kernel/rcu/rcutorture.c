@@ -2601,6 +2601,7 @@ static bool rcu_torture_one_read(struct torture_random_state *trsp, long myid)
 	    READ_ONCE(firsttime) && xchg(&firsttime, 0)) {
 		nsegs = rtors.rtrsp - rtors.rtseg;
 		nsegs = clamp_val(nsegs, 0, RCUTORTURE_RDR_MAX_SEGS);
+		pr_alert("Slow-deboost rcutorture reader segments:\n");
 		rcu_torture_dump_read_segs(rtors.rtseg, nsegs);
 	}
 	return true;
