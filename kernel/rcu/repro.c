@@ -157,6 +157,7 @@ static struct repro_ops rwsem_ops = {
  */
 static void repro_wait_shutdown(void)
 {
+	cond_resched_tasks_rcu_qs();
 	if (atomic_read(&n_repro_writer_finished) < nrealwriters ||
 	    atomic_read(&n_repro_timer_finished) < nrealwriters ||
 	    atomic_read(&n_repro_reader_finished) < nrealreaders) {
