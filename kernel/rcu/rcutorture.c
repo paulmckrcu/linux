@@ -212,6 +212,7 @@ static long n_rcu_torture_boost_ktrerror;
 static long n_rcu_torture_boost_failure;
 static long n_rcu_torture_boosts;
 static atomic_long_t n_rcu_torture_timers;
+static atomic_long_t n_rcu_torture_irqs;
 static long n_barrier_attempts;
 static long n_barrier_successes; /* did rcu_barrier test succeed? */
 static unsigned long n_read_exits;
@@ -2337,10 +2338,17 @@ rcutorture_extend_mask(int oldmask, struct torture_random_state *trsp)
 	}
 
 	/*
+	 * Don't mess with interrupt masking in interrupt handlers.
+	 */
+	if (in_hardirq())
+		mask &= ~(preempts_irq | bhs);
+
+	/*
 	 * Can't enable bh w/irq disabled.
 	 */
 	if (mask & RCUTORTURE_RDR_IRQ)
 		mask |= oldmask & bhs;
+
 
 	/*
 	 * Ideally these sequences would be detected in debug builds
@@ -2633,6 +2641,30 @@ static void rcu_torture_timer(struct timer_list *unused)
 	atomic_long_inc(&n_rcu_torture_timers);
 	(void)rcu_torture_one_read(this_cpu_ptr(&rcu_torture_timer_rand), -1);
 
+	/* Test call_rcu() invocation from softirq handler. */
+	if (cur_ops->call) {
+		struct rcu_head *rhp = kmalloc_obj(*rhp, GFP_NOWAIT);
+
+		if (rhp)
+			cur_ops->call(rhp, rcu_torture_timer_cb);
+	}
+}
+
+static DEFINE_TORTURE_RANDOM_PERCPU(rcu_torture_irq_rand);
+
+/*
+ * RCU torture reader from timer handler.  Dereferences rcu_torture_current,
+ * incrementing the corresponding element of the pipeline array.  The
+ * counter in the element should never be greater than 1, otherwise, the
+ * RCU implementation is broken.
+ */
+static void rcu_torture_irq(void *unused)
+{
+	WARN_ON_ONCE(!in_hardirq());
+	WARN_ON_ONCE(in_nmi());
+	atomic_long_inc(&n_rcu_torture_irqs);
+	(void)rcu_torture_one_read(this_cpu_ptr(&rcu_torture_irq_rand), -1);
+
 	/* Test call_rcu() invocation from interrupt handler. */
 	if (cur_ops->call) {
 		struct rcu_head *rhp = kmalloc_obj(*rhp, GFP_NOWAIT);
@@ -2664,8 +2696,20 @@ rcu_torture_reader(void *arg)
 	tick_dep_set_task(current, TICK_DEP_BIT_RCU);  // CPU bound, so need tick.
 	do {
 		if (irqreader && cur_ops->irq_capable) {
-			if (!timer_pending(&t))
+			if (!timer_pending(&t)) {
+				int cpu;
+
 				mod_timer(&t, jiffies + 1);
+				preempt_disable();
+				cpu = torture_random(&rand) % nr_cpu_ids;
+				if (!cpu_online(cpu)) {
+					cpu = cpumask_next(cpu, cpu_online_mask);
+					if (cpu >= nr_cpu_ids)
+						cpu = cpumask_next(-1, cpu_online_mask);
+				}
+				smp_call_function_single(cpu, rcu_torture_irq, NULL, 0);
+				preempt_enable();
+			}
 		}
 		if (!rcu_torture_one_read(&rand, myid) && !torture_must_stop())
 			schedule_timeout_interruptible(HZ);
@@ -2941,10 +2985,11 @@ rcu_torture_stats_print(void)
 		atomic_read(&n_rcu_torture_mbchk_fail), atomic_read(&n_rcu_torture_mbchk_tries),
 		n_rcu_torture_barrier_error,
 		n_rcu_torture_boost_ktrerror);
-	pr_cont("rtbf: %ld rtb: %ld nt: %ld ",
+	pr_cont("rtbf: %ld rtb: %ld nt: %ld ni: %ld ",
 		n_rcu_torture_boost_failure,
 		n_rcu_torture_boosts,
-		atomic_long_read(&n_rcu_torture_timers));
+		atomic_long_read(&n_rcu_torture_timers),
+		atomic_long_read(&n_rcu_torture_irqs));
 	if (updownreaders)
 		pr_cont("ndowns: %lu nups: %lu nhrt: %lu nmigrates: %lu ", ndowns, nups, nunexpired,  nmigrates);
 	torture_onoff_stats();
