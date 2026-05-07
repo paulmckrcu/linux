@@ -2604,6 +2604,16 @@ static bool rcu_torture_one_read(struct torture_random_state *trsp, long myid)
 		return false;
 	rtors.rtrsp = rcutorture_loop_extend(&rtors.readstate, trsp, rtors.rtrsp);
 	rcu_torture_one_read_end(&rtors, trsp);
+	// This splat will happen on systems built with CONFIG_IRQ_WORK=n
+	// and on systems where arch_irq_work_has_interrupt() returns false.
+	// It might also happen on systems using a short-duration clock
+	// interrupt instead of a self-IPI (powerpc, s390) or that use
+	// neither a self-IPI nor a short-duration clock interrupts
+	// (all architectures using the generic implementation
+	// of arch_irq_work_raise()).  On such systems, RCU cannot
+	// guarantee to immediately deboost RCU readers when the outermost
+	// rcu_read_unlock() does not end the full segmented RCU read-side
+	// critical section.
 	if (WARN_ON_ONCE(cur_ops->is_task_rcu_boosted && cur_ops->is_task_rcu_boosted() &&
 			 !in_serving_softirq() && !in_hardirq() && !in_nmi()) &&
 	    READ_ONCE(firsttime) && xchg(&firsttime, 0)) {
