@@ -2119,6 +2119,8 @@ static void rcu_torture_reader_do_mbchk(long myid, struct rcu_torture *rtp,
 	smp_store_release(&rtrcp_assigner->rtc_chkrdr, -1); // Assigner can again assign.
 }
 
+static DEFINE_PER_CPU(bool, torture_in_scf_handler);
+
 // Verify the specified RCUTORTURE_RDR* state.
 #define ROEC_ARGS "%s %s: Current %#x  To add %#x  To remove %#x  preempt_count() %#x\n", __func__, s, curstate, new, old, preempt_count()
 static void rcutorture_one_extend_check(char *s, int curstate, int new, int old)
@@ -2145,7 +2147,7 @@ static void rcutorture_one_extend_check(char *s, int curstate, int new, int old)
 
 	// Interrupt handlers have all sorts of stuff disabled, so ignore
 	// unintended disabling.
-	if (in_serving_softirq() || in_hardirq())
+	if (in_serving_softirq() || in_hardirq() || this_cpu_read(torture_in_scf_handler))
 		return;
 
 	WARN_ONCE(cur_ops->extendables &&
@@ -2340,7 +2342,7 @@ rcutorture_extend_mask(int oldmask, struct torture_random_state *trsp)
 	/*
 	 * Don't mess with interrupt masking in interrupt handlers.
 	 */
-	if (in_hardirq())
+	if (in_hardirq() || this_cpu_read(torture_in_scf_handler))
 		mask &= ~(preempts_irq | bhs);
 
 	/*
@@ -2604,6 +2606,7 @@ static bool rcu_torture_one_read(struct torture_random_state *trsp, long myid)
 		return false;
 	rtors.rtrsp = rcutorture_loop_extend(&rtors.readstate, trsp, rtors.rtrsp);
 	rcu_torture_one_read_end(&rtors, trsp);
+
 	// This splat will happen on systems built with CONFIG_IRQ_WORK=n
 	// and on systems where arch_irq_work_has_interrupt() returns false.
 	// It might also happen on systems using a short-duration clock
@@ -2657,16 +2660,27 @@ static DEFINE_TORTURE_RANDOM_PERCPU(rcu_torture_irq_rand);
  * incrementing the corresponding element of the pipeline array.  The
  * counter in the element should never be greater than 1, otherwise, the
  * RCU implementation is broken.
+ *
+ * Note that on some systems, "interrupts" from idle are direct calls
+ * rather than interrupts.  The torture_in_scf_handler per-CPU variable
+ * accounts for this case.
  */
 static void rcu_torture_irq(void *unused)
 {
-	WARN_ON_ONCE(!in_hardirq());
 	WARN_ON_ONCE(in_nmi());
+	lockdep_assert_irqs_disabled();
 	atomic_long_inc(&n_rcu_torture_irqs);
+	this_cpu_write(torture_in_scf_handler, true);
 	(void)rcu_torture_one_read(this_cpu_ptr(&rcu_torture_irq_rand), -1);
+	this_cpu_write(torture_in_scf_handler, false);
 
-	/* Test call_rcu() invocation from interrupt handler. */
-	if (cur_ops->call) {
+	// Test call_rcu() invocation from interrupt handler.  Interrupts
+	// will always be disabled here, even in CONFIG_PREEMPT_RT=y kernels.
+	// The "right" thing to do would be to create a special-purpose
+	// lockless or raw-spinlock-protected allocator, but in the meantime,
+	// skip testing call_rcu() from interrupt handlers in kernels built
+	// with either CONFIG_PREEMPT_RT=y or CONFIG_PROVE_LOCKING=y.
+	if (cur_ops->call && !IS_ENABLED(CONFIG_PROVE_LOCKING) && !IS_ENABLED(CONFIG_PREEMPT_RT)) {
 		struct rcu_head *rhp = kmalloc_obj(*rhp, GFP_NOWAIT);
 
 		if (rhp)
@@ -2683,6 +2697,7 @@ static void rcu_torture_irq(void *unused)
 static int
 rcu_torture_reader(void *arg)
 {
+	unsigned long lastscf = jiffies;
 	unsigned long lastsleep = jiffies;
 	long myid = (long)arg;
 	int mynumonline = myid;
@@ -2707,7 +2722,12 @@ rcu_torture_reader(void *arg)
 					if (cpu >= nr_cpu_ids)
 						cpu = cpumask_next(-1, cpu_online_mask);
 				}
-				smp_call_function_single(cpu, rcu_torture_irq, NULL, 0);
+				// An smp_call_function_single() to self is not an interrupt!
+				if (cpu != smp_processor_id() &&
+				    time_after(jiffies, lastscf + HZ * nrealreaders / 50)) {
+					smp_call_function_single(cpu, rcu_torture_irq, NULL, 0);
+					lastscf = jiffies;
+				}
 				preempt_enable();
 			}
 		}
