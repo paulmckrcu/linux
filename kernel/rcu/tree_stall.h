@@ -308,6 +308,7 @@ struct rcu_stall_chk_rdr {
 	int nesting;
 	union rcu_special rs;
 	bool on_blkd_list;
+	bool on_dqs_blkd_list;
 };
 
 /*
@@ -323,6 +324,7 @@ static int check_slow_task(struct task_struct *t, void *arg)
 	rscrp->nesting = t->rcu_read_lock_nesting;
 	rscrp->rs = t->rcu_read_unlock_special;
 	rscrp->on_blkd_list = !list_empty(&t->rcu_node_entry);
+	rscrp->on_dqs_blkd_list = (t->rcu_node_entry_dqs == 1);
 	return 0;
 }
 
@@ -354,13 +356,20 @@ static int rcu_print_task_stall(struct rcu_node *rnp, unsigned long flags)
 		if (i >= ARRAY_SIZE(ts))
 			break;
 	}
+	list_for_each_entry(t, &rnp->dqs_blkd_tasks, rcu_node_entry) {
+		if (i >= ARRAY_SIZE(ts))
+			break;
+		get_task_struct(t);
+		ts[i++] = t;
+	}
 	raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
 	while (i) {
 		t = ts[--i];
 		if (task_call_func(t, check_slow_task, &rscr))
 			pr_cont(" P%d", t->pid);
 		else
-			pr_cont(" P%d/%d:%c%c%c%c",
+			pr_cont(" %c%d/%d:%c%c%c%c",
+				rscr.on_dqs_blkd_list ? 'Q' : 'P',
 				t->pid, rscr.nesting,
 				".b"[rscr.rs.b.blocked],
 				".q"[rscr.rs.b.need_qs],
