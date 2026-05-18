@@ -350,13 +350,15 @@ static int rcu_print_task_stall(struct rcu_node *rnp, unsigned long flags)
 	}
 	pr_err("\tTasks blocked on level-%d rcu_node (CPUs %d-%d):",
 	       rnp->level, rnp->grplo, rnp->grphi);
-	t = list_entry(rnp->gp_tasks->prev,
-		       struct task_struct, rcu_node_entry);
-	list_for_each_entry_continue(t, &rnp->blkd_tasks, rcu_node_entry) {
-		get_task_struct(t);
-		ts[i++] = t;
-		if (i >= ARRAY_SIZE(ts))
-			break;
+	if (rnp->gp_tasks) {
+		t = list_entry(rnp->gp_tasks->prev,
+			       struct task_struct, rcu_node_entry);
+		list_for_each_entry_continue(t, &rnp->blkd_tasks, rcu_node_entry) {
+			get_task_struct(t);
+			ts[i++] = t;
+			if (i >= ARRAY_SIZE(ts))
+				break;
+		}
 	}
 	list_for_each_entry(t, &rnp->dqs_blkd_tasks, rcu_node_entry) {
 		if (i >= ARRAY_SIZE(ts))
