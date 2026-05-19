@@ -1682,7 +1682,6 @@ rcu_torture_writer(void *arg)
 		stallsdone += (stall_cpu_holdoff + stall_gp_kthread + stall_cpu + 60) *
 			      HZ * (stall_cpu_repeat + 1);
 	VERBOSE_TOROUT_STRING("rcu_torture_writer task started");
-	INIT_WORK_ONSTACK(&lazy_work, rcu_torture_writer_work);
 	if (!can_expedite)
 		pr_alert("%s" TORTURE_FLAG
 			 " GP expediting controlled from boot/sysfs for %s.\n",
@@ -1719,6 +1718,8 @@ rcu_torture_writer(void *arg)
 		pr_alert("%s" TORTURE_FLAG " Waited %lu jiffies for boot to complete.\n",
 			 torture_type, jiffies - j);
 
+	if (IS_ENABLED(CONFIG_RCU_LAZY))
+		INIT_WORK_ONSTACK(&lazy_work, rcu_torture_writer_work);
 	do {
 		rcu_torture_writer_state = RTWS_FIXED_DELAY;
 		torture_hrtimeout_us(500, 1000, &rand);
@@ -1943,6 +1944,10 @@ rcu_torture_writer(void *arg)
 		pr_alert("%s" TORTURE_FLAG
 			 " Dynamic grace-period expediting was disabled.\n",
 			 torture_type);
+	if (IS_ENABLED(CONFIG_RCU_LAZY)) {
+		cancel_work_sync(&lazy_work);
+		destroy_work_on_stack(&lazy_work);
+	}
 	kfree(ulo);
 	kfree(rgo);
 	rcu_torture_writer_state = RTWS_STOPPING;
