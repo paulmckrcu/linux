@@ -189,7 +189,7 @@ struct hazptr_torture_ops {
 	void (*sync)(void *htp);
 	// @@@ void (*stats)(void); If statistics must be extracted from hazptr.c.
 	int irq_capable;
-	int must_free_ctx;
+	int onstack_ctx;
 	const char *name;
 };
 
@@ -238,7 +238,7 @@ static void hazptr_torture_read_unlock(struct hazptr_ctx *hcp, struct hazptr_tor
 {
 	if (hcp) {
 		hazptr_release(hcp, htp);
-		if (cur_ops->must_free_ctx)
+		if (cur_ops->onstack_ctx)
 			kfree(hcp);
 	}
 }
@@ -255,7 +255,7 @@ static struct hazptr_torture_ops hazptr_ops = {
 	.readunlock		= hazptr_torture_read_unlock,
 	.sync			= hazptr_synchronize,
 	.irq_capable		= 1,
-	.must_free_ctx		= 1,
+	.onstack_ctx		= 1,
 	.name			= "hazptr"
 };
 
