@@ -785,6 +785,12 @@ static int __init hazptr_torture_init(void)
 
 	/* Start up the kthreads. */
 
+	// This must be before the readers in order to set up the module
+	// parameters used by the readers.
+	firsterr = hazptr_torture_do_pending_init();
+	if (torture_init_error(firsterr))
+		goto unwind;
+
 	reader_tasks = kzalloc_objs(reader_tasks[0], nrealreaders);
 	for (i = 0; i < nrealreaders; i++) {
 		firsterr = torture_create_kthread(hazptr_torture_reader, (void *)i,
@@ -794,10 +800,6 @@ static int __init hazptr_torture_init(void)
 	}
 
 	firsterr = torture_create_kthread(hazptr_torture_writer, NULL, writer_task);
-	if (torture_init_error(firsterr))
-		goto unwind;
-
-	firsterr = hazptr_torture_do_pending_init();
 	if (torture_init_error(firsterr))
 		goto unwind;
 
