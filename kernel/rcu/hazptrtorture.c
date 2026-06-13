@@ -435,7 +435,7 @@ static int hazptr_torture_reader(void *arg)
 			torture_hrtimeout_us(500, 1000, &rand);
 			lastsleep = jiffies + 10;
 		}
-		if (can_defer && defer_modulus && !(torture_random(&rand) % defer_modulus)) {
+		if (can_defer && !(torture_random(&rand) % defer_modulus)) {
 			hazptr_torture_defer(hppp, &rand);
 			hppp = NULL;
 		} else {
