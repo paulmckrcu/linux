@@ -37,6 +37,7 @@ torture_param(int, kthread_do_pending_ms, -1,
 	      "Delay between cleanups for deferred hazard pointers (ms), zero to disable");
 // @@@ torture_param(int, leakpointer, 0, "Leak pointer dereferences from readers");
 torture_param(int, nreaders, -1, "Number of hazard-pointer reader threads");
+torture_param(int, nwriters, 1, "Number of hazard-pointer writer threads, 0 or 1");
 torture_param(int, onoff_holdoff, 0, "Time after boot before CPU hotplugs (s)");
 torture_param(int, onoff_interval, 0, "Time between CPU hotplugs (jiffies), 0=disable");
 // @@@ Move the rcu_torture_preempt() function and friends to kernel/torture.c.
@@ -830,9 +831,12 @@ static int __init hazptr_torture_init(void)
 			goto unwind;
 	}
 
-	firsterr = torture_create_kthread(hazptr_torture_writer, NULL, writer_task);
-	if (torture_init_error(firsterr))
-		goto unwind;
+	if (nwriters) {
+		WARN_ON(IS_BUILTIN(CONFIG_HAZPTR_TORTURE_TEST) && nwriters != 1);
+		firsterr = torture_create_kthread(hazptr_torture_writer, NULL, writer_task);
+		if (torture_init_error(firsterr))
+			goto unwind;
+	}
 
 	firsterr = torture_onoff_init(onoff_holdoff * HZ, onoff_interval, NULL);
 	if (torture_init_error(firsterr))
