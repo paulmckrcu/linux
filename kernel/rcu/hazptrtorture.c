@@ -33,8 +33,6 @@ MODULE_AUTHOR("Paul E. McKenney <paulmckrcu@meta.com>");
 torture_param(int, defer_modulus, -1, "Defer once per specified # of hazptr ops, zero to disable");
 torture_param(int, irq_acquire, -1,
 	      "Acquire hazard pointers from irq handlers once per specified #, zero to disable");
-torture_param(int, irq_release, -1,
-	      "Release hazard pointers from irq handlers once per specified #, zero to disable");
 torture_param(int, kthread_do_pending_ms, -1,
 	      "Delay between cleanups for deferred hazard pointers (ms), zero to disable");
 // @@@ torture_param(int, leakpointer, 0, "Leak pointer dereferences from readers");
