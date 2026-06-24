@@ -80,6 +80,7 @@ MODULE_AUTHOR("Paul E. McKenney <paulmck@linux.ibm.com> and Josh Triplett <josh@
 					/* Must be power of two minus one. */
 #define RCUTORTURE_RDR_MAX_SEGS (RCUTORTURE_RDR_MAX_LOOPS + 3)
 
+torture_param(bool, deboost_timeliness_check, 0, "Enable checks for immediate deboosting");
 torture_param(int, extendables, RCUTORTURE_MAX_EXTEND,
 	      "Extend readers by disabling bh (1), irqs (2), or preempt (4)");
 torture_param(int, fqs_duration, 0, "Duration of fqs bursts (us), 0 to disable");
@@ -2625,9 +2626,10 @@ static bool rcu_torture_one_read(struct torture_random_state *trsp, long myid)
 	// guarantee to immediately deboost RCU readers when the outermost
 	// rcu_read_unlock() does not end the full segmented RCU read-side
 	// critical section.
-	if (WARN_ON_ONCE(cur_ops->is_task_rcu_boosted && cur_ops->is_task_rcu_boosted() &&
-			 !in_serving_softirq() && !in_hardirq() && !in_nmi()) &&
+	if (cur_ops->is_task_rcu_boosted && cur_ops->is_task_rcu_boosted() &&
+	    !in_serving_softirq() && !in_hardirq() && !in_nmi() &&
 	    READ_ONCE(firsttime) && xchg(&firsttime, 0)) {
+		WARN_ON_ONCE(deboost_timeliness_check);
 		nsegs = rtors.rtrsp - rtors.rtseg;
 		nsegs = clamp_val(nsegs, 0, RCUTORTURE_RDR_MAX_SEGS);
 		pr_alert("Slow-deboost rcutorture reader segments:\n");
