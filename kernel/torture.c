@@ -745,6 +745,7 @@ bool stutter_will_wait(void)
 
 	return _stutter_will_wait(&till_ns);
 }
+EXPORT_SYMBOL_GPL(stutter_will_wait);
 
 /*
  * Block until the stutter interval ends.  This must be called periodically
