@@ -428,7 +428,6 @@ static void hazptr_torture_defer(struct hazptr_pending *hppp, struct torture_ran
 	int cpu = torture_random(trsp) % nr_cpu_ids;
 	struct llist_head *llhp;
 
-	hazptr_detach_from_task(&hppp->hpp_hc);
 	guard(preempt)();
 	hazptr_detach_from_task(&hppp->hpp_hc);
 	cpu = cpumask_next_wrap(cpu, cpu_online_mask);
