@@ -126,6 +126,28 @@ void hazptr_promote_to_backup_slot(struct hazptr_ctx *ctx, struct hazptr_slot *s
 	ctx->slot = backup_slot;
 }
 
+/**
+ * hazptr_detach_from_task - Allow a hazard pointer to be released by some other task
+ *
+ * @ctx: The hazard-pointer context to be migrated.
+ *
+ * By default, a given hazptr_acquire() and the corresponding
+ * hazptr_release() must run in a single execution context, for example,
+ * the context of a single task or a single interrupt handler.  When you
+ * have acquired a hazard pointer in one context and need to release it
+ * in another, you must invoke hazptr_detach_from_task() on that hazard
+ * pointer's context.  It is permissible to invoke hazptr_detach_from_task()
+ * multiple times on the same @ctx while it is protecting the same pointer,
+ * however, the first invocation absolutely must be in the same context
+ * that did the hazptr_acquire(), and must take place after the return
+ * from that hazptr_acquire().
+ *
+ * For example, if a hazard pointer is acquired by a task and
+ * released by a timer handler, that task would need to pass the hazard
+ * pointer's context to hazptr_detach_from_task() after return from the
+ * hazptr_acquire() and before arming the timer (or at least before the
+ * handler had a chance to access that hazard-pointer context).
+ */
 static inline
 void hazptr_detach_from_task(struct hazptr_ctx *ctx)
 {
@@ -160,12 +182,26 @@ void hazptr_note_context_switch(void)
 	}
 }
 
-/*
- * hazptr_acquire: Load pointer at address and protect with hazard pointer.
+/**
+ * hazptr_acquire - Load pointer at address and protect with hazard pointer.
+ *
+ * @ctx: The hazard-pointer context to be passed to hazptr_release().
+ * @addr_p: Pointer to the pointer that is to be hazard-pointer protected.
  *
  * Load @addr_p, and protect the loaded pointer with hazard pointer.
- * When using hazptr_acquire from interrupt handlers, the acquired slots
- * need to be released before returning from the interrupt handler.
+ * This protection is roughly similar to (but way faster than) that of a
+ * reference counter, and ends with a later call to hazptr_release().
+ *
+ * By default, the call to hazptr_release() must be running in the same
+ * execution context as the corresponding hazptr_acquire(), for example,
+ * within the same task or interrupt handler.  When it is necessary
+ * to instead call hazptr_release() from some other context, pass @ctx
+ * to hazptr_detach_from_task() in the original context after invoking
+ * hazptr_acquire() but before making the hazard pointer available to that
+ * other context.
+ *
+ * It is not permissible to invoke hazptr_acquire() twice on the same @ctx
+ * without an intervening hazptr_release().
  *
  * Returns a non-NULL protected address if the loaded pointer is non-NULL.
  * Returns NULL if the loaded pointer is NULL.
@@ -233,7 +269,23 @@ void hazptr_release_debug(struct hazptr_ctx *ctx, void *addr)
 static inline void hazptr_release_debug(struct hazptr_ctx *ctx, void *addr) { }
 #endif
 
-/* Release the protected hazard pointer from @slot. */
+/**
+ * hazptr_release - Release the specified hazard pointer
+ *
+ * @ctx: The hazard-pointer context that was passed to hazptr_acquire().
+ * @addr_p: The pointer that is to be hazard-pointer unprotected.
+ *
+ * Release the protected hazard pointer recorded in @ctx.
+ *
+ * By default, hazptr_release() must execute in the same execution context
+ * that invoked the corresponding hazptr_acquire(), for example, within the
+ * same task or the same interrupt handler.  However, if this restriction
+ * is problematic for your use case, please see hazptr_detach_from_task().
+ *
+ * It is permissible (though unwise from a maintainability viewpoint)
+ * to invoke hazptr_release() twice on the same @ctx without an intervening
+ * hazptr_acquire().
+ */
 static inline
 void hazptr_release(struct hazptr_ctx *ctx, void *addr)
 {
