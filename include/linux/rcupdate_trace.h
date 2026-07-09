@@ -198,19 +198,13 @@ static inline void rcu_tasks_trace_expedite_current(void)
 	srcu_expedite_current(&rcu_tasks_trace_srcu_struct);
 }
 
-#ifdef CONFIG_RCU_TORTURE_TEST
-unsigned long srcu_batches_completed(struct srcu_struct *ssp);
-
-static inline unsigned long rcu_tasks_trace_batches_completed(void)
-{
-	return srcu_batches_completed(&rcu_tasks_trace_srcu_struct);
-}
-#endif // #ifdef CONFIG_RCU_TORTURE_TEST
+unsigned long rcu_tasks_trace_batches_completed(void);
 
 // Placeholders to enable stepwise transition.
 void __init rcu_tasks_trace_suppress_unused(void);
 
 #else
+static inline unsigned long rcu_tasks_trace_batches_completed(void) { return 0; }
 /*
  * The BPF JIT forms these addresses even when it doesn't call these
  * functions, so provide definitions that result in runtime errors.
