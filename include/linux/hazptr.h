@@ -189,8 +189,8 @@ void hazptr_note_context_switch(void)
  * @addr_p: Pointer to the pointer that is to be hazard-pointer protected.
  *
  * Load @addr_p, and protect the loaded pointer with hazard pointer.
- * This protection is roughly similar to that of a reference counter, and
- * ends with a later call to hazptr_release().
+ * This protection is roughly similar to (but way faster than) that of a
+ * reference counter, and ends with a later call to hazptr_release().
  *
  * By default, the call to hazptr_release() must be running in the same
  * execution context as the corresponding hazptr_acquire(), for example,
