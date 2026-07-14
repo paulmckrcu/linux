@@ -420,7 +420,7 @@ hazptr_torture_reader_tail(struct hazptr_pending *hppp, struct torture_random_st
 		 * Handling release from a remote CPU.
 		 * Detach hazptr from its task so it can be released by another task.
 		 */
-		hazptr_detach_from_task(&hppp->hpp_hc);
+		hazptr_detach(&hppp->hpp_hc);
 		cpu = cpumask_next_wrap(smp_processor_id(), cpu_online_mask);
 		smp_call_function_single(cpu, hazptr_torture_release, hppp, 1);
 	} else {
@@ -442,7 +442,7 @@ static void hazptr_torture_defer(struct hazptr_pending *hppp, struct torture_ran
 	 * Handling release from a remote CPU.
 	 * Detach hazptr from its task so it can be released by another task.
 	 */
-	hazptr_detach_from_task(&hppp->hpp_hc);
+	hazptr_detach(&hppp->hpp_hc);
 	cpu = cpumask_next_wrap(cpu, cpu_online_mask);
 	llhp = per_cpu_ptr(&hazptr_pending, cpu);
 	llist_add(&hppp->hpp_node, llhp);
