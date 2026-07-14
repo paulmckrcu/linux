@@ -149,7 +149,7 @@ void hazptr_promote_to_backup_slot(struct hazptr_ctx *ctx, struct hazptr_slot *s
  * handler had a chance to access that hazard-pointer context).
  */
 static inline
-void hazptr_detach_from_task(struct hazptr_ctx *ctx)
+void hazptr_detach(struct hazptr_ctx *ctx)
 {
 	struct hazptr_slot *slot;
 
