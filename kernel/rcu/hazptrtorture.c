@@ -374,7 +374,7 @@ static void hazptr_torture_acquire(void *hppp_in)
 	 * Acquiring a hazard pointer from a remote CPU.
 	 * Detach hazptr from its task so it can be released by another task.
 	 */
-	hazptr_detach_from_task(&hppp->hpp_hc);
+	hazptr_detach(&hppp->hpp_hc);
 	atomic_long_inc(per_cpu_ptr(&hazptr_torture_acquires_irq, raw_smp_processor_id()));
 }
 
