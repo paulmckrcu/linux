@@ -75,12 +75,16 @@ DECLARE_PER_CPU(struct hazptr_percpu_slots, hazptr_percpu_slots);
 
 void *__hazptr_acquire(struct hazptr_ctx *ctx, void * const * addr_p);
 
-/*
- * hazptr_synchronize: Wait until @addr is released from all slots.
+/**
+ * hazptr_synchronize: Wait for release from hazard-pointer protection
  *
- * Wait to observe that each slot contains a value that differs from
- * @addr before returning.
- * Should be called from preemptible context.
+ * @addr: The address to be released from hazard-pointer protection
+ *
+ * Wait for the specified @addr to be released from protection from all
+ * hazard pointers.  The caller should make @addr inaccessible to all
+ * hazard-pointer readers before invoking this function.
+ *
+ * Must be called from preemptible context.
  */
 void hazptr_synchronize(void *addr);
 
