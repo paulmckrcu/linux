@@ -398,7 +398,7 @@ static void call_rcu_tasks_generic(struct rcu_head *rhp, rcu_callback_t func,
 	// We can't create the kthread with interrupts disabled because a
 	// scheduler spinlock might be held, so kthread creation is deferred
 	// until core_initcall() time.  Similarly, wakeups are deferred using
-	// irq_work in order to to avoid potential scheduler-lock-deadlock
+	// irq_work in order to avoid potential scheduler-lock-deadlock
 	// lockdep splats.
 	if (needwake && READ_ONCE(rtp->kthread_ptr))
 		irq_work_queue(&rtpcp->rtp_irq_work);
