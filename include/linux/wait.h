@@ -556,7 +556,7 @@ do {										\
 	}									\
 										\
 	__ret = ___wait_event(wq_head, condition, state, 0, 0,			\
-		if (!__t.task) {						\
+		if (!READ_ONCE(__t.task)) {					\
 			__ret = -ETIME;						\
 			break;							\
 		}								\

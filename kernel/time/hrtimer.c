@@ -2288,7 +2288,7 @@ static enum hrtimer_restart hrtimer_wakeup(struct hrtimer *timer)
 	struct hrtimer_sleeper *t = container_of(timer, struct hrtimer_sleeper, timer);
 	struct task_struct *task = t->task;
 
-	t->task = NULL;
+	WRITE_ONCE(t->task, NULL);
 	if (task)
 		wake_up_process(task);
 
@@ -2317,7 +2317,7 @@ void hrtimer_sleeper_start_expires(struct hrtimer_sleeper *sl, enum hrtimer_mode
 
 	/* If already expired, clear the task pointer and set current state to running */
 	if (!hrtimer_start_expires_user(&sl->timer, mode)) {
-		sl->task = NULL;
+		WRITE_ONCE(sl->task, NULL);
 		__set_current_state(TASK_RUNNING);
 	}
 }
@@ -2395,13 +2395,13 @@ static int __sched do_nanosleep(struct hrtimer_sleeper *t, enum hrtimer_mode mod
 		set_current_state(TASK_INTERRUPTIBLE|TASK_FREEZABLE);
 		hrtimer_sleeper_start_expires(t, mode);
 
-		if (likely(t->task))
+		if (likely(READ_ONCE(t->task)))
 			schedule();
 
 		hrtimer_cancel(&t->timer);
 		mode = HRTIMER_MODE_ABS;
 
-	} while (t->task && !signal_pending(current));
+	} while (READ_ONCE(t->task) && !signal_pending(current));
 
 	__set_current_state(TASK_RUNNING);
 

@@ -2345,11 +2345,11 @@ static void spin(struct pktgen_dev *pkt_dev, ktime_t spin_until)
 			set_current_state(TASK_INTERRUPTIBLE);
 			hrtimer_sleeper_start_expires(&t, HRTIMER_MODE_ABS);
 
-			if (likely(t.task))
+			if (likely(READ_ONCE(t.task)))
 				schedule();
 
 			hrtimer_cancel(&t.timer);
-		} while (t.task && pkt_dev->running && !signal_pending(current));
+		} while (READ_ONCE(t.task) && pkt_dev->running && !signal_pending(current));
 		__set_current_state(TASK_RUNNING);
 		end_time = ktime_get();
 	}
