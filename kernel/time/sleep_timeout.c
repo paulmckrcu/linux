@@ -212,7 +212,7 @@ int __sched schedule_hrtimeout_range_clock(ktime_t *expires, u64 delta,
 	hrtimer_set_expires_range_ns(&t.timer, *expires, delta);
 	hrtimer_sleeper_start_expires(&t, mode);
 
-	if (likely(READ_ONCE(t.task)))
+	if (likely(t.task))
 		schedule();
 
 	hrtimer_cancel(&t.timer);
