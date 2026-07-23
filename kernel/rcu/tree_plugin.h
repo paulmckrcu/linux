@@ -1364,13 +1364,18 @@ static void rcu_spawn_one_boost_kthread(struct rcu_node *rnp)
  */
 bool rcu_is_task_rcu_boosted(void)
 {
+	bool ret;
 	struct rcu_node *rnp;
 	struct task_struct *t = current;
 
+	preempt_disable(); // Stabilize ->rcu_blocked_node
 	rnp = t->rcu_blocked_node;
 	if (!rnp)
-		return false;
-	return rt_mutex_owner(&rnp->boost_mtx.rtmutex) == t;
+		ret = false;
+	else
+		ret = (rt_mutex_owner(&rnp->boost_mtx.rtmutex) == t);
+	preempt_enable();
+	return ret;
 }
 EXPORT_SYMBOL_GPL(rcu_is_task_rcu_boosted);
 
