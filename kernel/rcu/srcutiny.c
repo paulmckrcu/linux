@@ -10,6 +10,7 @@
 
 #include <linux/export.h>
 #include <linux/irq_work.h>
+#include <linux/llist.h>
 #include <linux/mutex.h>
 #include <linux/preempt.h>
 #include <linux/rcupdate_wait.h>
@@ -43,6 +44,8 @@ static int init_srcu_struct_fields(struct srcu_struct *ssp)
 	INIT_WORK(&ssp->srcu_work, srcu_drive_gp);
 	INIT_LIST_HEAD(&ssp->srcu_work.entry);
 	init_irq_work(&ssp->srcu_irq_work, srcu_tiny_irq_work);
+	init_llist_head(&ssp->defer_cbs);
+	init_irq_work(&ssp->defer_iw, srcu_defer_drain);
 	return 0;
 }
 
@@ -218,8 +221,18 @@ static void srcu_gp_start_if_needed(struct srcu_struct *ssp)
  * Enqueue an SRCU callback on the specified srcu_struct structure,
  * initiating grace-period processing if it is not already running.
  */
-void call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
-	       rcu_callback_t func)
+/*
+ * The callback-list enqueue runs with interrupts disabled, so it can be
+ * corrupted by an NMI or a synchronous re-entry from instrumentation.  Defer
+ * such callbacks to a lockless list that an irq_work re-issues later.
+ */
+
+/*
+ * Enqueue @rhp on the callback list.  Also called by srcu_defer_drain() to
+ * re-issue a deferred callback, so it must not re-check the deferral condition.
+ */
+static void srcu_do_enqueue(struct srcu_struct *ssp, struct rcu_head *rhp,
+			    rcu_callback_t func)
 {
 	unsigned long flags;
 
@@ -232,6 +245,37 @@ void call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
 	local_irq_restore(flags);
 	srcu_gp_start_if_needed(ssp);
 	preempt_enable();
+}
+
+void srcu_defer_drain(struct irq_work *iw)
+{
+	struct srcu_struct *ssp = container_of(iw, struct srcu_struct, defer_iw);
+	struct llist_node *node, *next;
+
+	/*
+	 * Callbacks have no mutual ordering guarantee and srcu_barrier() has
+	 * already flushed us, so drain in llist order without reversing.
+	 */
+	llist_for_each_safe(node, next, llist_del_all(&ssp->defer_cbs)) {
+		struct rcu_head *rhp = (struct rcu_head *)node;
+
+		srcu_do_enqueue(ssp, rhp, rhp->func);
+	}
+}
+EXPORT_SYMBOL_GPL(srcu_defer_drain);
+
+void call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
+	       rcu_callback_t func)
+{
+	/* Defer if we cannot safely enqueue now; see srcu_defer_drain(). */
+	if (in_nmi() || irqs_disabled()) {
+		rhp->func = func;
+		if (llist_add((struct llist_node *)rhp, &ssp->defer_cbs))
+			irq_work_queue(&ssp->defer_iw);
+		return;
+	}
+
+	srcu_do_enqueue(ssp, rhp, func);
 }
 EXPORT_SYMBOL_GPL(call_srcu);
 
@@ -261,6 +305,14 @@ void synchronize_srcu(struct srcu_struct *ssp)
 	destroy_rcu_head_on_stack(&rs.head);
 }
 EXPORT_SYMBOL_GPL(synchronize_srcu);
+
+/* Register any deferred callbacks, then wait for all in-flight ones. */
+void srcu_barrier(struct srcu_struct *ssp)
+{
+	irq_work_sync(&ssp->defer_iw);
+	synchronize_srcu(ssp);
+}
+EXPORT_SYMBOL_GPL(srcu_barrier);
 
 /*
  * get_state_synchronize_srcu - Provide an end-of-grace-period cookie
