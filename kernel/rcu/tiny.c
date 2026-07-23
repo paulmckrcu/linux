@@ -11,6 +11,8 @@
  */
 #include <linux/completion.h>
 #include <linux/interrupt.h>
+#include <linux/irq_work.h>
+#include <linux/llist.h>
 #include <linux/notifier.h>
 #include <linux/rcupdate_wait.h>
 #include <linux/kernel.h>
@@ -42,8 +44,79 @@ static struct rcu_ctrlblk rcu_ctrlblk = {
 	.gp_seq		= 0 - 300UL,
 };
 
+/*
+ * The callback-list enqueue runs with interrupts disabled, so it can be
+ * corrupted by an NMI or a synchronous re-entry from instrumentation.  Defer
+ * such callbacks to a lockless list that an irq_work re-issues later.  One
+ * global list and irq_work suffice, as Tiny RCU is uniprocessor.
+ */
+static void rcu_defer_drain(struct irq_work *iw);
+static LLIST_HEAD(rcu_defer_list);
+static DEFINE_IRQ_WORK(rcu_defer_iw, rcu_defer_drain);
+
+/*
+ * Enqueue @head on the callback list.  Also called by rcu_defer_drain() to
+ * re-issue a deferred callback, so it must not re-check the deferral condition.
+ */
+static void rcu_do_enqueue(struct rcu_head *head, rcu_callback_t func)
+{
+	static atomic_t doublefrees;
+	unsigned long flags;
+
+	if (debug_rcu_head_queue(head)) {
+		if (atomic_inc_return(&doublefrees) < 4) {
+			pr_err("%s(): Double-freed CB %p->%pS()!!!  ", __func__, head, head->func);
+			mem_dump_obj(head);
+		}
+		return;
+	}
+
+	head->func = func;
+	head->next = NULL;
+
+	local_irq_save(flags);
+	*rcu_ctrlblk.curtail = head;
+	rcu_ctrlblk.curtail = &head->next;
+	local_irq_restore(flags);
+
+	if (unlikely(is_idle_task(current))) {
+		/* force scheduling for rcu_qs() */
+		resched_cpu(0);
+	}
+}
+
+static void rcu_defer_drain(struct irq_work *iw)
+{
+	struct llist_node *node, *next;
+
+	/*
+	 * Callbacks have no mutual ordering guarantee and rcu_barrier() has
+	 * already flushed us, so drain in llist order without reversing.
+	 */
+	llist_for_each_safe(node, next, llist_del_all(&rcu_defer_list)) {
+		struct rcu_head *head = (struct rcu_head *)node;
+
+		rcu_do_enqueue(head, head->func);
+	}
+}
+
+static void call_rcu_defer(struct rcu_head *head, rcu_callback_t func)
+{
+	head->func = func;
+	if (llist_add((struct llist_node *)head, &rcu_defer_list))
+		irq_work_queue(&rcu_defer_iw);
+}
+
+/* Register any deferred callbacks so a following rcu_barrier() waits for them. */
+static void rcu_defer_flush(void)
+{
+	irq_work_sync(&rcu_defer_iw);
+}
+
 void rcu_barrier(void)
 {
+	/* Register any deferred callbacks first. */
+	rcu_defer_flush();
 	wait_rcu_gp(call_rcu_hurry);
 }
 EXPORT_SYMBOL(rcu_barrier);
@@ -157,29 +230,13 @@ EXPORT_SYMBOL_GPL(synchronize_rcu);
  */
 void call_rcu(struct rcu_head *head, rcu_callback_t func)
 {
-	static atomic_t doublefrees;
-	unsigned long flags;
-
-	if (debug_rcu_head_queue(head)) {
-		if (atomic_inc_return(&doublefrees) < 4) {
-			pr_err("%s(): Double-freed CB %p->%pS()!!!  ", __func__, head, head->func);
-			mem_dump_obj(head);
-		}
+	/* Defer if we cannot safely enqueue now; see rcu_defer_drain(). */
+	if (in_nmi() || irqs_disabled()) {
+		call_rcu_defer(head, func);
 		return;
 	}
 
-	head->func = func;
-	head->next = NULL;
-
-	local_irq_save(flags);
-	*rcu_ctrlblk.curtail = head;
-	rcu_ctrlblk.curtail = &head->next;
-	local_irq_restore(flags);
-
-	if (unlikely(is_idle_task(current))) {
-		/* force scheduling for rcu_qs() */
-		resched_cpu(0);
-	}
+	rcu_do_enqueue(head, func);
 }
 EXPORT_SYMBOL_GPL(call_rcu);
 
