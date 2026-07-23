@@ -20,6 +20,7 @@
 #include <linux/percpu.h>
 #include <linux/preempt.h>
 #include <linux/irq_work.h>
+#include <linux/llist.h>
 #include <linux/rcupdate_wait.h>
 #include <linux/sched.h>
 #include <linux/smp.h>
@@ -79,6 +80,24 @@ static void process_srcu(struct work_struct *work);
 static void srcu_irq_work(struct irq_work *work);
 static void srcu_delay_timer(struct timer_list *t);
 
+static void srcu_defer_drain(struct irq_work *iw);
+
+/*
+ * Deferral for a call_srcu() that cannot enqueue now.  The callback is staged
+ * on its srcu_data's ->defer_cbs, and that srcu_data is chained (->defer_link)
+ * onto this per-CPU list drained by an irq_work.  The irq_work is global (per
+ * CPU, not per srcu_struct), so it needs no per-srcu_struct initialization.
+ */
+struct srcu_defer {
+	struct llist_head	list;
+	struct irq_work		iw;
+};
+
+static DEFINE_PER_CPU(struct srcu_defer, srcu_defer) = {
+	/* HARD so the CPU-offline flush (irq_work_run()) drains it on PREEMPT_RT. */
+	.iw = IRQ_WORK_INIT_HARD(srcu_defer_drain),
+};
+
 /*
  * Initialize SRCU per-CPU data.  Note that statically allocated
  * srcu_struct structures might already have srcu_read_lock() and
@@ -107,6 +126,11 @@ static void init_srcu_struct_data(struct srcu_struct *ssp)
 		sdp->cpu = cpu;
 		INIT_WORK(&sdp->work, srcu_invoke_callbacks);
 		timer_setup(&sdp->delay_work, srcu_delay_timer, 0);
+		/*
+		 * ->defer_cbs and ->defer_link are valid when zeroed and are not
+		 * reinitialized here, lest we clobber callbacks a reentrant
+		 * call_srcu() already staged.  See __call_srcu().
+		 */
 		sdp->ssp = ssp;
 	}
 }
@@ -697,6 +721,9 @@ void cleanup_srcu_struct(struct srcu_struct *ssp)
 		return; /* Just leak it! */
 	/* Wait for irq_work to finish first as it may queue a new work. */
 	irq_work_sync(&sup->irq_work);
+	/* Drain any deferred callbacks (shared irq_work) before freeing ->sda. */
+	for_each_possible_cpu(cpu)
+		irq_work_sync(&per_cpu(srcu_defer, cpu).iw);
 	flush_delayed_work(&sup->work);
 	for_each_possible_cpu(cpu) {
 		struct srcu_data *sdp = per_cpu_ptr(ssp->sda, cpu);
@@ -1410,8 +1437,15 @@ static unsigned long srcu_gp_start_if_needed(struct srcu_struct *ssp,
  * srcu_read_lock(), and srcu_read_unlock() that are all passed the same
  * srcu_struct structure.
  */
-static void __call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
-			rcu_callback_t func, bool do_norm)
+/*
+ * srcu_gp_start_if_needed() enqueues under raw_spin_lock_irqsave() and may walk
+ * the srcu_node tree, so like call_rcu() it can be corrupted by an NMI or a
+ * synchronous re-entry from instrumentation (e.g. call_rcu_tasks_trace(), which
+ * is call_srcu() on a dedicated srcu_struct, from a BPF program).  __call_srcu()
+ * defers such callbacks to a per-CPU irq_work.
+ */
+static void srcu_do_enqueue(struct srcu_struct *ssp, struct rcu_head *rhp,
+			    rcu_callback_t func, bool do_norm)
 {
 	if (debug_rcu_head_queue(rhp)) {
 		/* Probable double call_srcu(), so leak the callback. */
@@ -1421,6 +1455,51 @@ static void __call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
 	}
 	rhp->func = func;
 	(void)srcu_gp_start_if_needed(ssp, rhp, do_norm);
+}
+
+static void __call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
+			rcu_callback_t func, bool do_norm)
+{
+	/* Defer if we cannot safely enqueue now; see srcu_defer_drain(). */
+	if (in_nmi() || irqs_disabled()) {
+		struct srcu_data *sdp = this_cpu_ptr(ssp->sda);
+
+		rhp->func = func;
+		if (llist_add((struct llist_node *)rhp, &sdp->defer_cbs)) {
+			/* First deferral on this srcu_data: chain it for the drain. */
+			struct srcu_defer *sndp = this_cpu_ptr(&srcu_defer);
+
+			sdp->ssp = ssp;
+			if (llist_add(&sdp->defer_link, &sndp->list))
+				irq_work_queue(&sndp->iw);
+		}
+		return;
+	}
+
+	srcu_do_enqueue(ssp, rhp, func, do_norm);
+}
+
+/*
+ * Re-issue this CPU's deferred callbacks from irq_work context, going straight
+ * to srcu_do_enqueue() to avoid re-deferring.
+ */
+static void srcu_defer_drain(struct irq_work *iw)
+{
+	struct srcu_defer *sndp = container_of(iw, struct srcu_defer, iw);
+	struct llist_node *snode, *snext;
+
+	llist_for_each_safe(snode, snext, llist_del_all(&sndp->list)) {
+		struct srcu_data *sdp = container_of(snode, struct srcu_data, defer_link);
+		struct srcu_struct *ssp = sdp->ssp;
+		struct llist_node *cnode, *cnext;
+
+		cnode = llist_del_all(&sdp->defer_cbs);
+		llist_for_each_safe(cnode, cnext, cnode) {
+			struct rcu_head *rhp = (struct rcu_head *)cnode;
+
+			srcu_do_enqueue(ssp, rhp, rhp->func, true);
+		}
+	}
 }
 
 /**
@@ -1677,9 +1756,18 @@ void srcu_barrier(struct srcu_struct *ssp)
 {
 	int cpu;
 	int idx;
-	unsigned long s = rcu_seq_snap(&ssp->srcu_sup->srcu_barrier_seq);
+	unsigned long s;
 
 	check_init_srcu_struct(ssp);
+
+	/*
+	 * Register any deferred callbacks before snapshotting the sequence.  The
+	 * shared irq_work may also drain other srcu_structs', which is harmless.
+	 */
+	for_each_possible_cpu(cpu)
+		irq_work_sync(&per_cpu(srcu_defer, cpu).iw);
+
+	s = rcu_seq_snap(&ssp->srcu_sup->srcu_barrier_seq);
 	mutex_lock(&ssp->srcu_sup->srcu_barrier_mutex);
 	if (rcu_seq_done(&ssp->srcu_sup->srcu_barrier_seq, s)) {
 		smp_mb(); /* Force ordering following return. */

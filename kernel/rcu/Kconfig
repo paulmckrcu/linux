@@ -66,6 +66,8 @@ config TINY_SRCU
 config TREE_SRCU
 	bool
 	default y if SMP
+	# call_srcu() defers to irq_work from an NMI or reentrant context
+	select IRQ_WORK
 	help
 	  This option selects the full-fledged version of SRCU.
 
