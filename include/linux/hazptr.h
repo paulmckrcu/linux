@@ -1,6 +1,6 @@
-// SPDX-FileCopyrightText: 2024 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
-//
 // SPDX-License-Identifier: LGPL-2.1-or-later
+//
+// SPDX-FileCopyrightText: 2024 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
 
 #ifndef _LINUX_HAZPTR_H
 #define _LINUX_HAZPTR_H
@@ -73,7 +73,7 @@ struct hazptr_percpu_slots {
 
 DECLARE_PER_CPU(struct hazptr_percpu_slots, hazptr_percpu_slots);
 
-void *__hazptr_acquire(struct hazptr_ctx *ctx, void * const * addr_p);
+void *__hazptr_acquire(struct hazptr_ctx *ctx, void * const *addr_p);
 
 /**
  * hazptr_synchronize: Wait for release from hazard-pointer protection

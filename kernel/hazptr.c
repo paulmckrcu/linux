@@ -1,6 +1,6 @@
-// SPDX-FileCopyrightText: 2024 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
-//
 // SPDX-License-Identifier: LGPL-2.1-or-later
+//
+// SPDX-FileCopyrightText: 2024 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
 
 /*
  * hazptr: Hazard Pointers
