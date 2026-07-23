@@ -24,6 +24,7 @@
 #include <linux/smp.h>
 #include <linux/rcupdate_wait.h>
 #include <linux/interrupt.h>
+#include <linux/llist.h>
 #include <linux/sched.h>
 #include <linux/sched/debug.h>
 #include <linux/nmi.h>
@@ -3148,20 +3149,26 @@ static void check_cb_ovld(struct rcu_data *rdp)
 	raw_spin_unlock_rcu_node(rnp);
 }
 
-static void
-__call_rcu_common(struct rcu_head *head, rcu_callback_t func, bool lazy_in)
+/*
+ * The rcu_segcblist enqueue is not reentrant: it runs with interrupts disabled
+ * (plus the nocb locks when offloaded), so it can be corrupted by an NMI or by
+ * a synchronous re-entry from instrumentation (e.g. a BPF program calling
+ * call_rcu()).  __call_rcu_common() defers such callbacks to a per-CPU llist
+ * that an irq_work re-issues from a benign context.
+ */
+static void rcu_defer_drain(struct irq_work *iw);
+
+/*
+ * Enqueue @head on this CPU's rcu_segcblist.  Also called by rcu_defer_drain()
+ * to re-issue a deferred callback, so it must not re-check the deferral
+ * condition.  Either caller may have interrupts already disabled.
+ */
+static void rcu_do_enqueue(struct rcu_head *head, rcu_callback_t func, bool lazy_in)
 {
 	static atomic_t doublefrees;
 	unsigned long flags;
 	bool lazy;
 	struct rcu_data *rdp;
-
-	/* Misaligned rcu_head! */
-	WARN_ON_ONCE((unsigned long)head & (sizeof(void *) - 1));
-
-	/* Avoid NULL dereference if callback is NULL. */
-	if (WARN_ON_ONCE(!func))
-		return;
 
 	if (debug_rcu_head_queue(head)) {
 		/*
@@ -3204,6 +3211,68 @@ __call_rcu_common(struct rcu_head *head, rcu_callback_t func, bool lazy_in)
 	else
 		call_rcu_core(rdp, head, flags);
 	local_irq_restore(flags);
+}
+
+/*
+ * Re-issue deferred callbacks from irq_work context, going straight to the
+ * enqueue to avoid re-deferring.  They are hurried, having already waited.
+ */
+static void rcu_defer_drain(struct irq_work *iw)
+{
+	struct rcu_data *rdp = container_of(iw, struct rcu_data, defer_work);
+	struct llist_node *node, *next;
+
+	llist_for_each_safe(node, next, llist_del_all(&rdp->defer_head)) {
+		struct rcu_head *head = (struct rcu_head *)node;
+
+		rcu_do_enqueue(head, head->func, false);
+	}
+}
+
+/* Stage @head for this CPU's irq_work when call_rcu() cannot enqueue now. */
+static void call_rcu_defer(struct rcu_head *head, rcu_callback_t func)
+{
+	struct rcu_data *rdp = this_cpu_ptr(&rcu_data);
+
+	head->func = func;
+	if (llist_add((struct llist_node *)head, &rdp->defer_head))
+		irq_work_queue(&rdp->defer_work);
+}
+
+/*
+ * Flush every CPU's deferred callbacks into the callback list so a following
+ * rcu_barrier() waits for them.  A CPU's own irq_work re-issues its callbacks,
+ * keeping nocb locality; irq_work_sync() also waits out one in flight.
+ */
+static void rcu_defer_flush(void)
+{
+	int cpu;
+
+	for_each_possible_cpu(cpu)
+		irq_work_sync(&per_cpu_ptr(&rcu_data, cpu)->defer_work);
+}
+
+static void
+__call_rcu_common(struct rcu_head *head, rcu_callback_t func, bool lazy_in)
+{
+	/* Misaligned rcu_head! */
+	WARN_ON_ONCE((unsigned long)head & (sizeof(void *) - 1));
+
+	/* Avoid NULL dereference if callback is NULL. */
+	if (WARN_ON_ONCE(!func))
+		return;
+
+	/*
+	 * Defer if we cannot safely enqueue now: an NMI may have interrupted a
+	 * segcblist/nocb operation, and interrupts-off means we may be nested in
+	 * one.  See rcu_defer_drain().
+	 */
+	if (in_nmi() || irqs_disabled()) {
+		call_rcu_defer(head, func);
+		return;
+	}
+
+	rcu_do_enqueue(head, func, lazy_in);
 }
 
 #ifdef CONFIG_RCU_LAZY
@@ -3896,8 +3965,12 @@ void rcu_barrier(void)
 	unsigned long flags;
 	unsigned long gseq;
 	struct rcu_data *rdp;
-	unsigned long s = rcu_seq_snap(&rcu_state.barrier_sequence);
+	unsigned long s;
 
+	/* Register any deferred callbacks before snapshotting the sequence. */
+	rcu_defer_flush();
+
+	s = rcu_seq_snap(&rcu_state.barrier_sequence);
 	rcu_barrier_trace(TPS("Begin"), -1, s);
 
 	/* Take mutex to serialize concurrent rcu_barrier() requests. */
@@ -4231,6 +4304,9 @@ rcu_boot_init_percpu_data(int cpu)
 	rdp->rcu_onl_gp_state = RCU_GP_CLEANED;
 	rdp->last_sched_clock = jiffies;
 	rdp->cpu = cpu;
+	init_llist_head(&rdp->defer_head);
+	/* HARD so the CPU-offline flush (irq_work_run()) drains it on PREEMPT_RT. */
+	rdp->defer_work = IRQ_WORK_INIT_HARD(rcu_defer_drain);
 	rcu_boot_init_nocb_percpu_data(rdp);
 }
 
