@@ -46,6 +46,9 @@ struct srcu_data {
 	struct llist_head defer_cbs;		/* Callbacks deferred on re-entry. */
 	struct llist_node defer_link;		/* Links onto the per-CPU */
 						/*  deferral drain list; see __call_srcu(). */
+#ifdef CONFIG_PROVE_RCU
+	unsigned long defer_ip;			/* Caller of a deferred call_srcu(). */
+#endif
 	struct rcu_head srcu_barrier_head;	/* For srcu_barrier() use. */
 	struct rcu_head srcu_ec_head;		/* For srcu_expedite_current() use. */
 	int srcu_ec_state;			/*  State for srcu_expedite_current(). */

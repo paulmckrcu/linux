@@ -1445,12 +1445,13 @@ static unsigned long srcu_gp_start_if_needed(struct srcu_struct *ssp,
  * defers such callbacks to a per-CPU irq_work.
  */
 static void srcu_do_enqueue(struct srcu_struct *ssp, struct rcu_head *rhp,
-			    rcu_callback_t func, bool do_norm)
+			    rcu_callback_t func, bool do_norm, unsigned long ip)
 {
 	if (debug_rcu_head_queue(rhp)) {
 		/* Probable double call_srcu(), so leak the callback. */
 		WRITE_ONCE(rhp->func, srcu_leak_callback);
-		WARN_ONCE(1, "call_srcu(): Leaked duplicate callback\n");
+		WARN_ONCE(1, "call_srcu(): Leaked duplicate callback from %pS\n",
+			  (void *)ip);
 		return;
 	}
 	rhp->func = func;
@@ -1458,7 +1459,7 @@ static void srcu_do_enqueue(struct srcu_struct *ssp, struct rcu_head *rhp,
 }
 
 static void __call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
-			rcu_callback_t func, bool do_norm)
+			rcu_callback_t func, bool do_norm, unsigned long ip)
 {
 	/* Defer if we cannot safely enqueue now; see srcu_defer_drain(). */
 	if (in_nmi() || irqs_disabled()) {
@@ -1470,13 +1471,17 @@ static void __call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
 			struct srcu_defer *sndp = this_cpu_ptr(&srcu_defer);
 
 			sdp->ssp = ssp;
+#ifdef CONFIG_PROVE_RCU
+			/* Record the batch's first caller for the leak warning. */
+			cmpxchg(&sdp->defer_ip, 0, ip);
+#endif
 			if (llist_add(&sdp->defer_link, &sndp->list))
 				irq_work_queue(&sndp->iw);
 		}
 		return;
 	}
 
-	srcu_do_enqueue(ssp, rhp, func, do_norm);
+	srcu_do_enqueue(ssp, rhp, func, do_norm, ip);
 }
 
 /*
@@ -1492,12 +1497,20 @@ static void srcu_defer_drain(struct irq_work *iw)
 		struct srcu_data *sdp = container_of(snode, struct srcu_data, defer_link);
 		struct srcu_struct *ssp = sdp->ssp;
 		struct llist_node *cnode, *cnext;
+		unsigned long ip = _THIS_IP_;
 
+#ifdef CONFIG_PROVE_RCU
+		/* Consume this batch's recorded caller for the leak warning. */
+		unsigned long defer_ip = xchg(&sdp->defer_ip, 0);
+
+		if (defer_ip)
+			ip = defer_ip;
+#endif
 		cnode = llist_del_all(&sdp->defer_cbs);
 		llist_for_each_safe(cnode, cnext, cnode) {
 			struct rcu_head *rhp = (struct rcu_head *)cnode;
 
-			srcu_do_enqueue(ssp, rhp, rhp->func, true);
+			srcu_do_enqueue(ssp, rhp, rhp->func, true, ip);
 		}
 	}
 }
@@ -1526,7 +1539,7 @@ static void srcu_defer_drain(struct irq_work *iw)
 void call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
 	       rcu_callback_t func)
 {
-	__call_srcu(ssp, rhp, func, true);
+	__call_srcu(ssp, rhp, func, true, _RET_IP_);
 }
 EXPORT_SYMBOL_GPL(call_srcu);
 
@@ -1551,7 +1564,7 @@ static void __synchronize_srcu(struct srcu_struct *ssp, bool do_norm)
 	check_init_srcu_struct(ssp);
 	init_completion(&rcu.completion);
 	init_rcu_head_on_stack(&rcu.head);
-	__call_srcu(ssp, &rcu.head, wakeme_after_rcu, do_norm);
+	__call_srcu(ssp, &rcu.head, wakeme_after_rcu, do_norm, _RET_IP_);
 	wait_for_completion(&rcu.completion);
 	destroy_rcu_head_on_stack(&rcu.head);
 
@@ -1804,6 +1817,7 @@ static void srcu_expedite_current_cb(struct rcu_head *rhp)
 	unsigned long flags;
 	bool needcb = false;
 	struct srcu_data *sdp = container_of(rhp, struct srcu_data, srcu_ec_head);
+	struct srcu_struct *ssp = sdp->ssp;
 
 	raw_spin_lock_irqsave_sdp_contention(sdp, &flags);
 	if (sdp->srcu_ec_state == SRCU_EC_IDLE) {
@@ -1818,7 +1832,7 @@ static void srcu_expedite_current_cb(struct rcu_head *rhp)
 	raw_spin_unlock_irqrestore_rcu_node(sdp, flags);
 	// If needed, requeue ourselves as an expedited SRCU callback.
 	if (needcb)
-		__call_srcu(sdp->ssp, &sdp->srcu_ec_head, srcu_expedite_current_cb, false);
+		__call_srcu(ssp, &sdp->srcu_ec_head, srcu_expedite_current_cb, false, _RET_IP_);
 }
 
 /**
@@ -1851,7 +1865,7 @@ void srcu_expedite_current(struct srcu_struct *ssp)
 	raw_spin_unlock_irqrestore_rcu_node(sdp, flags);
 	// If needed, queue an expedited SRCU callback.
 	if (needcb)
-		__call_srcu(ssp, &sdp->srcu_ec_head, srcu_expedite_current_cb, false);
+		__call_srcu(ssp, &sdp->srcu_ec_head, srcu_expedite_current_cb, false, _RET_IP_);
 	migrate_enable();
 }
 EXPORT_SYMBOL_GPL(srcu_expedite_current);
