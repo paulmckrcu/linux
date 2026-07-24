@@ -2456,7 +2456,7 @@ static int psched_show(struct seq_file *seq, void *v)
 	seq_printf(seq, "%08x %08x %08x %08x\n",
 		   (u32)NSEC_PER_USEC, (u32)PSCHED_TICKS2NS(1),
 		   1000000,
-		   (u32)NSEC_PER_SEC / hrtimer_resolution);
+		   (u32)NSEC_PER_SEC / READ_ONCE(hrtimer_resolution));
 
 	return 0;
 }
