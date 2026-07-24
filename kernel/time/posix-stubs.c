@@ -76,7 +76,7 @@ SYSCALL_DEFINE2(clock_getres, const clockid_t, which_clock, struct __kernel_time
 {
 	struct timespec64 rtn_tp = {
 		.tv_sec = 0,
-		.tv_nsec = hrtimer_resolution,
+		.tv_nsec = READ_ONCE(hrtimer_resolution),
 	};
 
 	switch (which_clock) {
@@ -159,7 +159,7 @@ SYSCALL_DEFINE2(clock_getres_time32, clockid_t, which_clock,
 {
 	struct timespec64 rtn_tp = {
 		.tv_sec = 0,
-		.tv_nsec = hrtimer_resolution,
+		.tv_nsec = READ_ONCE(hrtimer_resolution),
 	};
 
 	switch (which_clock) {
