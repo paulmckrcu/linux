@@ -792,22 +792,12 @@ static noinline_for_stack void nocb_gp_wait(struct rcu_data *my_rdp)
 							   RCU_NEXT_READY_TAIL);
 			raw_spin_unlock_rcu_node(rnp); /* irqs disabled. */
 		}
-		// Need to wait on some grace period?
+
 		WARN_ON_ONCE(wasempty &&
 			     !rcu_segcblist_restempty(&rdp->cblist,
 						      RCU_NEXT_READY_TAIL));
-		/*
-		 * Only request a GP wait if the next pending callback's
-		 * GP has not already completed (normal or expedited).
-		 * If poll_state_synchronize_rcu_full() says it completed,
-		 * then rcu_advance_cbs() above already moved those
-		 * callbacks to RCU_DONE_TAIL, so there is no GP to wait
-		 * for.  Any remaining callbacks got new (future) GP
-		 * numbers from rcu_accelerate_cbs() inside
-		 * rcu_advance_cbs() and will be handled on the next pass.
-		 */
-		if (rcu_segcblist_nextgp(&rdp->cblist, &cur_gp_seq) &&
-		    !poll_state_synchronize_rcu_full(&cur_gp_seq)) {
+		// Need to wait on some grace period?
+		if (rcu_segcblist_nextgp(&rdp->cblist, &cur_gp_seq)) {
 			/*
 			 * Track the earliest pending normal and expedited GP
 			 * across the group so the wait below can be released by
