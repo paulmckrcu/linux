@@ -603,7 +603,7 @@ static int alarm_clock_getres(const clockid_t which_clock, struct timespec64 *tp
 		return -EINVAL;
 
 	tp->tv_sec = 0;
-	tp->tv_nsec = hrtimer_resolution;
+	tp->tv_nsec = READ_ONCE(hrtimer_resolution);
 	return 0;
 }
 
