@@ -44,6 +44,9 @@ static void pwm_gpio_round(struct pwm_state *dest, const struct pwm_state *src)
 
 	*dest = *src;
 
+	/* For hrtimer_resolution to be stable. */
+	lockdep_assert_irqs_disabled();
+
 	/* Round down to hrtimer resolution */
 	dividend = dest->period;
 	remainder = do_div(dividend, hrtimer_resolution);
@@ -100,14 +103,16 @@ static enum hrtimer_restart pwm_gpio_timer(struct hrtimer *gpio_timer)
 static int pwm_gpio_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 			  const struct pwm_state *state)
 {
+	int res;
 	struct pwm_gpio *gpwm = pwmchip_get_drvdata(chip);
 	bool invert = state->polarity == PWM_POLARITY_INVERSED;
 
-	if (state->duty_cycle && state->duty_cycle < hrtimer_resolution)
+	res = READ_ONCE(hrtimer_resolution);
+	if (state->duty_cycle && state->duty_cycle < res)
 		return -EINVAL;
 
 	if (state->duty_cycle != state->period &&
-	    (state->period - state->duty_cycle < hrtimer_resolution))
+	    (state->period - state->duty_cycle < res))
 		return -EINVAL;
 
 	if (!state->enabled) {
