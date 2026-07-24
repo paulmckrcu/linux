@@ -99,7 +99,7 @@ print_base(struct seq_file *m, struct hrtimer_clock_base *base, u64 now)
 	SEQ_printf(m, "  .base:       %p\n", base);
 	SEQ_printf(m, "  .index:      %d\n", base->index);
 
-	SEQ_printf(m, "  .resolution: %u nsecs\n", hrtimer_resolution);
+	SEQ_printf(m, "  .resolution: %u nsecs\n", READ_ONCE(hrtimer_resolution));
 #ifdef CONFIG_HIGH_RES_TIMERS
 	SEQ_printf(m, "  .offset:     %Ld nsecs\n",
 		   (long long) base->offset);

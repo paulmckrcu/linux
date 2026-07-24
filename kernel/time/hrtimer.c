@@ -777,7 +777,7 @@ static void hrtimer_switch_to_hres(void)
 		return;
 	}
 	base->hres_active = true;
-	hrtimer_resolution = HIGH_RES_NSEC;
+	WRITE_ONCE(hrtimer_resolution, HIGH_RES_NSEC);
 
 	tick_setup_sched_timer(true);
 	/* "Retrigger" the interrupt to get things going */
@@ -1062,6 +1062,7 @@ u64 hrtimer_forward(struct hrtimer *timer, ktime_t now, ktime_t interval)
 {
 	ktime_t delta;
 	u64 orun = 1;
+	int res;
 
 	delta = ktime_sub(now, hrtimer_get_expires(timer));
 
@@ -1071,8 +1072,9 @@ u64 hrtimer_forward(struct hrtimer *timer, ktime_t now, ktime_t interval)
 	if (WARN_ON(timer->is_queued))
 		return 0;
 
-	if (interval < hrtimer_resolution)
-		interval = hrtimer_resolution;
+	res = READ_ONCE(hrtimer_resolution);
+	if (interval < res)
+		interval = res;
 
 	if (unlikely(delta >= interval)) {
 		s64 incr = ktime_to_ns(interval);
