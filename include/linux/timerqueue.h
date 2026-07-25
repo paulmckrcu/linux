@@ -51,7 +51,7 @@ struct timerqueue_linked_node *timerqueue_linked_first(struct timerqueue_linked_
 static __always_inline
 struct timerqueue_linked_node *timerqueue_linked_next(struct timerqueue_linked_node *node)
 {
-	return rb_entry_safe(READ_ONCE(node->node.next), struct timerqueue_linked_node, node);
+	return rb_entry_safe(node->node.next, struct timerqueue_linked_node, node);
 }
 
 static __always_inline
