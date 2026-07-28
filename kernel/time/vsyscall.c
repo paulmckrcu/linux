@@ -109,6 +109,7 @@ void update_vsyscall(struct timekeeper *tk)
 	/*
 	 * Read without the seqlock held by clock_getres().
 	 */
+	lockdep_assert_irqs_disabled();
 	WRITE_ONCE(vdata->hrtimer_res, hrtimer_resolution);
 
 	/*
