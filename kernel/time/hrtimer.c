@@ -1280,6 +1280,10 @@ static inline ktime_t hrtimer_update_lowres(struct hrtimer *timer, ktime_t tim,
 					    const enum hrtimer_mode mode)
 {
 #ifdef CONFIG_TIME_LOW_RES
+
+	/* For hrtimer_resolution to be stable. */
+	lockdep_assert_irqs_disabled();
+
 	/*
 	 * CONFIG_TIME_LOW_RES indicates that the system has no way to return
 	 * granular time values. For relative timers we add hrtimer_resolution
