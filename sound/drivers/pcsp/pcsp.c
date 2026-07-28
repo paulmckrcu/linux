@@ -45,6 +45,9 @@ static int snd_pcsp_create(struct snd_card *card)
 	unsigned int resolution = hrtimer_resolution;
 	int div, min_div, order;
 
+	/* For hrtimer_resolution to be stable. */
+	lockdep_assert_irqs_disabled();
+
 	if (!nopcm) {
 		if (resolution > PCSP_MAX_PERIOD_NS) {
 			dev_err(card->dev,
