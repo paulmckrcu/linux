@@ -572,6 +572,21 @@ static inline void tasks_cblist_init_generic(void) { }
 #define RCU_SCHEDULER_INIT	1
 #define RCU_SCHEDULER_RUNNING	2
 
+/*
+ * Should a call_rcu()/call_srcu() callback be deferred rather than enqueued
+ * now?  Defer whenever interrupts are disabled: a callback-list operation may
+ * be in flight on this CPU, so enqueuing now could corrupt it.  But not while
+ * the scheduler is down -- early boot is single-threaded and can call this
+ * before init_IRQ() makes irq_work usable (e.g. rcu_init()'s self-tests).
+ */
+static inline bool should_rcu_defer(void)
+{
+	if (!IS_ENABLED(CONFIG_RCU_DEFER))
+		return false;
+
+	return irqs_disabled() && rcu_scheduler_active != RCU_SCHEDULER_INACTIVE;
+}
+
 enum rcutorture_type {
 	RCU_FLAVOR,
 	RCU_TASKS_FLAVOR,
