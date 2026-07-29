@@ -89,6 +89,9 @@ EXPORT_SYMBOL_GPL(init_srcu_struct_generic);
 void cleanup_srcu_struct(struct srcu_struct *ssp)
 {
 	WARN_ON(srcu_readers_active(ssp));
+	/* Re-issue any deferred callbacks so ->srcu_cb_head sees them below. */
+	if (IS_ENABLED(CONFIG_RCU_DEFER))
+		irq_work_sync(&ssp->defer_iw);
 	irq_work_sync(&ssp->srcu_irq_work);
 	flush_work(&ssp->srcu_work);
 	WARN_ON(ssp->srcu_gp_running);
