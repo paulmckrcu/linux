@@ -130,7 +130,7 @@ static int __init snd_hrtimer_init(void)
 	struct snd_timer *timer;
 	int err;
 
-	resolution = hrtimer_resolution;
+	resolution = READ_ONCE(hrtimer_resolution);
 
 	/* Create a new timer and set up the fields */
 	err = snd_timer_global_new("hrtimer", SNDRV_TIMER_GLOBAL_HRTIMER,
