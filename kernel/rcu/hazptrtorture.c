@@ -38,7 +38,7 @@ torture_param(int, irq_release, -1,
 torture_param(int, kthread_do_pending_ms, -1,
 	      "Delay between cleanups for deferred hazard pointers (ms), zero to disable");
 torture_param(int, nreaders, -1, "Number of hazard-pointer reader threads");
-torture_param(int, nwriters, 1, "Number of hazard-pointer writer threads, 0 or 1");
+torture_param(bool, nwriters, 1, "Number of hazard-pointer writer threads, 0 or 1");
 torture_param(int, onoff_holdoff, 0, "Time after boot before CPU hotplugs (s)");
 torture_param(int, onoff_interval, 0, "Time between CPU hotplugs (jiffies), 0=disable");
 torture_param(int, preempt_duration, 0, "Preemption duration (ms), zero to disable");
@@ -891,7 +891,6 @@ static int __init hazptr_torture_init(void)
 	}
 
 	if (nwriters) {
-		WARN_ON(IS_BUILTIN(CONFIG_HAZPTR_TORTURE_TEST) && nwriters != 1);
 		firsterr = torture_create_kthread(hazptr_torture_writer, NULL, writer_task);
 		if (torture_init_error(firsterr))
 			goto unwind;
