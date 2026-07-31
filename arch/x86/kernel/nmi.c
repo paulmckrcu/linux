@@ -85,7 +85,7 @@ static DEFINE_PER_CPU(struct nmi_stats, nmi_stats);
 static int ignore_nmis __read_mostly;
 
 int unknown_nmi_panic;
-unsigned long toolong_nmi_panic = 0;
+unsigned long toolong_nmi_panic;
 int panic_on_unrecovered_nmi;
 int panic_on_io_nmi;
 
@@ -114,7 +114,7 @@ static int __init setup_toolong_nmi_panic(char *str)
 	}
 	return 1;
 }
-__setup("toolong_nmi_panic", setup_toolong_nmi_panic);
+__setup("toolong_nmi_panic=", setup_toolong_nmi_panic);
 
 static u64 nmi_longest_ns = 1 * NSEC_PER_MSEC;
 
