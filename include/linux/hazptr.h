@@ -196,6 +196,18 @@ void hazptr_note_context_switch(void)
  * This protection is roughly similar to (but way faster than) that of a
  * reference counter, and ends with a later call to hazptr_release().
  *
+ * This protection is unconditional, and has limitations similar to
+ * that of unconditional reference-counter acquisition.  In particular,
+ * although holding a hazard pointer prevents a hazard-pointer-protected
+ * object from being freed, it does not prevent that object from being
+ * removed from a linked data structure, and does not prevent other
+ * hazard-pointer-protected objects referenced by this object from being
+ * both removed and freed.  At which point, invoking hazptr_acquire()
+ * on these dangling pointers would be a bug.  On the other hand, use of
+ * hazptr_acquire() is safe for immortal pointers to objects that do not
+ * themselves contain pointers to hazard-pointer-protected objects.
+ * Other (more complex) use cases are also possible.
+ *
  * By default, the call to hazptr_release() must be running in the same
  * execution context as the corresponding hazptr_acquire(), for example,
  * within the same task or interrupt handler.  When it is necessary to
