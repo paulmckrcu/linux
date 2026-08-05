@@ -85,7 +85,7 @@ static DEFINE_PER_CPU(struct nmi_stats, nmi_stats);
 static int ignore_nmis __read_mostly;
 
 int unknown_nmi_panic;
-unsigned long toolong_nmi_panic;
+static unsigned long toolong_nmi_panic;
 int panic_on_unrecovered_nmi;
 int panic_on_io_nmi;
 
