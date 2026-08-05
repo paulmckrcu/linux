@@ -238,8 +238,7 @@ config RCU_FANOUT_LEAF
 
 config RCU_BOOST
 	bool
-	depends on (RT_MUTEXES && PREEMPT_RCU) || PREEMPT_RT
-	default y if PREEMPT_RT
+	default y if (RT_MUTEXES && PREEMPT_RCU) || PREEMPT_RT
 	help
 	  This option boosts the priority of preempted RCU readers that
 	  block the current preemptible RCU grace period for too long.
