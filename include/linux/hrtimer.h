@@ -73,7 +73,7 @@ enum hrtimer_mode {
  */
 struct hrtimer_sleeper {
 	struct hrtimer timer;
-	struct task_struct __private *task;
+	struct task_struct *__private task;
 };
 
 static inline void hrtimer_set_expires(struct hrtimer *timer, ktime_t time)
