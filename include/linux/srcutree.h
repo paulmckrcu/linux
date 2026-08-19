@@ -80,6 +80,7 @@ struct srcu_usage {
 	struct mutex srcu_cb_mutex;		/* Serialize CB preparation. */
 	raw_spinlock_t __private lock;		/* Protect counters and size state. */
 	struct mutex srcu_gp_mutex;		/* Serialize GP work. */
+	atomic_t srcu_atomic_gp_flag;		/* Serialize atomic GP work. */
 	unsigned long srcu_gp_seq;		/* Grace-period seq #. */
 	unsigned long srcu_gp_seq_needed;	/* Latest gp_seq needed. */
 	unsigned long srcu_gp_seq_needed_exp;	/* Furthest future exp GP. */

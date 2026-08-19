@@ -253,6 +253,7 @@ static int init_srcu_struct_fields(struct srcu_struct *ssp, bool is_static, bool
 	ssp->srcu_sup->node = NULL;
 	mutex_init(&ssp->srcu_sup->srcu_cb_mutex);
 	mutex_init(&ssp->srcu_sup->srcu_gp_mutex);
+	atomic_set(&ssp->srcu_sup->srcu_atomic_gp_flag, 0);
 	ssp->srcu_sup->srcu_gp_seq = SRCU_GP_SEQ_INITIAL_VAL;
 	ssp->srcu_sup->srcu_barrier_seq = 0;
 	mutex_init(&ssp->srcu_sup->srcu_barrier_mutex);
@@ -2018,6 +2019,71 @@ static void srcu_advance_state(struct srcu_struct *ssp, bool is_atomic)
 		srcu_gp_end(ssp);  /* Releases ->srcu_gp_mutex. */
 	}
 }
+
+/**
+ * synchronize_srcu_atomic - spin for prior SRCU read-side critical-section completion
+ * @ssp: srcu_struct with which to synchronize.
+ *
+ * Similar to synchronize_srcu(), but spins rather than blocking.
+ * Use only with srcu_read_lock_atomic() and srcu_read_unlock_atomic(),
+ * which are forbidden from voluntarily context switching.  If
+ * synchronize_srcu_atomic() is invoked from a more restrictive context
+ * (for example, interrupts disabled) for a given srcu_struct structure,
+ * then for that structure, all calls to both srcu_read_lock_atomic()
+ * and srcu_read_unlock_atomic() must be invoked from that same context,
+ * or one that is even more strict.
+ *
+ * If synchronize_srcu_atomic() is invoked on a given srcu_struct
+ * structure, then none of call_srcu(), synchronize_srcu(),
+ * synchronize_srcu_expedited(), or start_poll_synchronize_srcu() may be
+ * invoked on that same structure.
+ *
+ * Because synchronize_srcu_atomic() is even more expedited than is
+ * synchronize_srcu_expedited(), there is no expedited counterpart to
+ * this function.
+ */
+void synchronize_srcu_atomic(struct srcu_struct *ssp)
+{
+	unsigned long srcu_state;
+	struct srcu_usage *sup = ssp->srcu_sup;
+
+	// Initialize.	Either init_srcu_struct() was invoked or
+	// DEFINE_SRCU() or similar was used.  Therefore, no allocation
+	// will be done here.
+	check_init_srcu_struct(ssp, true);
+	srcu_check_read_flavor(ssp, SRCU_READ_FLAVOR_ATOMIC);
+
+	// Perhaps others will do our work for us.
+	srcu_state = get_state_synchronize_srcu(ssp);
+	while (atomic_read(&sup->srcu_atomic_gp_flag) ||
+	       atomic_xchg(&sup->srcu_atomic_gp_flag, 1)) {
+		if (poll_state_synchronize_srcu(ssp, srcu_state))
+			return;
+		cpu_relax();
+	}
+
+	// One last check for others doing our work for us under the lock.
+	raw_spin_lock_irq_rcu_node(sup);
+	if (poll_state_synchronize_srcu(ssp, srcu_state)) {
+		raw_spin_unlock_irq_rcu_node(sup);
+		atomic_set(&sup->srcu_atomic_gp_flag, 0);
+		return;
+	}
+
+	// OK, we really have to do it ourselves.  Start the grace period.
+	non_block_start();  // We must not voluntarily block!
+	srcu_gp_start(ssp);
+	raw_spin_unlock_irq_rcu_node(sup);
+
+	// Wait for it to complete, helping it along.
+	while (!poll_state_synchronize_srcu(ssp, srcu_state)) {
+		cpu_relax();
+		srcu_advance_state(ssp, true);
+	}
+	atomic_set(&sup->srcu_atomic_gp_flag, 0);
+	non_block_end();
+}
+EXPORT_SYMBOL_GPL(synchronize_srcu_atomic);
 
 /*
  * Invoke a limited number of SRCU callbacks that have passed through
