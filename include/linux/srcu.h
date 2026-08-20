@@ -87,6 +87,8 @@ int init_srcu_struct_fast_updown(struct srcu_struct *ssp);
 					 SRCU_READ_FLAVOR_FAST | SRCU_READ_FLAVOR_FAST_UPDOWN | \
 					 SRCU_READ_FLAVOR_ATOMIC)
 						// All of the above.
+#define SRCU_READ_FLAVOR_PREDEF		(SRCU_READ_FLAVOR_FAST | SRCU_READ_FLAVOR_ATOMIC)
+						// Flavors special DEFINE_SRCU() flavors.
 #define SRCU_READ_FLAVOR_SLOWGP		(SRCU_READ_FLAVOR_FAST | SRCU_READ_FLAVOR_FAST_UPDOWN)
 						// Flavors requiring synchronize_rcu()
 						// instead of smp_mb().
