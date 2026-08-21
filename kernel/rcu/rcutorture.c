@@ -710,6 +710,7 @@ static struct rcu_torture_ops rcu_busted_ops = {
 DEFINE_STATIC_SRCU(srcu_ctl);
 DEFINE_STATIC_SRCU_FAST(srcu_ctlf);
 DEFINE_STATIC_SRCU_FAST_UPDOWN(srcu_ctlfud);
+DEFINE_STATIC_SRCU_ATOMIC(srcu_ctla);
 static struct srcu_struct srcu_ctld;
 static struct srcu_struct *srcu_ctlp = &srcu_ctl;
 static struct rcu_torture_ops srcud_ops;
@@ -728,6 +729,10 @@ static void srcu_torture_init(void)
 	if (reader_flavor & SRCU_READ_FLAVOR_FAST_UPDOWN) {
 		srcu_ctlp = &srcu_ctlfud;
 		VERBOSE_TOROUT_STRING("srcu_torture_init fast-up/down SRCU");
+	}
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
+		srcu_ctlp = &srcu_ctla;
+		VERBOSE_TOROUT_STRING("srcu_torture_init atomic SRCU");
 	}
 }
 
@@ -766,6 +771,11 @@ static int srcu_torture_read_lock(void)
 		WARN_ON_ONCE(idx & ~0x1);
 		ret += idx << 3;
 	}
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
+		idx = srcu_read_lock_atomic(srcu_ctlp);
+		WARN_ON_ONCE(idx & ~0x1);
+		ret += idx << 4;
+	}
 	return ret;
 }
 
@@ -785,7 +795,8 @@ srcu_read_delay(struct torture_random_state *rrsp, struct rt_read_seg *rtrsp)
 
 	delay = torture_random(rrsp) %
 		(nrealreaders * 2 * longdelay * uspertick);
-	if (!delay && !in_atomic() && !rcu_preempt_depth() && !irqs_disabled()) {
+	if (!delay && !in_atomic() && !rcu_preempt_depth() && !irqs_disabled() &&
+	    !(reader_flavor & SRCU_READ_FLAVOR_ATOMIC)) {
 		schedule_timeout_interruptible(longdelay);
 		rtrsp->rt_delay_jiffies = longdelay;
 	} else {
@@ -796,6 +807,8 @@ srcu_read_delay(struct torture_random_state *rrsp, struct rt_read_seg *rtrsp)
 static void srcu_torture_read_unlock(int idx)
 {
 	WARN_ON_ONCE((reader_flavor && (idx & ~reader_flavor)) || (!reader_flavor && (idx & ~0x1)));
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC)
+		srcu_read_unlock_atomic(srcu_ctlp, (idx & 0x10) >> 4);
 	if (reader_flavor & SRCU_READ_FLAVOR_FAST_UPDOWN)
 		srcu_read_unlock_fast_updown(srcu_ctlp,
 					     __srcu_ctr_to_ptr(srcu_ctlp, (idx & 0x8) >> 3));
@@ -875,7 +888,10 @@ static void srcu_torture_deferred_free(struct rcu_torture *rp)
 
 static void srcu_torture_synchronize(void)
 {
-	synchronize_srcu(srcu_ctlp);
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC)
+		synchronize_srcu_atomic(srcu_ctlp);
+	else
+		synchronize_srcu(srcu_ctlp);
 }
 
 static unsigned long srcu_torture_get_gp_state(void)
@@ -969,6 +985,9 @@ static void srcud_torture_init(void)
 	} else if (reader_flavor & SRCU_READ_FLAVOR_FAST_UPDOWN) {
 		WARN_ON(init_srcu_struct_fast_updown(&srcu_ctld));
 		VERBOSE_TOROUT_STRING("srcud_torture_init fast-up/down SRCU");
+	} else if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
+		WARN_ON(init_srcu_struct_atomic(&srcu_ctld));
+		VERBOSE_TOROUT_STRING("srcud_torture_init atomic SRCU");
 	} else {
 		WARN_ON(init_srcu_struct(&srcu_ctld));
 	}
