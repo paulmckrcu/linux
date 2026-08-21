@@ -710,12 +710,14 @@ static struct rcu_torture_ops rcu_busted_ops = {
 DEFINE_STATIC_SRCU(srcu_ctl);
 DEFINE_STATIC_SRCU_FAST(srcu_ctlf);
 DEFINE_STATIC_SRCU_FAST_UPDOWN(srcu_ctlfud);
+DEFINE_STATIC_SRCU_ATOMIC(srcu_ctla);
 static struct srcu_struct srcu_ctld;
 static struct srcu_struct *srcu_ctlp = &srcu_ctl;
 static struct rcu_torture_ops srcud_ops;
 
 static void srcu_torture_init(void)
 {
+	pr_alert("%s: reader_flavor: %d\n", __func__, reader_flavor);
 	rcu_sync_torture_init();
 	if (!reader_flavor || (reader_flavor & SRCU_READ_FLAVOR_NORMAL))
 		VERBOSE_TOROUT_STRING("srcu_torture_init normal SRCU");
@@ -728,6 +730,10 @@ static void srcu_torture_init(void)
 	if (reader_flavor & SRCU_READ_FLAVOR_FAST_UPDOWN) {
 		srcu_ctlp = &srcu_ctlfud;
 		VERBOSE_TOROUT_STRING("srcu_torture_init fast-up/down SRCU");
+	}
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
+		srcu_ctlp = &srcu_ctla;
+		VERBOSE_TOROUT_STRING("srcu_torture_init atomic SRCU");
 	}
 }
 
@@ -766,6 +772,11 @@ static int srcu_torture_read_lock(void)
 		WARN_ON_ONCE(idx & ~0x1);
 		ret += idx << 3;
 	}
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
+		idx = srcu_read_lock_atomic(srcu_ctlp);
+		WARN_ON_ONCE(idx & ~0x1);
+		ret += idx << 4;
+	}
 	return ret;
 }
 
@@ -785,7 +796,8 @@ srcu_read_delay(struct torture_random_state *rrsp, struct rt_read_seg *rtrsp)
 
 	delay = torture_random(rrsp) %
 		(nrealreaders * 2 * longdelay * uspertick);
-	if (!delay && !in_atomic() && !rcu_preempt_depth() && !irqs_disabled()) {
+	if (!delay && !in_atomic() && !rcu_preempt_depth() && !irqs_disabled() &&
+	    !(reader_flavor & SRCU_READ_FLAVOR_ATOMIC)) {
 		schedule_timeout_interruptible(longdelay);
 		rtrsp->rt_delay_jiffies = longdelay;
 	} else {
@@ -796,6 +808,8 @@ srcu_read_delay(struct torture_random_state *rrsp, struct rt_read_seg *rtrsp)
 static void srcu_torture_read_unlock(int idx)
 {
 	WARN_ON_ONCE((reader_flavor && (idx & ~reader_flavor)) || (!reader_flavor && (idx & ~0x1)));
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC)
+		srcu_read_unlock_atomic(srcu_ctlp, (idx & 0x10) >> 4);
 	if (reader_flavor & SRCU_READ_FLAVOR_FAST_UPDOWN)
 		srcu_read_unlock_fast_updown(srcu_ctlp,
 					     __srcu_ctr_to_ptr(srcu_ctlp, (idx & 0x8) >> 3));
