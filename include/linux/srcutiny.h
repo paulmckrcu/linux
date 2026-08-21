@@ -65,6 +65,9 @@ void srcu_defer_drain(struct irq_work *irq_work);
 #define DEFINE_SRCU_FAST_UPDOWN(name) DEFINE_SRCU(name)
 #define DEFINE_STATIC_SRCU_FAST_UPDOWN(name) \
 	static struct srcu_struct name = __SRCU_STRUCT_INIT(name, name, name, name)
+#define DEFINE_SRCU_ATOMIC(name) DEFINE_SRCU(name)
+#define DEFINE_STATIC_SRCU_ATOMIC(name) \
+	static struct srcu_struct name = __SRCU_STRUCT_INIT(name, name, name, name)
 
 // Dummy structure for srcu_notifier_head.
 struct srcu_usage { };
