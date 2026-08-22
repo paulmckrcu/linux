@@ -36,6 +36,8 @@ static inline int __init_srcu_struct(struct srcu_struct *ssp, const char *name,
 int __init_srcu_struct_fast(struct srcu_struct *ssp, const char *name, struct lock_class_key *key);
 int __init_srcu_struct_fast_updown(struct srcu_struct *ssp, const char *name,
 				   struct lock_class_key *key);
+int __init_srcu_struct_atomic(struct srcu_struct *ssp, const char *name,
+			      struct lock_class_key *key);
 #endif // #ifndef CONFIG_TINY_SRCU
 
 #define init_srcu_struct_fast(ssp) \
@@ -52,6 +54,13 @@ int __init_srcu_struct_fast_updown(struct srcu_struct *ssp, const char *name,
 	__init_srcu_struct_fast_updown((ssp), #ssp, &__srcu_key); \
 })
 
+#define init_srcu_struct_atomic(ssp) \
+({ \
+	static struct lock_class_key __srcu_key; \
+	\
+	__init_srcu_struct_atomic((ssp), #ssp, &__srcu_key); \
+})
+
 #define __SRCU_DEP_MAP_INIT(srcu_name)	.dep_map = { .name = #srcu_name },
 #else /* #ifdef CONFIG_DEBUG_LOCK_ALLOC */
 
@@ -64,6 +73,7 @@ static inline int __init_srcu_struct(struct srcu_struct *ssp, const char *name,
 #ifndef CONFIG_TINY_SRCU
 int init_srcu_struct_fast(struct srcu_struct *ssp);
 int init_srcu_struct_fast_updown(struct srcu_struct *ssp);
+int init_srcu_struct_atomic(struct srcu_struct *ssp);
 #endif // #ifndef CONFIG_TINY_SRCU
 
 #define __SRCU_DEP_MAP_INIT(srcu_name)

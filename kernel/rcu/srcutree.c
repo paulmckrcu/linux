@@ -331,6 +331,13 @@ int __init_srcu_struct_fast_updown(struct srcu_struct *ssp, const char *name,
 }
 EXPORT_SYMBOL_GPL(__init_srcu_struct_fast_updown);
 
+int __init_srcu_struct_atomic(struct srcu_struct *ssp, const char *name, struct lock_class_key *key)
+{
+	ssp->srcu_reader_flavor = SRCU_READ_FLAVOR_ATOMIC;
+	return __init_srcu_struct_common(ssp, name, key);
+}
+EXPORT_SYMBOL_GPL(__init_srcu_struct_atomic);
+
 #else /* #ifdef CONFIG_DEBUG_LOCK_ALLOC */
 
 /**
@@ -385,6 +392,26 @@ int init_srcu_struct_fast_updown(struct srcu_struct *ssp)
 	return init_srcu_struct_fields(ssp, false, false);
 }
 EXPORT_SYMBOL_GPL(init_srcu_struct_fast_updown);
+
+/**
+ * init_srcu_struct_atomic - initialize an atomic sleep-RCU structure
+ * @ssp: structure to initialize.
+ *
+ * Use this in place of DEFINE_SRCU_ATOMIC() and DEFINE_STATIC_SRCU_ATOMIC()
+ * for non-static srcu_struct structures that are to be passed to
+ * srcu_read_lock_atomic() and friends.  It is necessary to invoke this on a
+ * given srcu_struct before passing that srcu_struct to any other function.
+ * Each srcu_struct represents a separate domain of SRCU protection.
+ *
+ * And yes, we really are defining a sleepable RCU implementation that
+ * cannot sleep.  Strange universe we live in, isn't it?
+ */
+int init_srcu_struct_atomic(struct srcu_struct *ssp)
+{
+	ssp->srcu_reader_flavor = SRCU_READ_FLAVOR_ATOMIC;
+	return init_srcu_struct_fields(ssp, false, false);
+}
+EXPORT_SYMBOL_GPL(init_srcu_struct_atomic);
 
 #endif /* #else #ifdef CONFIG_DEBUG_LOCK_ALLOC */
 
