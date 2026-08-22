@@ -983,6 +983,9 @@ static void srcud_torture_init(void)
 	} else if (reader_flavor & SRCU_READ_FLAVOR_FAST_UPDOWN) {
 		WARN_ON(init_srcu_struct_fast_updown(&srcu_ctld));
 		VERBOSE_TOROUT_STRING("srcud_torture_init fast-up/down SRCU");
+	} else if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
+		WARN_ON(init_srcu_struct_atomic(&srcu_ctld));
+		VERBOSE_TOROUT_STRING("srcud_torture_init atomic SRCU");
 	} else {
 		WARN_ON(init_srcu_struct(&srcu_ctld));
 	}
