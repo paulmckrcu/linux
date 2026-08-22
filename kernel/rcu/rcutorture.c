@@ -717,7 +717,6 @@ static struct rcu_torture_ops srcud_ops;
 
 static void srcu_torture_init(void)
 {
-	pr_alert("%s: reader_flavor: %d\n", __func__, reader_flavor);
 	rcu_sync_torture_init();
 	if (!reader_flavor || (reader_flavor & SRCU_READ_FLAVOR_NORMAL))
 		VERBOSE_TOROUT_STRING("srcu_torture_init normal SRCU");
@@ -889,7 +888,10 @@ static void srcu_torture_deferred_free(struct rcu_torture *rp)
 
 static void srcu_torture_synchronize(void)
 {
-	synchronize_srcu(srcu_ctlp);
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC)
+		synchronize_srcu_atomic(srcu_ctlp);
+	else
+		synchronize_srcu(srcu_ctlp);
 }
 
 static unsigned long srcu_torture_get_gp_state(void)
