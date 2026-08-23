@@ -2102,6 +2102,7 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 
 	// OK, we really have to do it ourselves.  Start the grace period.
 	non_block_start();  // We must not voluntarily block!
+	smp_store_release(&sup->srcu_gp_seq_needed, srcu_state); // See srcu_funnel_gp_start().
 	srcu_gp_start(ssp);
 	raw_spin_unlock_irq_rcu_node(sup);
 
@@ -2110,7 +2111,7 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 		cpu_relax();
 		srcu_advance_state(ssp, true);
 	}
-	atomic_set(&sup->srcu_atomic_gp_flag, 0);
+	atomic_set_release(&sup->srcu_atomic_gp_flag, 0);
 	non_block_end();
 }
 EXPORT_SYMBOL_GPL(synchronize_srcu_atomic);
