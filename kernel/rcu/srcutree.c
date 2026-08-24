@@ -973,7 +973,7 @@ static void srcu_schedule_cbs_snp(struct srcu_struct *ssp, struct srcu_node *snp
  * are initiating callback invocation.  This allows the ->srcu_have_cbs[]
  * array to have a finite number of elements.
  */
-static void srcu_gp_end(struct srcu_struct *ssp)
+static void srcu_gp_end(struct srcu_struct *ssp, bool is_atomic)
 {
 	unsigned long cbdelay = 1;
 	bool cbs;
@@ -989,7 +989,8 @@ static void srcu_gp_end(struct srcu_struct *ssp)
 	struct srcu_usage *sup = ssp->srcu_sup;
 
 	/* Prevent more than one additional grace period. */
-	mutex_lock(&sup->srcu_cb_mutex);
+	if (!is_atomic)
+		mutex_lock(&sup->srcu_cb_mutex);
 
 	/* End the current grace period. */
 	raw_spin_lock_irq_rcu_node(sup);
@@ -1004,7 +1005,8 @@ static void srcu_gp_end(struct srcu_struct *ssp)
 	if (ULONG_CMP_LT(sup->srcu_gp_seq_needed_exp, gpseq))
 		WRITE_ONCE(sup->srcu_gp_seq_needed_exp, gpseq);
 	raw_spin_unlock_irq_rcu_node(sup);
-	mutex_unlock(&sup->srcu_gp_mutex);
+	if (!is_atomic)
+		mutex_unlock(&sup->srcu_gp_mutex);
 	/* A new grace period can start at this point.  But only one. */
 
 	/* Initiate callback invocation as needed. */
@@ -1049,7 +1051,8 @@ static void srcu_gp_end(struct srcu_struct *ssp)
 		}
 
 	/* Callback initiation done, allow grace periods after next. */
-	mutex_unlock(&sup->srcu_cb_mutex);
+	if (!is_atomic)
+		mutex_unlock(&sup->srcu_cb_mutex);
 
 	/* Start a new grace period if needed. */
 	raw_spin_lock_irq_rcu_node(sup);
@@ -2046,7 +2049,7 @@ static void srcu_advance_state(struct srcu_struct *ssp, bool is_atomic)
 			return; /* readers present, retry later. */
 		}
 		ssp->srcu_sup->srcu_n_exp_nodelay = 0;
-		srcu_gp_end(ssp);  /* Releases ->srcu_gp_mutex. */
+		srcu_gp_end(ssp, is_atomic);  /* Releases ->srcu_gp_mutex. */
 	}
 }
 
@@ -2103,6 +2106,8 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 	// OK, we really have to do it ourselves.  Start the grace period.
 	non_block_start();  // We must not voluntarily block!
 	smp_store_release(&sup->srcu_gp_seq_needed, srcu_state); // See srcu_funnel_gp_start().
+	/*&&&&*/pr_alert("%s() start: ->srcu_gp_seq: %lx ->srcu_gp_seq_needed: %lx\n", __func__, ssp->srcu_sup->srcu_gp_seq, ssp->srcu_sup->srcu_gp_seq_needed);
+	ASSERT_EXCLUSIVE_WRITER(ssp->srcu_sup->srcu_gp_seq);
 	srcu_gp_start(ssp);
 	raw_spin_unlock_irq_rcu_node(sup);
 
@@ -2111,6 +2116,8 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 		cpu_relax();
 		srcu_advance_state(ssp, true);
 	}
+	/*&&&&*/pr_alert("%s() end: ->srcu_gp_seq: %lx ->srcu_gp_seq_needed: %lx\n", __func__, ssp->srcu_sup->srcu_gp_seq, ssp->srcu_sup->srcu_gp_seq_needed);
+	ASSERT_EXCLUSIVE_WRITER(sup->srcu_atomic_gp_flag);
 	atomic_set_release(&sup->srcu_atomic_gp_flag, 0);
 	non_block_end();
 }
