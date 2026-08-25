@@ -368,6 +368,8 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 	preempt_disable();  // Guard against lazy preemption and some other grace period.
 	ret = !READ_ONCE(ssp->srcu_lock_nesting[0]) && !READ_ONCE(ssp->srcu_lock_nesting[1]);
 	if (ret) {
+		WRITE_ONCE(ssp->srcu_idx_max, ssp->srcu_idx + 2);
+		WRITE_ONCE(ssp->srcu_idx, ssp->srcu_idx + 2);
 		preempt_enable();
 		return;
 	}
@@ -389,6 +391,7 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 
 	// We get here if a reader has been lazily preempted.
 	// First, wait for old readers, which are quite unlikely.
+	WRITE_ONCE(ssp->srcu_idx_max, get_state_synchronize_srcu(ssp));
 	idx = !(((READ_ONCE(ssp->srcu_idx) + 1) & 0x2) >> 1);
 	while (READ_ONCE(ssp->srcu_lock_nesting[idx])) {
 		cond_resched_tasks_rcu_qs();
