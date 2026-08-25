@@ -917,7 +917,9 @@ static void srcu_torture_call(struct rcu_head *head,
 
 static void srcu_torture_barrier(void)
 {
-	srcu_barrier(srcu_ctlp);
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
+		srcu_barrier(srcu_ctlp);
+	}
 }
 
 static void srcu_torture_stats(void)
@@ -1768,7 +1770,7 @@ rcu_torture_writer(void *arg)
 		pr_alert("%s" TORTURE_FLAG " Waited %lu jiffies for boot to complete.\n",
 			 torture_type, jiffies - j);
 
-	if (IS_ENABLED(CONFIG_RCU_LAZY))
+	if (IS_ENABLED(CONFIG_RCU_LAZY) && !(reader_flavor & SRCU_READ_FLAVOR_ATOMIC))
 		INIT_WORK_ONSTACK(&lazy_work, rcu_torture_writer_work);
 
 	do {
@@ -4437,7 +4439,7 @@ rcu_torture_cleanup(void)
 
 	if (torture_cleanup_begin()) {
 		rcu_torture_nmi_cleanup();
-		if (cur_ops->cb_barrier != NULL) {
+		if (cur_ops->cb_barrier != NULL && !(reader_flavor & SRCU_READ_FLAVOR_ATOMIC)) {
 			pr_info("%s: Invoking %pS().\n", __func__, cur_ops->cb_barrier);
 			cur_ops->cb_barrier();
 		}
@@ -4505,7 +4507,7 @@ rcu_torture_cleanup(void)
 	 * Wait for all RCU callbacks to fire, then do torture-type-specific
 	 * cleanup operations.
 	 */
-	if (cur_ops->cb_barrier != NULL) {
+	if (cur_ops->cb_barrier != NULL && !(reader_flavor & SRCU_READ_FLAVOR_ATOMIC)) {
 		pr_info("%s: Invoking %pS().\n", __func__, cur_ops->cb_barrier);
 		cur_ops->cb_barrier();
 	}
