@@ -1516,6 +1516,8 @@ static void srcu_do_enqueue(struct srcu_struct *ssp, struct rcu_head *rhp,
 static void __call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
 			rcu_callback_t func, bool do_norm)
 {
+	if (WARN_ON_ONCE(ssp->srcu_reader_flavor == SRCU_READ_FLAVOR_ATOMIC))
+		return; // Leak the callback rather than corrupt SRCU state.
 	if (should_rcu_defer()) {
 		struct srcu_defer *sndp = this_cpu_ptr(&srcu_defer);
 		struct srcu_data *sdp;
@@ -1655,6 +1657,10 @@ static void __synchronize_srcu(struct srcu_struct *ssp, bool do_norm)
 
 	if (rcu_scheduler_active == RCU_SCHEDULER_INACTIVE)
 		return;
+	if (ssp->srcu_reader_flavor == SRCU_READ_FLAVOR_ATOMIC) {
+		synchronize_srcu_atomic(ssp);
+		return;
+	}
 	might_sleep();
 	check_init_srcu_struct(ssp, false);
 	init_completion(&rcu.completion);
