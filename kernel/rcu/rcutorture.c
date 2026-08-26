@@ -715,6 +715,15 @@ static struct srcu_struct srcu_ctld;
 static struct srcu_struct *srcu_ctlp = &srcu_ctl;
 static struct rcu_torture_ops srcud_ops;
 
+// Restrict APIs permitted for atomic SRCU.
+static void srcu_torture_init_forbidden_apis(void)
+{
+	cur_ops->call = NULL;
+	cur_ops->cb_barrier = NULL;
+	cur_ops->deferred_free = NULL;
+	cur_ops->start_gp_poll = NULL;
+}
+
 static void srcu_torture_init(void)
 {
 	rcu_sync_torture_init();
@@ -733,6 +742,7 @@ static void srcu_torture_init(void)
 	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
 		srcu_ctlp = &srcu_ctla;
 		VERBOSE_TOROUT_STRING("srcu_torture_init atomic SRCU");
+		srcu_torture_init_forbidden_apis();
 	}
 }
 
@@ -917,9 +927,7 @@ static void srcu_torture_call(struct rcu_head *head,
 
 static void srcu_torture_barrier(void)
 {
-	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
-		srcu_barrier(srcu_ctlp);
-	}
+	srcu_barrier(srcu_ctlp);
 }
 
 static void srcu_torture_stats(void)
@@ -929,7 +937,10 @@ static void srcu_torture_stats(void)
 
 static void srcu_torture_synchronize_expedited(void)
 {
-	synchronize_srcu_expedited(srcu_ctlp);
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC)
+		synchronize_srcu_atomic(srcu_ctlp);
+	else
+		synchronize_srcu_expedited(srcu_ctlp);
 }
 
 static void srcu_torture_expedite_current(void)
@@ -990,6 +1001,7 @@ static void srcud_torture_init(void)
 	} else if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC) {
 		WARN_ON(init_srcu_struct_atomic(&srcu_ctld));
 		VERBOSE_TOROUT_STRING("srcud_torture_init atomic SRCU");
+		srcu_torture_init_forbidden_apis();
 	} else {
 		WARN_ON(init_srcu_struct(&srcu_ctld));
 	}
@@ -1770,7 +1782,7 @@ rcu_torture_writer(void *arg)
 		pr_alert("%s" TORTURE_FLAG " Waited %lu jiffies for boot to complete.\n",
 			 torture_type, jiffies - j);
 
-	if (IS_ENABLED(CONFIG_RCU_LAZY) && !(reader_flavor & SRCU_READ_FLAVOR_ATOMIC))
+	if (IS_ENABLED(CONFIG_RCU_LAZY) && cur_ops->call)
 		INIT_WORK_ONSTACK(&lazy_work, rcu_torture_writer_work);
 
 	do {
@@ -1965,7 +1977,7 @@ rcu_torture_writer(void *arg)
 				       !rcu_gp_is_normal();
 		}
 		rcu_torture_writer_state = RTWS_STUTTER;
-		if (IS_ENABLED(CONFIG_RCU_LAZY))
+		if (IS_ENABLED(CONFIG_RCU_LAZY) && cur_ops->call)
 			queue_work(system_percpu_wq, &lazy_work);
 		stutter_waited = stutter_wait("rcu_torture_writer");
 		if (stutter_waited &&
@@ -1998,7 +2010,7 @@ rcu_torture_writer(void *arg)
 			 " Dynamic grace-period expediting was disabled.\n",
 			 torture_type);
 
-	if (IS_ENABLED(CONFIG_RCU_LAZY)) {
+	if (IS_ENABLED(CONFIG_RCU_LAZY) && cur_ops->call) {
 		cancel_work_sync(&lazy_work);
 		destroy_work_on_stack(&lazy_work);
 	}
@@ -4439,7 +4451,7 @@ rcu_torture_cleanup(void)
 
 	if (torture_cleanup_begin()) {
 		rcu_torture_nmi_cleanup();
-		if (cur_ops->cb_barrier != NULL && !(reader_flavor & SRCU_READ_FLAVOR_ATOMIC)) {
+		if (cur_ops->cb_barrier != NULL) {
 			pr_info("%s: Invoking %pS().\n", __func__, cur_ops->cb_barrier);
 			cur_ops->cb_barrier();
 		}
@@ -4507,7 +4519,7 @@ rcu_torture_cleanup(void)
 	 * Wait for all RCU callbacks to fire, then do torture-type-specific
 	 * cleanup operations.
 	 */
-	if (cur_ops->cb_barrier != NULL && !(reader_flavor & SRCU_READ_FLAVOR_ATOMIC)) {
+	if (cur_ops->cb_barrier != NULL) {
 		pr_info("%s: Invoking %pS().\n", __func__, cur_ops->cb_barrier);
 		cur_ops->cb_barrier();
 	}
