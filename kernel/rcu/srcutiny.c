@@ -440,6 +440,11 @@ EXPORT_SYMBOL_GPL(get_state_synchronize_srcu);
  * The difference between this and get_state_synchronize_srcu() is that
  * this function ensures that the poll_state_synchronize_srcu() will
  * eventually return the value true.
+ *
+ * This function cannot be used with atomic SRCU, which only has
+ * atomic grace periods.  Doing so will silently corrupt internal
+ * SRCU state.  Tree SRCU has appropriate checking with splats,
+ * so please test with CONFIG_SMP=y as well as CONFIG_SMP=n.
  */
 unsigned long start_poll_synchronize_srcu(struct srcu_struct *ssp)
 {
