@@ -910,6 +910,7 @@ static void srcu_gp_start(struct srcu_struct *ssp)
 {
 	int state;
 
+	/*&&&&*/pr_alert("%s() start: ->srcu_gp_seq: %lx ->srcu_gp_seq_needed: %lx\n", __func__, ssp->srcu_sup->srcu_gp_seq, ssp->srcu_sup->srcu_gp_seq_needed);
 	lockdep_assert_held(&ACCESS_PRIVATE(ssp->srcu_sup, lock));
 	WARN_ON_ONCE(ULONG_CMP_GE(ssp->srcu_sup->srcu_gp_seq, ssp->srcu_sup->srcu_gp_seq_needed));
 	WRITE_ONCE(ssp->srcu_sup->srcu_gp_start, jiffies);
@@ -1059,6 +1060,7 @@ static void srcu_gp_end(struct srcu_struct *ssp, bool is_atomic)
 	gpseq = rcu_seq_current(&sup->srcu_gp_seq);
 	if (!rcu_seq_state(gpseq) &&
 	    ULONG_CMP_LT(gpseq, sup->srcu_gp_seq_needed)) {
+		WARN_ON_ONCE(ssp->srcu_reader_flavor & SRCU_READ_FLAVOR_ATOMIC);
 		srcu_gp_start(ssp);
 		raw_spin_unlock_irq_rcu_node(sup);
 		srcu_reschedule(ssp, 0);
@@ -1182,6 +1184,7 @@ static void srcu_funnel_gp_start(struct srcu_struct *ssp, struct srcu_data *sdp,
 	/* If grace period not already in progress, start it. */
 	if (!WARN_ON_ONCE(rcu_seq_done(&sup->srcu_gp_seq, s)) &&
 	    rcu_seq_state(sup->srcu_gp_seq) == SRCU_STATE_IDLE) {
+		WARN_ON_ONCE(ssp->srcu_reader_flavor & SRCU_READ_FLAVOR_ATOMIC);
 		srcu_gp_start(ssp);
 
 		// And how can that list_add() in the "else" clause
@@ -1657,7 +1660,8 @@ static void __synchronize_srcu(struct srcu_struct *ssp, bool do_norm)
 
 	if (rcu_scheduler_active == RCU_SCHEDULER_INACTIVE)
 		return;
-	if (ssp->srcu_reader_flavor == SRCU_READ_FLAVOR_ATOMIC) {
+	if (WARN_ON_ONCE(ssp->srcu_reader_flavor == SRCU_READ_FLAVOR_ATOMIC)) {
+		// This works, and exposes a possible bug.
 		synchronize_srcu_atomic(ssp);
 		return;
 	}
@@ -1873,6 +1877,12 @@ void srcu_barrier(struct srcu_struct *ssp)
 	unsigned long s;
 
 	check_init_srcu_struct(ssp, false);
+	if (WARN_ON_ONCE(ssp->srcu_reader_flavor == SRCU_READ_FLAVOR_ATOMIC)) {
+		// There shouldn't be any callbacks for atomic SRCU,
+		// but just in case.
+		schedule_timeout_uninterruptible(HZ/10);
+		return;
+	}
 
 	/*
 	 * Register any deferred callbacks before snapshotting the sequence.  The
@@ -2018,8 +2028,10 @@ static void srcu_advance_state(struct srcu_struct *ssp, bool is_atomic)
 			return;
 		}
 		idx = rcu_seq_state(READ_ONCE(ssp->srcu_sup->srcu_gp_seq));
-		if (idx == SRCU_STATE_IDLE)
+		if (idx == SRCU_STATE_IDLE) {
+			WARN_ON_ONCE(ssp->srcu_reader_flavor & SRCU_READ_FLAVOR_ATOMIC);
 			srcu_gp_start(ssp);
+		}
 		raw_spin_unlock_irq_rcu_node(ssp->srcu_sup);
 		if (idx != SRCU_STATE_IDLE) {
 			if (!is_atomic)
@@ -2208,6 +2220,7 @@ static void srcu_reschedule(struct srcu_struct *ssp, unsigned long delay)
 		}
 	} else if (!rcu_seq_state(ssp->srcu_sup->srcu_gp_seq)) {
 		/* Outstanding request and no GP.  Start one. */
+		WARN_ON_ONCE(ssp->srcu_reader_flavor & SRCU_READ_FLAVOR_ATOMIC);
 		srcu_gp_start(ssp);
 	}
 	raw_spin_unlock_irq_rcu_node(ssp->srcu_sup);
