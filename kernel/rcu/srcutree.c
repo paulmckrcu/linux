@@ -1785,10 +1785,21 @@ EXPORT_SYMBOL_GPL(get_state_synchronize_srcu);
  * period has elapsed in the meantime.  Unlike get_state_synchronize_srcu(),
  * this function also ensures that any needed SRCU grace period will be
  * started.  This convenience does come at a cost in terms of CPU overhead.
+ *
+ * This function cannot be used with atomic SRCU, which only has
+ * atomic grace periods.  Give a warning if someone tries, and return
+ * the same cookie that would have been returned, but refrain from
+ * messing up state by starting a grace period.  If someone somewhere
+ * somehow invokes synchronize_srcu_atomic(), passing this cookie to
+ * poll_state_synchronize_srcu() will return true.  If no one ever invokes
+ * synchronize_srcu_atomic(), too bad.
  */
 unsigned long start_poll_synchronize_srcu(struct srcu_struct *ssp)
 {
-	return srcu_gp_start_if_needed(ssp, NULL, true);
+	if (WARN_ON_ONCE(ssp->srcu_reader_flavor == SRCU_READ_FLAVOR_ATOMIC))
+		return get_state_synchronize_srcu(ssp);
+	else
+		return srcu_gp_start_if_needed(ssp, NULL, true);
 }
 EXPORT_SYMBOL_GPL(start_poll_synchronize_srcu);
 
