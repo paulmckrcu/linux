@@ -363,7 +363,6 @@ function torture_one {
 		boottag="--bootargs"
 		cur_bootargs="$torture_bootargs"
 	fi
-	echo "$@" $boottag "$cur_bootargs" --datestamp "$ds/results-$curflavor" # @@@
 	"$@" "${boottag}" "$cur_bootargs" --datestamp "$ds/results-$curflavor" > $T/$curflavor.out 2>&1
 	retcode=$?
 	resdir="`grep '^Results directory: ' $T/$curflavor.out | tail -1 | sed -e 's/^Results directory: //'`"
@@ -399,7 +398,6 @@ function torture_set {
 	if test "$do_normal" = "yes"
 	then
 		curflavor=$flavor
-		echo torture_one "$@" # @@@
 		torture_one "$@"
 		if test -e $T/last-resdir
 		then
