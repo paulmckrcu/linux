@@ -273,6 +273,7 @@ do
 		TORTURE_TRUST_MAKE="y"
 		;;
 	"")
+		# torture.sh can pass empty arguments.  Ignore them.
 		;;
 	*)
 		echo Unknown argument $1
