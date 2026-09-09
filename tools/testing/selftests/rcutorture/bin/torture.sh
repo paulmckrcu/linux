@@ -69,7 +69,7 @@ do_clocksourcewd="${ifnotaarch64}"
 do_rt=yes
 do_rcutasksflavors="${ifnotaarch64}" # FIXME: Back to "yes" when SMP=n auto-avoided
 do_srcu_lockdep=yes
-do_atomic_srcu=no
+do_atomic_srcu=yes
 do_rcu_rust=no
 do_hazptr=yes
 
