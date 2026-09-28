@@ -98,7 +98,6 @@ usage () {
 
 while test $# -gt 0
 do
-	echo Argument: :$1:
 	case "$1" in
 	--allcpus)
 		cpus=$TORTURE_ALLOTED_CPUS
