@@ -11321,3 +11321,10 @@ void sched_change_end(struct sched_change_ctx *ctx)
 		p->sched_class->prio_changed(rq, p, ctx->prio);
 	}
 }
+
+// Not for mainline, but hopefully someone has a trick that gets this
+// job done.
+struct task_struct *rcu_cpu_curr(int cpu)
+{
+	return cpu_curr(cpu);
+}
