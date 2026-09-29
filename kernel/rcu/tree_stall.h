@@ -309,6 +309,7 @@ struct rcu_stall_chk_rdr {
 	bool rcu_rdr_running;
 	int rcu_rdr_boosted;
 	int rcu_rdr_cpu;
+	int rcu_rdr_cpu_offline;
 	struct task_struct *rcu_rdr_cpu_task;
 };
 
@@ -331,6 +332,7 @@ static int check_slow_task(struct task_struct *t, void *arg)
 	rscrp->rcu_rdr_running = task_curr(t);
 	rscrp->rcu_rdr_boosted = 0;
 	rscrp->rcu_rdr_cpu = cpu = task_cpu(t);
+	rscrp->rcu_rdr_cpu_offline = cpu_is_offline(cpu);
 	rscrp->rcu_rdr_cpu_task = th = rcu_cpu_curr(cpu);
 	if (rscrp->on_blkd_list) {
 		rnp = READ_ONCE(t->rcu_blocked_node);
@@ -382,7 +384,7 @@ static int rcu_print_task_stall(struct rcu_node *rnp, unsigned long flags)
 			pr_cont(" P%d", t->pid);
 		} else {
 			tc = rscr.rcu_rdr_cpu_task;
-			pr_cont(" P%d/%d:%c%c%c%c%c%c CPU %d %s (%d)%s",
+			pr_cont(" P%d/%d:%c%c%c%c%c%c CPU %d%s %s (%d)%s",
 				t->pid, rscr.nesting,
 				".b"[rscr.rs.b.blocked],
 				".q"[rscr.rs.b.need_qs],
@@ -391,6 +393,7 @@ static int rcu_print_task_stall(struct rcu_node *rnp, unsigned long flags)
 				".R"[rscr.rcu_rdr_running],
 				".B?"[rscr.rcu_rdr_boosted],
 				rscr.rcu_rdr_cpu,
+				rscr.rcu_rdr_cpu_offline ? "!" : "",
 				tc ? tc->comm : "???",
 				tc ? tc->pid : -1,
 				tc ? (is_idle_task(tc) ? " (idle!)" : "") : " (no task)");
