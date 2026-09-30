@@ -401,7 +401,7 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 		cond_resched_tasks_rcu_qs();
 		preempt_disable();
 	}
-	ssp->srcu_atomic_gp_flag = 1;
+	ssp->srcu_atomic_gp_flag = 1;  // Acquire SRCU grace-period "lock".
 	preempt_enable();
 
 	// We get here if a reader has been lazily preempted.
@@ -424,6 +424,7 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 	// Finally, flip the index again for poll_state_synchronize_srcu().
 	WRITE_ONCE(ssp->srcu_idx, ssp->srcu_idx + 1);
 	WARN_ON_ONCE(!poll_state_synchronize_srcu(ssp, srcu_state));
+	ssp->srcu_atomic_gp_flag = 0; // Release SRCU grace-period "lock".
 }
 EXPORT_SYMBOL_GPL(synchronize_srcu_atomic);
 
