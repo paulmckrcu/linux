@@ -2796,9 +2796,10 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 {
 	int cpu;
 	unsigned long flags;
+	struct list_head *g = NULL;
 	bool halfway;
 	struct rcu_node *rnp;
-	struct task_struct *t = NULL;
+	struct task_struct *t;
 
 	rcu_state.cbovld = rcu_state.cbovldnext;
 	rcu_state.cbovldnext = false;
@@ -2820,9 +2821,11 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 			WARN_ON_ONCE(halfway); // @@@
 			if (halfway) {
 				WARN_ON_ONCE(1); // @@@
-				t = container_of(rnp->gp_tasks, struct task_struct, rcu_node_entry);
-				if (t)
+				g = rnp->gp_tasks;
+				if (g) {
+					t = container_of(g, struct task_struct, rcu_node_entry);
 					get_task_struct(t);
+				}
 			}
 			if (rcu_preempt_blocked_readers_cgp(rnp)) {
 				/*
@@ -2842,7 +2845,7 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 			// Unless the CPU belongs to some other rcu_node
 			// structure, in which case, call resched_cpu()
 			// directly.
-			if (halfway && t) {
+			if (halfway && g) {
 				WARN_ON_ONCE(1); // @@@
 				cpu = task_call_func(t, fqs_slow_task, rnp);
 				if (cpu >= 0) {
