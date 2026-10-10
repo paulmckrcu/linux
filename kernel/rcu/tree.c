@@ -2755,6 +2755,38 @@ void rcu_sched_clock_irq(int user)
 	trace_rcu_utilization(TPS("End scheduler-tick"));
 }
 
+// Check to see if a task holding up the current grace period is
+// preempted but runnable on an idle CPU.  This involves an
+// rcu_node structure, a pointer to which is passed to fqs_slow_task()
+// as a callback from task_call_func().  The fqs_slow_task()
+// function returns the CPU to pass to resched_cpu() or -1 if
+// there is no need for an additional call to resched_cpu().
+static int fqs_slow_task(struct task_struct *t, void *arg)
+{
+	int cpu;
+#ifdef CONFIG_PREEMPT_RCU
+	struct rcu_node *rnp = arg;
+#endif // #ifdef CONFIG_PREEMPT_RCU
+	struct task_struct *tc;
+
+#ifdef CONFIG_PREEMPT_RCU
+	// If the task is running or is no longer blocking the current
+	// grace period, there should be no call to resched_cpu().
+	if (task_curr(t) || READ_ONCE(rnp->gp_tasks) != &t->rcu_node_entry)
+		return -1;
+#endif // #ifdef CONFIG_PREEMPT_RCU
+
+	// If the target CPU is not idle, there should be no call to
+	// resched_cpu().
+	cpu = task_cpu(t);
+	tc = rcu_cpu_curr(cpu);
+	if (!is_idle_task(tc))
+		return -1;
+
+	// But the target CPU is idle, so resched_cpu() it is!
+	return cpu;
+}
+
 /*
  * Scan the leaf rcu_node structures.  For each structure on which all
  * CPUs have reported a quiescent state and on which there are tasks
@@ -2765,12 +2797,12 @@ void rcu_sched_clock_irq(int user)
 static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 {
 	int cpu;
-	unsigned long flags;
 	struct rcu_node *rnp;
 
 	rcu_state.cbovld = rcu_state.cbovldnext;
 	rcu_state.cbovldnext = false;
 	rcu_for_each_leaf_node(rnp) {
+		unsigned long flags;
 		unsigned long mask = 0;
 		unsigned long rsmask = 0;
 
@@ -2778,6 +2810,24 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 		raw_spin_lock_irqsave_rcu_node(rnp, flags);
 		rcu_state.cbovldnext |= !!rnp->cbovldmask;
 		if (rnp->qsmask == 0) {
+			struct list_head *g = NULL;
+			bool halfway = false;
+			struct task_struct *t = NULL;
+
+#ifdef CONFIG_PREEMPT_RCU
+			// Prepare to check for preempted tasks blocking
+			// the current RCU grace period whose CPU is idle.
+			// But only if we are at least halfway to the RCU
+			// CPU stall warning.
+			halfway = time_after(jiffies, rcu_state.jiffies_resched);
+			if (halfway) {
+				g = rnp->gp_tasks;
+				if (g) {
+					t = container_of(g, struct task_struct, rcu_node_entry);
+					get_task_struct(t);
+				}
+			}
+#endif // #ifdef CONFIG_PREEMPT_RCU
 			if (rcu_preempt_blocked_readers_cgp(rnp)) {
 				/*
 				 * No point in scanning bits because they
@@ -2786,9 +2836,26 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 				 */
 				rcu_initiate_boost(rnp, flags);
 				/* rcu_initiate_boost() releases rnp->lock */
-				continue;
+			} else {
+				raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
 			}
-			raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
+
+			// If the first preempted task blocking the
+			// current RCU grace period wants to run on a
+			// CPU that is idle, then add that CPU to rsmask.
+			// Unless the CPU belongs to some other rcu_node
+			// structure, in which case, call resched_cpu()
+			// directly.
+			if (halfway && g) {
+				cpu = task_call_func(t, fqs_slow_task, rnp);
+				if (cpu >= 0) {
+					pr_alert("%s: For task P%d, resched_cpu(%d).\n",
+						 __func__, t->pid, cpu);
+					resched_cpu(cpu);
+				}
+				put_task_struct(t);
+			}
+
 			continue;
 		}
 		for_each_leaf_node_cpu_mask(rnp, cpu, rnp->qsmask) {
@@ -2804,6 +2871,7 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 			if (ret < 0)
 				rsmask |= rdp->grpmask;
 		}
+
 		if (mask != 0) {
 			/* Idle/offline CPUs, report (releases rnp->lock). */
 			rcu_report_qs_rnp(mask, rnp, rnp->gp_seq, flags);
