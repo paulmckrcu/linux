@@ -2795,15 +2795,12 @@ static int fqs_slow_task(struct task_struct *t, void *arg)
 static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 {
 	int cpu;
-	unsigned long flags;
-	struct list_head *g = NULL;
-	bool halfway;
 	struct rcu_node *rnp;
-	struct task_struct *t;
 
 	rcu_state.cbovld = rcu_state.cbovldnext;
 	rcu_state.cbovldnext = false;
 	rcu_for_each_leaf_node(rnp) {
+		unsigned long flags;
 		unsigned long mask = 0;
 		unsigned long rsmask = 0;
 
@@ -2811,6 +2808,9 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 		raw_spin_lock_irqsave_rcu_node(rnp, flags);
 		rcu_state.cbovldnext |= !!rnp->cbovldmask;
 		if (rnp->qsmask == 0) {
+			struct list_head *g = NULL;
+			bool halfway;
+			struct task_struct *t = NULL;
 
 			// Prepare to check for preempted tasks blocking
 			// the current RCU grace period whose CPU is idle.
