@@ -2778,14 +2778,12 @@ static int fqs_slow_task(struct task_struct *t, void *arg)
 
 	// If the target CPU is not idle, there should be no call to
 	// resched_cpu().
-	WARN_ON_ONCE(1); // @@@
 	cpu = task_cpu(t);
 	tc = rcu_cpu_curr(cpu);
 	if (!is_idle_task(tc))
 		return -1;
 
 	// But the target CPU is idle, so resched_cpu() it is!
-	WARN_ON_ONCE(1); // @@@
 	return cpu;
 }
 
@@ -2822,10 +2820,7 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 			// But only if we are at least halfway to the RCU
 			// CPU stall warning.
 			halfway = time_after(jiffies, rcu_state.jiffies_resched);
-			WARN_ONCE(1, "%s: halfway: %d.\n", __func__, halfway); // @@@
-			WARN_ON_ONCE(halfway); // @@@
 			if (halfway) {
-				WARN_ON_ONCE(1); // @@@
 				g = rnp->gp_tasks;
 				if (g) {
 					t = container_of(g, struct task_struct, rcu_node_entry);
@@ -2852,11 +2847,10 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 			// structure, in which case, call resched_cpu()
 			// directly.
 			if (halfway && g) {
-				WARN_ON_ONCE(1); // @@@
 				cpu = task_call_func(t, fqs_slow_task, rnp);
 				if (cpu >= 0) {
 					pr_alert("%s: For task P%d, resched_cpu(%d).\n",
-						 __func__, t->pid, cpu); // @@@
+						 __func__, t->pid, cpu);
 					resched_cpu(cpu);
 				}
 				put_task_struct(t);
