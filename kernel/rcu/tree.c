@@ -2764,13 +2764,17 @@ void rcu_sched_clock_irq(int user)
 static int fqs_slow_task(struct task_struct *t, void *arg)
 {
 	int cpu;
+#ifdef CONFIG_PREEMPT_RCU
 	struct rcu_node *rnp = arg;
+#endif // #ifdef CONFIG_PREEMPT_RCU
 	struct task_struct *tc;
 
+#ifdef CONFIG_PREEMPT_RCU
 	// If the task is running or is no longer blocking the current
 	// grace period, there should be no call to resched_cpu().
 	if (task_curr(t) || READ_ONCE(rnp->gp_tasks) != &t->rcu_node_entry)
 		return -1;
+#endif // #ifdef CONFIG_PREEMPT_RCU
 
 	// If the target CPU is not idle, there should be no call to
 	// resched_cpu().
@@ -2809,9 +2813,10 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 		rcu_state.cbovldnext |= !!rnp->cbovldmask;
 		if (rnp->qsmask == 0) {
 			struct list_head *g = NULL;
-			bool halfway;
+			bool halfway = false;
 			struct task_struct *t = NULL;
 
+#ifdef CONFIG_PREEMPT_RCU
 			// Prepare to check for preempted tasks blocking
 			// the current RCU grace period whose CPU is idle.
 			// But only if we are at least halfway to the RCU
@@ -2827,6 +2832,7 @@ static void force_qs_rnp(int (*f)(struct rcu_data *rdp))
 					get_task_struct(t);
 				}
 			}
+#endif // #ifdef CONFIG_PREEMPT_RCU
 			if (rcu_preempt_blocked_readers_cgp(rnp)) {
 				/*
 				 * No point in scanning bits because they
