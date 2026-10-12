@@ -279,6 +279,7 @@ static void do_idle(void)
 {
 	int cpu = smp_processor_id();
 	bool got_tick = false;
+	struct rq *rq;
 
 	if (cpu_is_offline(cpu)) {
 		local_irq_disable();
@@ -338,6 +339,24 @@ static void do_idle(void)
 		 *   again to reprogram the tick.
 		 */
 		local_irq_disable();
+
+		/*
+		 * Lost-kick safety net: never sleep with genuinely runnable
+		 * work queued.  Exclude delayed-dequeue tasks, which are
+		 * counted in nr_running but not pickable (as in
+		 * wake_affine_idle()).  Lockless reads are fine: a spurious
+		 * hit costs one extra schedule pass, a miss is re-checked
+		 * on the next tick/interrupt.
+		 */
+		rq = this_rq();
+		if (READ_ONCE(rq->nr_running) >
+		    READ_ONCE(rq->cfs.h_nr_queued) - READ_ONCE(rq->cfs.h_nr_runnable)) {
+			WARN_ONCE(1, "CPU %d entering idle with %u runnable tasks queued\n",
+				  cpu, READ_ONCE(rq->nr_running));
+			set_tsk_need_resched(current);
+			local_irq_enable();
+			continue;
+		}
 
 		arch_cpu_idle_enter();
 		rcu_nocb_flush_deferred_wakeup();
