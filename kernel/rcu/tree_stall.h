@@ -336,6 +336,8 @@ static int check_slow_task(struct task_struct *t, void *arg)
 	rscrp->rcu_rdr_cpu_offline = cpu_is_offline(cpu);
 	// Interrupt are disabled for RCU read-side critical section. 
 	rscrp->rcu_rdr_cpu_task = th = cpu_curr_snapshot_rcu(cpu);
+	if (th)
+		get_task_struct(th);
 	if (rscrp->on_blkd_list) {
 		rnp = READ_ONCE(t->rcu_blocked_node);
 		raw_spin_lock_rcu_node(rnp); /* irqs already disabled. */
@@ -402,6 +404,8 @@ static int rcu_print_task_stall(struct rcu_node *rnp, unsigned long flags)
 		}
 		lockdep_assert_irqs_disabled();
 		put_task_struct(t);
+		if (tc)
+			put_task_struct(tc);
 		ndetected++;
 	}
 	pr_cont("\n");
