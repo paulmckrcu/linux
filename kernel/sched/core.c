@@ -11323,7 +11323,7 @@ void sched_change_end(struct sched_change_ctx *ctx)
 
 // Not for mainline, but hopefully someone has a trick that gets this
 // job done.
-struct task_struct *rcu_cpu_curr(int cpu)
+struct task_struct *cpu_curr_snapshot_rcu(int cpu)
 {
-	return cpu_curr(cpu);
+	return rcu_dereference_all(cpu_curr(cpu));
 }

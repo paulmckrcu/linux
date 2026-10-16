@@ -334,7 +334,8 @@ static int check_slow_task(struct task_struct *t, void *arg)
 	rscrp->rcu_rdr_boosted = 0;
 	rscrp->rcu_rdr_cpu = cpu = task_cpu(t);
 	rscrp->rcu_rdr_cpu_offline = cpu_is_offline(cpu);
-	rscrp->rcu_rdr_cpu_task = th = rcu_cpu_curr(cpu);
+	// Interrupt are disabled for RCU read-side critical section. 
+	rscrp->rcu_rdr_cpu_task = th = cpu_curr_snapshot_rcu(cpu);
 	if (rscrp->on_blkd_list) {
 		rnp = READ_ONCE(t->rcu_blocked_node);
 		raw_spin_lock_rcu_node(rnp); /* irqs already disabled. */
