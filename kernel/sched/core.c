@@ -11325,8 +11325,7 @@ void sched_change_end(struct sched_change_ctx *ctx)
  * cpu_curr_snapshot_rcu - Return the task currently running on CPU
  * @cpu: CPU to query
  *
- * The caller must either be within an RCU read-side critical section
- * or must hold some lock that prevents the task from exiting.
+ * The caller must be within an RCU read-side critical section.
  *
  * Return: Pointer to task_struct of task running on @cpu.
  */
