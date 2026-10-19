@@ -11321,8 +11321,15 @@ void sched_change_end(struct sched_change_ctx *ctx)
 	}
 }
 
-// Not for mainline, but hopefully someone has a trick that gets this
-// job done.
+/**
+ * cpu_curr_snapshot_rcu - Return the task currently running on CPU
+ * @cpu: CPU to query
+ *
+ * The caller must either be within an RCU read-side critical section
+ * or must hold some lock that prevents the task from exiting.
+ *
+ * Return: Pointer to task_struct of task running on @cpu.
+ */
 struct task_struct *cpu_curr_snapshot_rcu(int cpu)
 {
 	return rcu_dereference_all(cpu_curr(cpu));
