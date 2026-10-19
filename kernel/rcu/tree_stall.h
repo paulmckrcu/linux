@@ -336,8 +336,9 @@ static int check_slow_task(struct task_struct *t, void *arg)
 	rscrp->rcu_rdr_cpu_offline = cpu_is_offline(cpu);
 	// Interrupt are disabled for RCU read-side critical section. 
 	rscrp->rcu_rdr_cpu_task = th = cpu_curr_snapshot_rcu(cpu);
-	if (th)
-		get_task_struct(th);
+	// There is no need for get_task_struct(t) because we are in
+	// an implicit RCU read-side critical section due to interrupts
+	// being disabled.
 	if (rscrp->on_blkd_list) {
 		rnp = READ_ONCE(t->rcu_blocked_node);
 		raw_spin_lock_rcu_node(rnp); /* irqs already disabled. */
@@ -376,7 +377,9 @@ static int rcu_print_task_stall(struct rcu_node *rnp, unsigned long flags)
 	t = list_entry(rnp->gp_tasks->prev,
 		       struct task_struct, rcu_node_entry);
 	list_for_each_entry_continue(t, &rnp->blkd_tasks, rcu_node_entry) {
-		get_task_struct(t);
+		// There is no need for get_task_struct(t) because we
+		// are in an implicit RCU read-side critical section due
+		// to interrupts being disabled.
 		ts[i++] = t;
 		if (i >= ARRAY_SIZE(ts))
 			break;
@@ -403,9 +406,6 @@ static int rcu_print_task_stall(struct rcu_node *rnp, unsigned long flags)
 				tc ? (is_idle_task(tc) ? " (idle!)" : "") : " (no task)");
 		}
 		lockdep_assert_irqs_disabled();
-		put_task_struct(t);
-		if (tc)
-			put_task_struct(tc);
 		ndetected++;
 	}
 	pr_cont("\n");
