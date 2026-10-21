@@ -4543,6 +4543,19 @@ struct task_struct *cpu_curr_snapshot(int cpu)
 }
 
 /**
+ * cpu_curr_snapshot_rcu - Return the task currently running on CPU
+ * @cpu: CPU to query
+ *
+ * The caller must be within an RCU read-side critical section.
+ *
+ * Return: Pointer to task_struct of task running on @cpu.
+ */
+struct task_struct *cpu_curr_snapshot_rcu(int cpu)
+{
+	return rcu_dereference_all(cpu_curr(cpu));
+}
+
+/**
  * wake_up_process - Wake up a specific process
  * @p: The process to be woken up.
  *
@@ -11319,17 +11332,4 @@ void sched_change_end(struct sched_change_ctx *ctx)
 	} else {
 		p->sched_class->prio_changed(rq, p, ctx->prio);
 	}
-}
-
-/**
- * cpu_curr_snapshot_rcu - Return the task currently running on CPU
- * @cpu: CPU to query
- *
- * The caller must be within an RCU read-side critical section.
- *
- * Return: Pointer to task_struct of task running on @cpu.
- */
-struct task_struct *cpu_curr_snapshot_rcu(int cpu)
-{
-	return rcu_dereference_all(cpu_curr(cpu));
 }
