@@ -81,6 +81,7 @@ MODULE_AUTHOR("Paul E. McKenney <paulmck@linux.ibm.com> and Josh Triplett <josh@
 					/* Must be power of two minus one. */
 #define RCUTORTURE_RDR_MAX_SEGS (RCUTORTURE_RDR_MAX_LOOPS + 3)
 
+torture_param(int, busted_delay, 0, "Specify synchronize_rcu_busted() delay (jiffies)");
 torture_param(bool, deboost_timeliness_check, 0, "Enable checks for immediate deboosting");
 torture_param(int, extendables, RCUTORTURE_MAX_EXTEND,
 	      "Extend readers by disabling bh (1), irqs (2), or preempt (4)");
@@ -675,9 +676,10 @@ static void rcu_busted_torture_deferred_free(struct rcu_torture *p)
 static void synchronize_rcu_busted(void)
 {
 	/* This is a deliberate bug for testing purposes only! */
+	schedule_timeout_idle(busted_delay);
 }
 
-static void
+static void __maybe_unused
 call_rcu_busted(struct rcu_head *head, rcu_callback_t func)
 {
 	/* This is a deliberate bug for testing purposes only! */
@@ -695,7 +697,7 @@ static struct rcu_torture_ops rcu_busted_ops = {
 	.deferred_free	= rcu_busted_torture_deferred_free,
 	.sync		= synchronize_rcu_busted,
 	.exp_sync	= synchronize_rcu_busted,
-	.call		= call_rcu_busted,
+	// .call		= call_rcu_busted,
 	.gather_gp_seqs	= rcutorture_gather_gp_seqs,
 	.format_gp_seqs	= rcutorture_format_gp_seqs,
 	.irq_capable	= 1,
@@ -3364,7 +3366,7 @@ rcu_torture_print_module_parms(struct rcu_torture_ops *cur_ops, const char *tag)
 		 "reader_flavor=%x "
 		 "nocbs_nthreads=%d nocbs_toggle=%d "
 		 "test_nmis=%d nmi_calls=%d "
-		 "preempt_duration=%d preempt_interval=%d n_up_down=%d\n",
+		 "preempt_duration=%d preempt_interval=%d n_up_down=%d busted_delay=%d\n",
 		 torture_type, tag, nrealreaders, nwriters, nrealfakewriters,
 		 stat_interval, verbose, test_no_idle_hz, shuffle_interval,
 		 stutter, irqreader, fqs_duration, fqs_holdoff, fqs_stutter,
@@ -3378,7 +3380,7 @@ rcu_torture_print_module_parms(struct rcu_torture_ops *cur_ops, const char *tag)
 		 reader_flavor,
 		 nocbs_nthreads, nocbs_toggle,
 		 test_nmis, nmi_calls,
-		 preempt_duration, preempt_interval, n_up_down);
+		 preempt_duration, preempt_interval, n_up_down, busted_delay);
 }
 
 static int rcutorture_booster_cleanup(unsigned int cpu)
