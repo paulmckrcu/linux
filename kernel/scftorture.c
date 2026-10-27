@@ -485,8 +485,9 @@ static int scftorture_invoker(void *arg)
 		/* Check affinity before hotplug can move this task away. */
 		curcpu = raw_smp_processor_id();
 		WARN_ONCE(curcpu != cpu,
-			  "%s: Wanted CPU %d, running on %d, nr_cpu_ids = %d\n",
-			  __func__, scfp->cpu, curcpu, nr_cpu_ids);
+			  "%s: Wanted CPU %d, running on %d, nr_cpu_ids = %d, cpumask = %*pbl\n",
+			  __func__, scfp->cpu, curcpu, nr_cpu_ids,
+			  cpumask_pr_args(current->cpus_ptr));
 	} else {
 		was_offline = true;
 	}
