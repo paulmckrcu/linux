@@ -800,7 +800,9 @@ hazptr_torture_cleanup(void)
 		return;
 	}
 
+	torture_stop_kthread(hazptr_torture_do_pending, do_pending_task);
 	torture_stop_kthread(hazptr_torture_preempt, preempt_task);
+	torture_stop_kthread(hazptr_torture_writer, writer_task);
 
 	if (reader_tasks) {
 		for (i = 0; i < nrealreaders; i++)
@@ -809,14 +811,6 @@ hazptr_torture_cleanup(void)
 		kfree(reader_tasks);
 		reader_tasks = NULL;
 	}
-
-	/*
-	 * Stop the writer only after do_pending, and do_pending only after
-	 * the readers: the writer may be waiting on hazard pointers that
-	 * readers deferred, which do_pending releases once they stopped.
-	 */
-	torture_stop_kthread(hazptr_torture_do_pending, do_pending_task);
-	torture_stop_kthread(hazptr_torture_writer, writer_task);
 
 	torture_stop_kthread(hazptr_torture_stats, stats_task);
 
