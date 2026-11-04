@@ -554,11 +554,11 @@ static int hazptr_torture_reader(void *arg)
 			schedule_timeout_interruptible(HZ / 5);
 		stutter_wait("hazptr_torture_reader");
 	} while (!torture_must_stop());
-	torture_kthread_stopping("hazptr_torture_reader");
 	// Each reader clears all CPUs, so nothing is left after all
 	// readers exit their for_each_possible_cpu() loops.
 	for_each_possible_cpu(cpu)
 		hazptr_torture_do_one_pending(cpu, &rand);
+	torture_kthread_stopping("hazptr_torture_reader");
 	return 0;
 }
 
