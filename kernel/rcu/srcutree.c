@@ -2108,6 +2108,13 @@ static void srcu_advance_state(struct srcu_struct *ssp, bool is_atomic)
  * and srcu_read_unlock_atomic() must be invoked from that same context,
  * or one that is even more strict.
  *
+ * If synchronize_srcu_atomic() is invoked from an interrupt handler for
+ * a given srcu_struct structure, then for that structure, all calls to
+ * synchronize_srcu_atomic() must be invoked with interrupts disabled,
+ * including those from task context.  Its callers take turns to drive a
+ * grace period, and the others spin until it ends.  An interrupt handler
+ * that calls it on the CPU of an interrupted caller would spin forever.
+ *
  * If synchronize_srcu_atomic() is invoked on a given srcu_struct
  * structure, then none of call_srcu(), synchronize_srcu(),
  * synchronize_srcu_expedited(), start_poll_synchronize_srcu(),
@@ -2144,7 +2151,13 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 	srcu_state = get_state_synchronize_srcu(ssp);
 	preempt_disable();
 	while (atomic_read(&sup->srcu_atomic_gp_flag) ||
-	       atomic_xchg(&sup->srcu_atomic_gp_flag, 1)) {
+	       atomic_cmpxchg(&sup->srcu_atomic_gp_flag, 0,
+			      smp_processor_id() + 1)) {
+		// The flag holds its owner's CPU number plus one.  An owner on
+		// this CPU is a caller that this one interrupted.  It cannot
+		// release the flag, so this caller would spin forever.
+		WARN_ON_ONCE(atomic_read(&sup->srcu_atomic_gp_flag) ==
+			     smp_processor_id() + 1);
 		preempt_enable();
 		if (poll_state_synchronize_srcu(ssp, srcu_state))
 			return;
