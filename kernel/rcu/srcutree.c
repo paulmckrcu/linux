@@ -828,7 +828,8 @@ void __srcu_check_read_flavor(struct srcu_struct *ssp, int read_flavor)
 
 	/* NMI-unsafe use in NMI is a bad sign, as is multi-bit read_flavor values. */
 	WARN_ON_ONCE(read_flavor != SRCU_READ_FLAVOR_NMI &&
-		     read_flavor != SRCU_READ_FLAVOR_FAST && in_nmi());
+		     read_flavor != SRCU_READ_FLAVOR_FAST &&
+		     read_flavor != SRCU_READ_FLAVOR_ATOMIC && in_nmi());
 	WARN_ON_ONCE(read_flavor & (read_flavor - 1));
 
 	sdp = raw_cpu_ptr(ssp->sda);
