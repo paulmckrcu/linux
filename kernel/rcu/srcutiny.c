@@ -401,9 +401,10 @@ void synchronize_srcu_atomic(struct srcu_struct *ssp)
 	if (rcu_scheduler_active == RCU_SCHEDULER_INACTIVE)
 		return;
 
-	if (IS_ENABLED(CONFIG_PREEMPTION))
-		synchronize_rcu(); // Needed for RCU Tasks Trace to imply RCU grace period.
-				   // And in Tiny RCU, it is near zero cost and doesn't block.
+	// No synchronize_rcu() here, unlike in srcu_drive_gp().  The caller
+	// may be in an interrupt handler or within rcu_read_lock().  Tiny
+	// synchronize_rcu() would then end an RCU grace period that an RCU
+	// reader still holds up.
 
 	// Usually, there will be no readers.
 	preempt_disable();  // Guard against lazy preemption and some other grace period.
