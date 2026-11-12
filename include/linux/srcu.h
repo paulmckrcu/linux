@@ -93,7 +93,7 @@ int init_srcu_struct_atomic(struct srcu_struct *ssp);
 //					0x04		// SRCU-lite is no longer with us.
 #define SRCU_READ_FLAVOR_FAST		0x04		// srcu_read_lock_fast(), also NMI-safe.
 #define SRCU_READ_FLAVOR_FAST_UPDOWN	0x08		// srcu_read_lock_fast_updown().
-#define SRCU_READ_FLAVOR_ATOMIC		0x10		// srcu_read_lock_atomic().
+#define SRCU_READ_FLAVOR_ATOMIC		0x10		// srcu_read_lock_atomic(), also NMI-safe.
 #define SRCU_READ_FLAVOR_ALL		(SRCU_READ_FLAVOR_NORMAL | SRCU_READ_FLAVOR_NMI | \
 					 SRCU_READ_FLAVOR_FAST | SRCU_READ_FLAVOR_FAST_UPDOWN | \
 					 SRCU_READ_FLAVOR_ATOMIC)
@@ -372,6 +372,9 @@ static inline int srcu_read_lock(struct srcu_struct *ssp)
  * The lock and matching srcu_read_unlock_atomic() must be invoked on
  * the same CPU, from the same context; passing the return value to
  * another task is not permitted for this flavor.
+ *
+ * This function is NMI-safe, in a manner similar to
+ * srcu_read_lock_nmisafe().
  */
 static inline int srcu_read_lock_atomic(struct srcu_struct *ssp)
 	__acquires_shared(ssp)
@@ -391,8 +394,15 @@ static inline int srcu_read_lock_atomic(struct srcu_struct *ssp)
 	if (in_task())
 		non_block_start();
 	srcu_check_read_flavor(ssp, SRCU_READ_FLAVOR_ATOMIC);
-	retval = __srcu_read_lock(ssp);
-	srcu_lock_acquire(&ssp->dep_map);
+	retval = __srcu_read_lock_nmisafe(ssp);
+	/*
+	 * An NMI may interrupt lockdep itself.  Annotate it as a trylock
+	 * there, as srcu_read_lock_nmisafe() does.
+	 */
+	if (in_nmi())
+		rcu_try_lock_acquire(&ssp->dep_map);
+	else
+		srcu_lock_acquire(&ssp->dep_map);
 	return retval;
 }
 
@@ -599,7 +609,7 @@ static inline void srcu_read_unlock_atomic(struct srcu_struct *ssp, int idx)
 	WARN_ON_ONCE(idx & ~0x1);
 	srcu_check_read_flavor(ssp, SRCU_READ_FLAVOR_ATOMIC);
 	srcu_lock_release(&ssp->dep_map);
-	__srcu_read_unlock(ssp, idx);
+	__srcu_read_unlock_nmisafe(ssp, idx);
 	if (in_task())
 		non_block_end();
 	preempt_enable();
