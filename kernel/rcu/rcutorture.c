@@ -799,6 +799,24 @@ static void srcu_torture_read_unlock_atomic(int idx)
 	srcu_read_unlock_atomic_irqrestore(srcu_ctlp, idx, flags);
 }
 
+/*
+ * Wait for an atomic SRCU grace period within an RCU reader.  The wait must
+ * not end an RCU grace period: this reader still holds it up.  The cookie is
+ * taken within the reader, so no RCU grace period can complete it there.
+ */
+static void srcu_torture_check_atomic_in_rcu_reader(void)
+{
+	unsigned long cookie;
+
+	rcu_read_lock();
+	cookie = get_state_synchronize_rcu();
+	synchronize_srcu_atomic(srcu_ctlp);
+	WARN_ONCE(poll_state_synchronize_rcu(cookie),
+		  "%s: synchronize_srcu_atomic() ended an RCU grace period within an RCU reader\n",
+		  __func__);
+	rcu_read_unlock();
+}
+
 static void srcu_torture_init(void)
 {
 	rcu_sync_torture_init();
@@ -819,6 +837,7 @@ static void srcu_torture_init(void)
 		VERBOSE_TOROUT_STRING("srcu_torture_init atomic SRCU");
 		srcu_torture_init_forbidden_apis();
 		srcu_torture_init_irqsave();
+		srcu_torture_check_atomic_in_rcu_reader();
 	}
 }
 
@@ -1093,6 +1112,8 @@ static void srcud_torture_init(void)
 		WARN_ON(init_srcu_struct(&srcu_ctld));
 	}
 	srcu_ctlp = &srcu_ctld;
+	if (reader_flavor & SRCU_READ_FLAVOR_ATOMIC)
+		srcu_torture_check_atomic_in_rcu_reader();
 }
 
 static void srcu_torture_cleanup(void)
