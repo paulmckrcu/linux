@@ -532,6 +532,12 @@ then
 	torture_set "atomic-srcu" tools/testing/selftests/rcutorture/bin/kvm.sh \
 		--allcpus --duration "$duration_rcutorture" \
 		--configs "$configs_atomic_srcu" --trust-make
+
+	# Half the readers then use srcu_read_lock_atomic_irqsave().
+	torture_bootargs="rcutorture.reader_flavor=0x10 rcutorture.atomic_irqsave=1"
+	torture_set "atomic-srcu-irqsave" tools/testing/selftests/rcutorture/bin/kvm.sh \
+		--allcpus --duration "$duration_rcutorture" \
+		--configs "SRCU-P" --trust-make
 fi
 
 if test "$do_locktorture" = "yes"
