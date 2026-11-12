@@ -357,31 +357,15 @@ static inline int srcu_read_lock(struct srcu_struct *ssp)
 	return retval;
 }
 
-/**
- * srcu_read_lock_atomic - register a new reader promising an atomic section
- * @ssp: srcu_struct in which to register the new reader.
- *
- * As srcu_read_lock(), but the caller promises that the read-side
- * critical section never sleeps and never blocks on anything which
- * may itself depend on memory allocation to make progress. Preemption
- * is disabled for the duration, which both enforces that promise (any
- * sleepable call in the section will splat on every configuration)
- * and bounds the section so that the update side may spin rather
- * than sleep when waiting for readers: see synchronize_srcu_atomic().
- *
- * The lock and matching srcu_read_unlock_atomic() must be invoked on
- * the same CPU, from the same context; passing the return value to
- * another task is not permitted for this flavor.
- *
- * This function is NMI-safe, in a manner similar to
- * srcu_read_lock_nmisafe().
+/*
+ * Register an atomic-section reader.  The caller has disabled preemption,
+ * or interrupts.
  */
-static inline int srcu_read_lock_atomic(struct srcu_struct *ssp)
+static inline int __srcu_read_lock_atomic(struct srcu_struct *ssp)
 	__acquires_shared(ssp)
 {
 	int retval;
 
-	preempt_disable();
 	/*
 	 * Arm might_sleep() to catch even a *potentially* sleeping call
 	 * in the section, not just an actual schedule: the atomic-domain
@@ -405,6 +389,50 @@ static inline int srcu_read_lock_atomic(struct srcu_struct *ssp)
 		srcu_lock_acquire(&ssp->dep_map);
 	return retval;
 }
+
+/**
+ * srcu_read_lock_atomic - register a new reader promising an atomic section
+ * @ssp: srcu_struct in which to register the new reader.
+ *
+ * As srcu_read_lock(), but the caller promises that the read-side
+ * critical section never sleeps and never blocks on anything which
+ * may itself depend on memory allocation to make progress. Preemption
+ * is disabled for the duration, which both enforces that promise (any
+ * sleepable call in the section will splat on every configuration)
+ * and bounds the section so that the update side may spin rather
+ * than sleep when waiting for readers: see synchronize_srcu_atomic().
+ *
+ * The lock and matching srcu_read_unlock_atomic() must be invoked on
+ * the same CPU, from the same context; passing the return value to
+ * another task is not permitted for this flavor.
+ *
+ * This function is NMI-safe, in a manner similar to
+ * srcu_read_lock_nmisafe().
+ */
+static inline int srcu_read_lock_atomic(struct srcu_struct *ssp)
+	__acquires_shared(ssp)
+{
+	preempt_disable();
+	return __srcu_read_lock_atomic(ssp);
+}
+
+/**
+ * srcu_read_lock_atomic_irqsave - register an atomic reader, interrupts off
+ * @ssp: srcu_struct in which to register the new reader.
+ * @flags: interrupt state to restore at srcu_read_unlock_atomic_irqrestore().
+ *
+ * As srcu_read_lock_atomic(), but with interrupts disabled for the
+ * duration instead of preemption.  Use it when synchronize_srcu_atomic()
+ * may be invoked with interrupts disabled for this srcu_struct: its
+ * readers must then disable interrupts too.
+ *
+ * Returns the index to pass to srcu_read_unlock_atomic_irqrestore().
+ */
+#define srcu_read_lock_atomic_irqsave(ssp, flags)			\
+({									\
+	local_irq_save(flags);						\
+	__srcu_read_lock_atomic((ssp));					\
+})
 
 /**
  * srcu_read_lock_fast - register a new reader for an SRCU-protected structure.
@@ -598,12 +626,11 @@ static inline void srcu_read_unlock(struct srcu_struct *ssp, int idx)
 	__srcu_read_unlock(ssp, idx);
 }
 
-/**
- * srcu_read_unlock_atomic - unregister an atomic-section reader
- * @ssp: srcu_struct from which to unregister the old reader.
- * @idx: return value from corresponding srcu_read_lock_atomic().
+/*
+ * Unregister an atomic-section reader.  The caller then enables preemption,
+ * or interrupts, again.
  */
-static inline void srcu_read_unlock_atomic(struct srcu_struct *ssp, int idx)
+static inline void __srcu_read_unlock_atomic(struct srcu_struct *ssp, int idx)
 	__releases_shared(ssp)
 {
 	WARN_ON_ONCE(idx & ~0x1);
@@ -612,8 +639,31 @@ static inline void srcu_read_unlock_atomic(struct srcu_struct *ssp, int idx)
 	__srcu_read_unlock_nmisafe(ssp, idx);
 	if (in_task())
 		non_block_end();
+}
+
+/**
+ * srcu_read_unlock_atomic - unregister an atomic-section reader
+ * @ssp: srcu_struct from which to unregister the old reader.
+ * @idx: return value from corresponding srcu_read_lock_atomic().
+ */
+static inline void srcu_read_unlock_atomic(struct srcu_struct *ssp, int idx)
+	__releases_shared(ssp)
+{
+	__srcu_read_unlock_atomic(ssp, idx);
 	preempt_enable();
 }
+
+/**
+ * srcu_read_unlock_atomic_irqrestore - unregister an irqsave atomic reader
+ * @ssp: srcu_struct from which to unregister the old reader.
+ * @idx: return value from corresponding srcu_read_lock_atomic_irqsave().
+ * @flags: interrupt state saved by srcu_read_lock_atomic_irqsave().
+ */
+#define srcu_read_unlock_atomic_irqrestore(ssp, idx, flags)		\
+do {									\
+	__srcu_read_unlock_atomic((ssp), (idx));			\
+	local_irq_restore(flags);					\
+} while (0)
 
 /**
  * srcu_read_unlock_fast - unregister a old reader from an SRCU-protected structure.
