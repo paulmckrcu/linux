@@ -363,7 +363,7 @@ function torture_one {
 		boottag="--bootargs"
 		cur_bootargs="$torture_bootargs"
 	fi
-	"$@" "${boottag}" "$cur_bootargs" --datestamp "$ds/results-$curflavor" > $T/$curflavor.out 2>&1
+	"$@" $boottag "$cur_bootargs" --datestamp "$ds/results-$curflavor" > $T/$curflavor.out 2>&1
 	retcode=$?
 	resdir="`grep '^Results directory: ' $T/$curflavor.out | tail -1 | sed -e 's/^Results directory: //'`"
 	if test -z "$resdir"
