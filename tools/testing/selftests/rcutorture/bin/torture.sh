@@ -523,21 +523,24 @@ fi
 # does not support.
 if test "$do_atomic_srcu" = "yes"
 then
-	torture_bootargs="rcutorture.reader_flavor=0x10"
+	torture_bootargs="rcutorture.reader_flavor=0x10 rcutorture.atomic_irqsave=1 rcutorture.nmi_readers=1"
 	configs_atomic_srcu="SRCU-N SRCU-P"
 	if test "$ifnotaarch64" = yes
 	then
 		configs_atomic_srcu="$configs_atomic_srcu SRCU-T"
+		qemu_args="-cpu host,pmu=on"
+	else
+		qemu_args=
 	fi
 	torture_set "atomic-srcu" tools/testing/selftests/rcutorture/bin/kvm.sh \
 		--allcpus --duration "$duration_rcutorture" \
-		--configs "$configs_atomic_srcu" --trust-make
+		--configs "$configs_atomic_srcu" ${qemu_args:+--qemu-args "$qemu_args"} --trust-make
 
 	# Half the readers then use srcu_read_lock_atomic_irqsave().
-	torture_bootargs="rcutorture.reader_flavor=0x10 rcutorture.atomic_irqsave=1"
+	torture_bootargs="rcutorture.reader_flavor=0x10 rcutorture.atomic_irqsave=1 rcutorture.nmi_readers=1"
 	torture_set "atomic-srcu-irqsave" tools/testing/selftests/rcutorture/bin/kvm.sh \
 		--allcpus --duration "$duration_rcutorture" \
-		--configs "SRCU-P" --trust-make
+		--configs "SRCU-P" ${qemu_args:+--qemu-args "$qemu_args"} --trust-make
 fi
 
 if test "$do_locktorture" = "yes"
