@@ -513,8 +513,15 @@ fi
 # --torture rcu
 if test "$do_rcutorture" = "yes"
 then
-	torture_bootargs="rcupdate.rcu_cpu_stall_suppress_at_boot=1 torture.disable_onoff_at_boot rcupdate.rcu_task_stall_timeout=30000"
-	torture_set "rcutorture" tools/testing/selftests/rcutorture/bin/kvm.sh --allcpus --duration "$duration_rcutorture" --configs "$configs_rcutorture" --trust-make
+	qemu_args=
+	if test "$ifnotaarch64" = yes
+	then
+		qemu_args="-cpu host,pmu=on"
+	fi
+	torture_bootargs="rcupdate.rcu_cpu_stall_suppress_at_boot=1 torture.disable_onoff_at_boot rcupdate.rcu_task_stall_timeout=30000 rcutorture.nmi_calls=1 rcutorture.nmi_readers=1"
+	torture_set "rcutorture" tools/testing/selftests/rcutorture/bin/kvm.sh --allcpus \
+		--duration "$duration_rcutorture" --configs "$configs_rcutorture" \
+		${qemu_args:+--qemu-args "$qemu_args"} --trust-make
 fi
 
 # Test atomic SRCU across Tree SRCU (SRCU-N and SRCU-P) and Tiny SRCU
