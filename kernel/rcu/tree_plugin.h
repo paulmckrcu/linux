@@ -1270,6 +1270,9 @@ static int rcu_boost_kthread(void *arg)
 	return 0;
 }
 
+static bool boost_disable;
+module_param(boost_disable, bool, 0444);
+
 /*
  * Check to see if it is time to start boosting RCU readers that are
  * blocking the current grace period, and, if so, tell the per-rcu_node
@@ -1284,7 +1287,7 @@ static void rcu_initiate_boost(struct rcu_node *rnp, unsigned long flags)
 	__releases(rnp->lock)
 {
 	raw_lockdep_assert_held_rcu_node(rnp);
-	if (!rnp->boost_kthread_task ||
+	if (boost_disable || !rnp->boost_kthread_task ||
 	    (!rcu_preempt_blocked_readers_cgp(rnp) && !rnp->exp_tasks)) {
 		raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
 		return;
