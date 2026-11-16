@@ -5753,6 +5753,13 @@ Kernel parameters
 			Set maximum number of finished RCU callbacks to
 			process in one batch.
 
+	rcutree.boost_disable=	[KNL]
+			Disable RCU priority boosting at runtime, even in
+			kernels built with CONFIG_RCU_BOOST=y.  This is
+			for testing the boost tests, for example by the
+			rcutorture BUSTED-BOOST scenario, and should not
+			be used otherwise.
+
 	rcutree.csd_lock_suppress_rcu_stall=	[KNL]
 			Do only a one-line RCU CPU stall warning when
 			there is an ongoing too-long CSD-lock wait.
