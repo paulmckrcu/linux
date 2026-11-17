@@ -2536,6 +2536,8 @@ static int srcu_module_coming(struct module *mod)
 
 	for (i = 0; i < mod->num_srcu_structs; i++) {
 		ssp = *(sspp++);
+		if (WARN_ON_ONCE(!within_module((unsigned long)ssp, mod)))
+			return -EINVAL;
 		ssp->sda = alloc_percpu(struct srcu_data);
 		if (WARN_ON_ONCE(!ssp->sda))
 			return -ENOMEM;
@@ -2559,6 +2561,8 @@ static void srcu_module_going(struct module *mod)
 	srcu_defer_flush();
 	for (i = 0; i < mod->num_srcu_structs; i++) {
 		ssp = *(sspp++);
+		if (WARN_ON_ONCE(!within_module((unsigned long)ssp, mod)))
+			continue;
 		if (!rcu_seq_state(smp_load_acquire(&ssp->srcu_sup->srcu_gp_seq_needed)) &&
 		    !WARN_ON_ONCE(!ssp->srcu_sup->sda_is_static))
 			cleanup_srcu_struct(ssp);
