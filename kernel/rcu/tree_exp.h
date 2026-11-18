@@ -678,6 +678,18 @@ static void synchronize_rcu_expedited_wait(void)
 
 		nbcon_cpu_emergency_exit();
 
+		// Check one more time just in case the grace period ended
+		// while synchronize_rcu_expedited_stall() was printing.
+		// In theory, we could omit this added check if panicking
+		// on stall is disabled.  In practice, the check is not
+		// all that slow and it is better to consolidate the panic
+		// checking within panic_on_rcu_stall().
+		if (sync_rcu_exp_done_unlocked(rcu_get_root())) {
+			pr_err("INFO: Expedited stall ended before panic check.\n");
+			(void)scx_rcu_cpu_stall(&rcu_exp_stall_cpumask);
+			return;
+		}
+
 		panic_on_rcu_stall(&rcu_exp_stall_cpumask, NULL, 0);
 	}
 }
