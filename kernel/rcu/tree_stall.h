@@ -335,7 +335,7 @@ static int check_slow_task(struct task_struct *t, void *arg)
 	rscrp->rcu_rdr_cpu = cpu = task_cpu(t);
 	rscrp->rcu_rdr_cpu_offline = cpu_is_offline(cpu);
 	lockdep_assert_irqs_disabled();
-	rscrp->rcu_rdr_cpu_task = th = cpu_curr_snapshot_rcu(cpu);
+	rscrp->rcu_rdr_cpu_task = cpu_curr_snapshot_rcu(cpu);
 	// There is no need for get_task_struct(t) because we are in
 	// an implicit RCU read-side critical section due to interrupts
 	// being disabled.
